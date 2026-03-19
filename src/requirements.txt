@@ -1,0 +1,7 @@
+requests
+transformers
+numpy
+pillow
+torch
+beautifulsoup4
+lxml
