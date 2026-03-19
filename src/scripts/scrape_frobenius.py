@@ -92,54 +92,143 @@ PARSED_DIR = DATASET_DIR / "parsed"
 SESSION = requests.Session()
 SESSION.headers.update(
     {
+        # Mimic a real browser — some CGI systems reject non-browser UAs outright
         "User-Agent": (
-            "AfricanArtifacts-Research/1.0 "
-            "(academic research; contact via GitHub suruleredotdev)"
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0.0.0 Safari/537.36"
         ),
-        "Accept-Language": "de,en;q=0.9",
-        "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+        "Accept-Language": "de-DE,de;q=0.9,en;q=0.8",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive",
     }
 )
 
 
-def get(url: str, *, timeout: int = 15) -> requests.Response | None:
-    """GET with error handling and polite delay."""
-    try:
-        resp = SESSION.get(url, timeout=timeout)
-        resp.raise_for_status()
+def get(url: str, *, timeout: int = 20) -> requests.Response | None:
+    """
+    GET with manual redirect handling.
+
+    The Frobenius FAU CGI system sometimes emits a redirect whose Location
+    header is pure whitespace (or contains leading/trailing whitespace).
+    requests.get() URL-encodes that whitespace, producing a nonsense URL like
+    http://HOST/%20%20%20...  which then 404s.
+
+    We disable automatic redirects and follow them manually after stripping
+    the Location value.
+    """
+    current_url = url
+    for hop in range(10):
+        try:
+            resp = SESSION.get(current_url, timeout=timeout, allow_redirects=False)
+        except requests.RequestException as exc:
+            print(f"  [WARN] GET {current_url} failed: {exc}")
+            return None
+
+        if resp.is_redirect:
+            raw_location = resp.headers.get("Location", "")
+            location = raw_location.strip()
+            if not location:
+                print(f"  [WARN] Redirect from {current_url} has empty/whitespace Location — stopping redirect chain")
+                # Return the redirect response itself so the caller can inspect content
+                time.sleep(REQUEST_DELAY_S)
+                return resp
+            next_url = urljoin(current_url, location)
+            if next_url == current_url:
+                break
+            print(f"  [→] {current_url}  →  {next_url}")
+            current_url = next_url
+            time.sleep(0.3)
+            continue
+
+        # Not a redirect — check for HTTP errors
+        try:
+            resp.raise_for_status()
+        except requests.HTTPError as exc:
+            print(f"  [WARN] GET {current_url} failed: {exc}")
+            return None
+
         time.sleep(REQUEST_DELAY_S)
         return resp
-    except requests.RequestException as exc:
-        print(f"  [WARN] GET {url} failed: {exc}")
-        return None
+
+    print(f"  [WARN] Too many redirects for {url}")
+    return None
 
 
 # ─── Session ID extraction ──────────────────────────────────────────────────────
 
-def extract_sid(url: str) -> str | None:
-    """Extract the session ID (sid=...) from a Frobenius URL."""
-    qs = parse_qs(urlparse(url).query)
-    return qs.get("sid", [None])[0]
+def extract_sid(url_or_qs: str) -> str | None:
+    """Extract the session ID (sid=...) from a Frobenius URL or query string."""
+    # Try as a full URL first
+    qs = parse_qs(urlparse(url_or_qs).query)
+    sid = qs.get("sid", [None])[0]
+    if sid:
+        return sid
+    # Try as a bare query string
+    qs2 = parse_qs(url_or_qs.lstrip("?"))
+    return qs2.get("sid", [None])[0]
 
 
-def get_fresh_session(url: str) -> str | None:
-    """
-    Try to obtain a fresh session ID by fetching the given URL and
-    extracting any sid= value from links in the response.
-    Falls back to the sid already present in the URL.
-    """
-    existing_sid = extract_sid(url)
-    resp = get(url)
-    if resp is None:
-        return existing_sid
+def _find_sid_in_html(html: str) -> str | None:
+    """Search HTML text for any sid= value in links, forms, or meta-refresh tags."""
+    soup = BeautifulSoup(html, "html.parser")
 
-    soup = BeautifulSoup(resp.text, "html.parser")
+    # <a href="...?sid=...">
     for tag in soup.find_all(href=True):
-        href: str = tag["href"]
-        if "sid=" in href:
-            sid = extract_sid(href)
+        sid = extract_sid(tag["href"])
+        if sid:
+            return sid
+
+    # <form action="...?sid=...">
+    for form in soup.find_all("form", action=True):
+        sid = extract_sid(form["action"])
+        if sid:
+            return sid
+
+    # <meta http-equiv="refresh" content="0; url=...?sid=...">
+    for meta in soup.find_all("meta"):
+        content = meta.get("content", "")
+        if "sid=" in content:
+            # content might be "0; url=...?sid=..." or just "?sid=..."
+            sid = extract_sid(content)
             if sid:
                 return sid
+
+    # Raw text scan (sometimes the SID is in inline JS)
+    match = re.search(r"[?&]sid=([A-Z0-9]+)", html)
+    if match:
+        return match.group(1)
+
+    return None
+
+
+def get_fresh_session(start_url: str) -> str | None:
+    """
+    Obtain a valid Frobenius session ID.
+
+    Strategy:
+      1. Visit the site root — the FAU system often issues a session on the
+         very first page load (via meta-refresh or a link).
+      2. If not found there, try the provided start_url.
+      3. Fall back to the sid already embedded in start_url.
+
+    The site does NOT use cookies for session management — the session ID
+    travels entirely through URL parameters (sid=...).
+    """
+    existing_sid = extract_sid(start_url)
+
+    for probe_url in [BASE_URL + "/", BASE_URL + "/index.html", start_url]:
+        print(f"  Probing for session: {probe_url}")
+        resp = get(probe_url)
+        if resp is None:
+            continue
+        sid = _find_sid_in_html(resp.text)
+        if sid:
+            print(f"  Found session ID in {probe_url}: {sid}")
+            return sid
+
+    print(f"  No fresh session found — reusing existing sid={existing_sid}")
     return existing_sid
 
 
@@ -154,7 +243,9 @@ def replace_sid(url: str, new_sid: str) -> str:
 
 # ─── Search results parsing ────────────────────────────────────────────────────
 
-def parse_search_results_page(html: str, page_url: str) -> dict[str, Any]:
+def parse_search_results_page(
+    html: str, page_url: str, *, debug: bool = False
+) -> dict[str, Any]:
     """
     Parse a Frobenius search results page and extract:
       - list of record entries (registration number + title + detail URL)
@@ -166,66 +257,102 @@ def parse_search_results_page(html: str, page_url: str) -> dict[str, Any]:
     next_url = None
     total_count = None
 
+    page_text = soup.get_text(" ", strip=True)
+
+    if debug:
+        print(f"  [DEBUG] Page text snippet: {page_text[:400]!r}")
+        all_links = [a.get("href", "") for a in soup.find_all("a", href=True)]
+        print(f"  [DEBUG] All hrefs ({len(all_links)}): {all_links[:20]}")
+
     # ── Try to find total count ──
-    # The site often shows e.g. "Treffer: 342" or "Ergebnis: 342 Objekte"
-    text_blocks = soup.get_text(" ", strip=True)
-    count_match = re.search(
-        r"(?:Treffer|Ergebnis|gefunden)[:\s]+(\d+)", text_blocks, re.IGNORECASE
-    )
-    if count_match:
-        total_count = int(count_match.group(1))
+    # FAU shows e.g. "342 Treffer", "Treffer: 342", "1 - 25 von 342"
+    for pattern in [
+        r"(\d+)\s*Treffer",
+        r"Treffer[:\s]+(\d+)",
+        r"von\s+(\d+)",
+        r"(\d+)\s*Ergebnis",
+        r"gefunden[:\s]+(\d+)",
+    ]:
+        m = re.search(pattern, page_text, re.IGNORECASE)
+        if m:
+            total_count = int(m.group(1))
+            break
 
     # ── Extract individual record links ──
-    # Records typically appear as links containing registration numbers like
-    # "FoA 04-5578" or "FE 26 123" etc., or as table rows.
-    # We look for <a> tags with href containing "hzeig.FAU" (detail view).
+    # FAU detail links contain "hzeig.FAU" with a zeig= parameter holding the record ID.
+    # e.g. hzeig.FAU?sid=...&dm=1&ind=1&zeig=FoA%2004-5578
     seen_zeig: set[str] = set()
     for a_tag in soup.find_all("a", href=True):
         href: str = a_tag["href"]
-        if "hzeig.FAU" not in href:
+        if "hzeig.FAU" not in href and "zeig=" not in href:
             continue
         full_url = urljoin(BASE_URL, href)
         qs = parse_qs(urlparse(full_url).query)
         zeig_val = qs.get("zeig", [None])[0]
-        if zeig_val in seen_zeig:
+        dedup_key = zeig_val or full_url
+        if dedup_key in seen_zeig:
             continue
-        seen_zeig.add(zeig_val or href)
+        seen_zeig.add(dedup_key)
 
-        # Try to extract a registration number from the link text or nearby text
+        # Grab link text and any nearby sibling text for a richer title snippet
         link_text = a_tag.get_text(" ", strip=True)
-        reg_match = re.search(
-            r"\b(Fo[A-Z]\s*\d+[-\s]\d+|[A-Z]{2,4}\s*\d+[-\s]\d+)\b",
-            link_text,
+        parent_text = ""
+        if a_tag.parent:
+            parent_text = a_tag.parent.get_text(" ", strip=True)
+
+        # Registration number patterns: FoA 04-5578, EB 26 123, MS-12345, etc.
+        for text_src in [link_text, parent_text, zeig_val or ""]:
+            reg_match = re.search(
+                r"\b(Fo[A-Za-z]\s*[\w][\w\s\-]+\d+|[A-Z]{2,4}\s*\d+[-\s]\d+|[A-Z]+-\d+)\b",
+                text_src,
+            )
+            if reg_match:
+                break
+        reg_number = (
+            reg_match.group(1).strip() if reg_match
+            else (zeig_val.replace("%20", " ") if zeig_val else "")
         )
-        reg_number = reg_match.group(1).strip() if reg_match else (zeig_val or "")
 
         records.append(
             {
                 "registration_number": reg_number,
-                "title_snippet": link_text[:200],
+                "title_snippet": (link_text or parent_text)[:200],
                 "detail_url": full_url,
                 "zeig_param": zeig_val,
             }
         )
 
     # ── Next page link ──
-    # Look for "weiter", "nächste", ">>" style pagination links
+    # Strategy 1: explicit "weiter" / ">>" navigation links
+    NAV_TEXTS = {"weiter", ">>", "next", "nächste", "vor", ">", "weiter »", "vorwärts"}
     for a_tag in soup.find_all("a", href=True):
         text = a_tag.get_text(strip=True).lower()
-        if text in {"weiter", ">>", "next", "nächste", "vor"}:
-            next_url = urljoin(BASE_URL, a_tag["href"])
-            break
-    # Also look for rech.FAU links with higher auft= (page offset)
-    if not next_url:
-        current_auft = int(parse_qs(urlparse(page_url).query).get("auft", ["0"])[0])
-        for a_tag in soup.find_all("a", href=True):
+        if text in NAV_TEXTS or text.startswith("weiter"):
             href = a_tag["href"]
             if "rech.FAU" in href or "auft=" in href:
-                qs = parse_qs(urlparse(href).query)
-                auft_val = qs.get("auft", [None])[0]
-                if auft_val and int(auft_val) > current_auft:
-                    next_url = urljoin(BASE_URL, href)
-                    break
+                next_url = urljoin(BASE_URL, href)
+                break
+
+    # Strategy 2: find any rech.FAU link with a higher auft= than current page
+    if not next_url:
+        current_auft = int(parse_qs(urlparse(page_url).query).get("auft", ["0"])[0])
+        best_auft = current_auft
+        for a_tag in soup.find_all("a", href=True):
+            href = a_tag["href"]
+            if "rech.FAU" not in href and "auft=" not in href:
+                continue
+            qs_link = parse_qs(urlparse(href).query)
+            auft_val = qs_link.get("auft", [None])[0]
+            if auft_val and int(auft_val) > best_auft:
+                best_auft = int(auft_val)
+                next_url = urljoin(BASE_URL, href)
+
+    # Strategy 3: if we got records and found no next link, compute next auft
+    # by advancing by the number of records on this page (FAU default page size = 25)
+    if not next_url and records:
+        current_auft = int(parse_qs(urlparse(page_url).query).get("auft", ["0"])[0])
+        next_auft = current_auft + len(records)
+        next_url = replace_sid_and_auft(page_url, next_auft)
 
     return {
         "page_url": page_url,
@@ -233,6 +360,15 @@ def parse_search_results_page(html: str, page_url: str) -> dict[str, Any]:
         "records": records,
         "next_url": next_url,
     }
+
+
+def replace_sid_and_auft(url: str, new_auft: int) -> str:
+    """Build a next-page URL by updating auft= in an existing rech.FAU URL."""
+    parsed = urlparse(url)
+    qs = parse_qs(parsed.query, keep_blank_values=True)
+    qs["auft"] = [str(new_auft)]
+    new_query = urlencode({k: v[0] for k, v in qs.items()})
+    return urlunparse(parsed._replace(query=new_query))
 
 
 # ─── Detail page parsing ───────────────────────────────────────────────────────
@@ -411,6 +547,8 @@ def scrape(
     max_pages: int = 50,
     filter_panel_types: bool = True,
     dry_run: bool = False,
+    debug: bool = False,
+    save_html_dir: Path | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """
     Crawl the Frobenius search results starting from `start_url`, then fetch
@@ -422,6 +560,9 @@ def scrape(
     print(f"Max pages: {max_pages}  |  Filter panel types: {filter_panel_types}")
     if dry_run:
         print("[DRY RUN] — no HTTP requests will be made")
+    if save_html_dir:
+        save_html_dir.mkdir(parents=True, exist_ok=True)
+        print(f"Saving raw HTML to: {save_html_dir}")
 
     # Obtain a fresh session ID
     sid: str | None = None
@@ -432,7 +573,7 @@ def scrape(
             start_url = replace_sid(start_url, sid)
             print(f"  Session ID: {sid}")
         else:
-            print("  Could not obtain fresh session — using original URL")
+            print("  Could not obtain fresh session — using original URL as-is")
 
     # Crawl search result pages
     all_result_stubs: list[dict] = []
@@ -453,12 +594,21 @@ def scrape(
             print("  Failed to fetch search results page; stopping.")
             break
 
-        page_data = parse_search_results_page(resp.text, current_url)
+        if save_html_dir:
+            html_file = save_html_dir / f"results_page_{pages_fetched + 1}.html"
+            html_file.write_text(resp.text, encoding="utf-8")
+            print(f"  Saved HTML → {html_file}")
+
+        page_data = parse_search_results_page(resp.text, current_url, debug=debug)
         stubs = page_data["records"]
         print(
             f"  Found {len(stubs)} records on this page  "
             f"(total reported: {page_data['total_count']})"
         )
+
+        if debug and not stubs:
+            print(f"  [DEBUG] Page text (first 600 chars):\n{resp.text[:600]!r}")
+
         all_result_stubs.extend(stubs)
 
         current_url = page_data["next_url"]
@@ -559,6 +709,16 @@ def main() -> None:
         default=DATASET_DIR,
         help=f"Root output directory (default: {DATASET_DIR})",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Print extra diagnostic output (page text, all hrefs, etc.)",
+    )
+    parser.add_argument(
+        "--save-html",
+        action="store_true",
+        help="Save raw HTML of each fetched page to panel_art_dataset/debug_html/",
+    )
     args = parser.parse_args()
 
     out_raw = args.output_dir / "raw"
@@ -566,11 +726,15 @@ def main() -> None:
     out_raw.mkdir(parents=True, exist_ok=True)
     out_parsed.mkdir(parents=True, exist_ok=True)
 
+    save_html_dir = (args.output_dir / "debug_html") if args.save_html else None
+
     raw_records, parsed_records = scrape(
         args.start_url,
         max_pages=args.max_pages,
         filter_panel_types=not args.no_filter,
         dry_run=args.dry_run,
+        debug=args.debug,
+        save_html_dir=save_html_dir,
     )
 
     if not args.dry_run:
