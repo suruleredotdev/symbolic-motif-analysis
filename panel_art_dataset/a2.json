@@ -1,0 +1,38 @@
+[
+  {
+    "id": "8462f28d-67e5-4d69-8a96-5c3b152ec0d7",
+    "title": "Aspects of Yoruba images of the divine : Ifa divination artifacts",
+    "culture": null,
+    "object_type": "Books",
+    "classification": "Publications",
+    "country": null,
+    "date_display": "1989",
+    "museum": "Smithsonian Institution",
+    "record_url": "https://siris-libraries.si.edu/ipac20/ipac.jsp?&profile=liball&source=~!silibraries&uri=full=3100001~!762787~!0#focus",
+    "primary_image_url": null
+  },
+  {
+    "id": "4b2f6398-41d7-4284-a129-21698718be72",
+    "title": "divination-board",
+    "culture": "Yoruba",
+    "object_type": "divination-board",
+    "classification": "divination-board",
+    "country": "Omu-Aran",
+    "date_display": "1933-1945",
+    "museum": "Britsh Museum",
+    "record_url": "https://www.britishmuseum.org/collection/object/E_Af1996-01-8-a-b",
+    "primary_image_url": "https://media.britishmuseum.org/media/Repository/Documents/2018_10/25_9/cb29f874_9b80_4e8d_a0e3_a9840098b7ee/large_EAF64070.jpg"
+  },
+  {
+    "id": "8300d188-423f-4877-95c7-d1cb7356a0e4",
+    "title": "Tray (Opon Ifa)",
+    "culture": null,
+    "object_type": "Religious/Ritual Object",
+    "classification": "ritual objects",
+    "country": null,
+    "date_display": "Mid–20th century, probably 1930s",
+    "museum": "Art Institute of Chicago",
+    "record_url": "https://api.artic.edu/api/v1/artworks/152014",
+    "primary_image_url": "https://www.artic.edu/iiif/2/e03eef00-c426-d2f4-8c7d-0bf254617318/full/843,/0/default.jpg"
+  }
+]
