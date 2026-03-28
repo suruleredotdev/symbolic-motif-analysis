@@ -3,11 +3,14 @@ filter_frobenius_panel_art.py
 
 Produces frobenius_panel_art.json — a filtered subset of frobenius_all.json
 containing only records that are:
-  - door_panel : carved wooden doors, door panels, wall boards
-  - ifa_board  : Ifa divination boards (opon Ifa), oracle boards, and
-                 closely related Ifa cult objects (iroke, bowls)
-  - figurine   : detached figurines, bronze figures, ancestor carvings,
-                 Ogboni edan, temple-pillar figures with religious function
+  - door_panel         : carved wooden doors, door panels, wall boards
+  - ifa_board          : Ifa divination boards (opon Ifa), oracle boards, and
+                         closely related Ifa cult objects (iroke, bowls)
+  - figurine           : detached figurines, bronze figures, ancestor carvings,
+                         Ogboni edan, temple-pillar figures with religious function
+  - motif_illustration : non-photographic drawings/ink illustrations of carved
+                         relief motifs on doors/boards, figures attached to doors,
+                         "Skulptur am Bau" architectural carvings, Reliefschnitzereien
 
 Each output record preserves all original fields and adds:
   "categories": ["door_panel", ...]   — one or more matched categories
@@ -96,6 +99,38 @@ CATEGORIES: dict[str, list[tuple[str, re.Pattern]]] = {
         ("holzfiguren fenster",
                            re.compile(r"holzfiguren.*fenster|fenster.*holzfiguren|holzfiguren.*wand|wand.*holzfiguren", re.I)),
     ],
+
+    # motif_illustration: non-photographic drawings/illustrations of carved relief
+    # motifs on doors or boards, figures architecturally attached to doors
+    # ("Skulptur am Bau"), and Reliefschnitzereien (relief carvings).
+    # These records must also be drawings/illustrations, not photographs.
+    "motif_illustration": [
+        # Figures depicted ON doors or boards ("auf Tür/Türen/Brett/Bretter")
+        ("auf tür",        re.compile(r"\bauf\s+tür\b",               re.I)),
+        ("auf türen",      re.compile(r"\bauf\s+türen\b",             re.I)),
+        ("auf brett",      re.compile(r"\bauf\s+bretter?n?\b",        re.I)),
+        ("auf brettern und türen",
+                           re.compile(r"auf\s+brettern\s+und\s+türen", re.I)),
+        # Figures at or before a door ("an/vor Haustür / Tür")
+        ("an haustür",     re.compile(r"\ban\s+(haus)?tür\b",         re.I)),
+        ("vor haustür",    re.compile(r"\bvor\s+(haus)?tür\b",        re.I)),
+        # Relief carvings (Reliefschnitzereien)
+        ("reliefschnitzerei",
+                           re.compile(r"\breliefschnitzerei(en)?\b",  re.I)),
+        # Skulptur am Bau = architectural sculpture (carvings on building elements)
+        ("skulptur am bau",re.compile(r"\bskulptur\s+am\s+bau\b",    re.I)),
+        # Edschu (Eshu/Legba) figure explicitly carved on temple board/door
+        ("edschu auf",     re.compile(r"\bedschu\b.*\bauf\b|\bauf\b.*\bedschu\b", re.I)),
+        # Tempelportal with carved figural column supports
+        ("tempelportal",   re.compile(r"\btempelportal\b",            re.I)),
+        # "Ornament" carved on architectural elements (cornices, pillars)
+        ("ornament schnitzerei",
+                           re.compile(r"ornament.*schnitzerei|schnitzerei.*ornament", re.I)),
+        # Drawings of carved wooden cult objects presented as carvings
+        ("holzschnitzerei",re.compile(r"\bholzschnitzerei(en)?\b",    re.I)),
+        # "Kult-Objekte" / Schnitzwerk (carved woodwork)
+        ("schnitzwerk",    re.compile(r"\bschnitzwerk\b",             re.I)),
+    ],
 }
 
 # ─── Text fields to search (both German and English variants) ────────────────
@@ -116,14 +151,58 @@ def record_text(r: dict) -> str:
     return " ".join(str(r[f]) for f in TEXT_FIELDS if f in r and r[f])
 
 
+# Drawing/illustration technique terms (German and English)
+_DRAWING_RE = re.compile(
+    r"\b(tusche|tinte|ink|bleistift|pencil|aquarell|watercolou?r|"
+    r"zeichnung|drawing|illustration|skizze|sketch|kohle|charcoal|"
+    r"feder|quill|gouache|lithograph)\b",
+    re.I,
+)
+
+_PHOTO_RE = re.compile(
+    r"\b(fotografie|photograph|photo|foto|aufnahme|lichtbild)\b",
+    re.I,
+)
+
+TECHNIQUE_FIELDS = [
+    "technique_image_type", "technik_bildtyp",
+    "inventory", "bestand",
+]
+
+
+def is_drawing(r: dict) -> bool:
+    """
+    Returns True if the record is a hand-made illustration (not a photograph).
+    Checks dedicated technique fields first, then falls back to full text.
+    """
+    technique_text = " ".join(
+        str(r[f]) for f in TECHNIQUE_FIELDS if f in r and r[f]
+    )
+    if _DRAWING_RE.search(technique_text):
+        return True
+    # If technique explicitly says "photo", exclude
+    if _PHOTO_RE.search(technique_text):
+        return False
+    # Ambiguous / missing technique: check broader text
+    full = record_text(r)
+    return bool(_DRAWING_RE.search(full))
+
+
 def classify(r: dict) -> dict[str, list[str]]:
     """
     Returns {category: [matched_term, ...]} for every category that fires.
     Empty dict = no match.
+    The `motif_illustration` category additionally requires is_drawing(r).
     """
     text = record_text(r)
     matched: dict[str, list[str]] = {}
+    drawing = None  # computed lazily
     for cat, patterns in CATEGORIES.items():
+        if cat == "motif_illustration":
+            if drawing is None:
+                drawing = is_drawing(r)
+            if not drawing:
+                continue
         hits = [label for label, pat in patterns if pat.search(text)]
         if hits:
             matched[cat] = hits
@@ -174,8 +253,10 @@ def main() -> None:
         "filter_description": (
             "Records specifically depicting: door panels (carved wooden doors, "
             "wall boards), Ifa divination boards (opon Ifa, oracle boards, iroke), "
-            "or figurines (bronze figures, wooden cult figures, Ogboni edan, "
-            "ivory carvings)."
+            "figurines (bronze figures, wooden cult figures, Ogboni edan, "
+            "ivory carvings), or motif illustrations (non-photographic drawings "
+            "of carved relief motifs on doors/boards, Skulptur am Bau, "
+            "Reliefschnitzereien, figures at/on doors)."
         ),
         "total_input_records": len(records),
         "total_output_records": len(output_records_deduped),
