@@ -130,6 +130,15 @@ CATEGORIES: dict[str, list[tuple[str, re.Pattern]]] = {
         ("holzschnitzerei",re.compile(r"\bholzschnitzerei(en)?\b",    re.I)),
         # "Kult-Objekte" / Schnitzwerk (carved woodwork)
         ("schnitzwerk",    re.compile(r"\bschnitzwerk\b",             re.I)),
+        # English: "carved temple board/panel" (KBA 19153–19155)
+        ("carved temple board",
+                           re.compile(r"carved\s+temple\s+(board|panel)", re.I)),
+        # English: "door...with depictions / from mythology" (KBA 19157)
+        ("door with depictions",
+                           re.compile(r"\bdoor\b.{0,60}(depi?ctions?|mythology|figurative)", re.I)),
+        # English: "figurative sculpture in a surface fill" (architectural relief)
+        ("figurative sculpture",
+                           re.compile(r"figurative\s+sculpture", re.I)),
     ],
 }
 
@@ -183,6 +192,12 @@ def is_drawing(r: dict) -> bool:
     # If technique explicitly says "photo", exclude
     if _PHOTO_RE.search(technique_text):
         return False
+    # KBA = Kartenbildarchiv (Card index image archive) — hand-drawn illustration
+    # archive; records from this inventory are illustrations even when the
+    # technique_image_type field is absent.
+    inventory = str(r.get("inventory") or r.get("bestand") or "").lower()
+    if "card index image archive" in inventory or "kartenbildarchiv" in inventory:
+        return True
     # Ambiguous / missing technique: check broader text
     full = record_text(r)
     return bool(_DRAWING_RE.search(full))
