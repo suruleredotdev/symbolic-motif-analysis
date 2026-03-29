@@ -3,5 +3,12 @@ transformers
 numpy
 pillow
 torch
+torchvision
 beautifulsoup4
 lxml
+# Motif extraction pipeline
+segment-anything-2        # SAM 2 auto mask generation
+opencv-python-headless    # bounding box annotation rendering
+open_clip_torch           # CLIP ViT-L/14 image + text embeddings
+umap-learn                # 2D projection for similarity scatter plots
+anthropic                 # Claude API for motif descriptions
