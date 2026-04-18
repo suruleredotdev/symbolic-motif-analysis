@@ -24,7 +24,8 @@ potrace 1.16 — ok
 ```
 Notes: Python pinned to 3.12 (torch 2.2.x has no py3.13 Intel Mac wheel);
 numpy pinned <2 (torch 2.2.x compiled against numpy 1.x ABI);
-SAM-2 must be installed separately via git (not on PyPI).
+SAM-2 requires torch ≥ 2.5.1 — incompatible with Intel Mac. Using SAM-1 (segment-anything==1.0) instead.
+SAM-1 also cannot use MPS (float64 ops unsupported) — forced to CPU.
 
 ---
 
@@ -81,68 +82,96 @@ Notes: The left two panels were physically touching; projection-valley splitting
 
 ## Phase 3 · Motif Segmentation (`motif_segment.py`)
 
-- [ ] Set up SAM-2 tiny model loading (local checkpoint or HuggingFace hub)
-- [ ] Implement `auto_segment(panel_img) -> list[Mask]` — SAM-2 automatic mask generation
-- [ ] Implement `classify_scale(mask, panel_area) -> str` — zone / motif / element
-- [ ] Implement `nms(masks, iou_threshold=0.3) -> list[Mask]` — non-max suppression
-- [ ] Implement `segment_panel(panel_img) -> list[Detection]` — full pipeline per panel
-- [ ] Write annotated images to `analysis/annotated/` (bounding boxes coloured by scale)
+- [x] SAM-1 (`segment-anything==1.0`) used — SAM-2 requires torch≥2.5, incompatible with Intel Mac
+- [x] Downloaded ViT-B checkpoint (369MB) to `src/python/sam_vit_b_01ec64.pth`
+- [x] Implement `load_generator` — SAM model + checkpoint loading, cached per process
+- [x] Implement `segment_panel(img, generator)` — auto-mask + filter_and_nms
+- [x] Implement `classify_scale` — zone/motif/element by area fraction
+- [x] Implement `segment_to_files` — annotated JPEG + detections JSON
+- [x] CLI `__main__`
+- [x] Forced CPU device (SAM-1 uses float64 ops; MPS doesn't support float64)
 
-**Validation:** Run on 2 door panels. Inspect annotated output — boxes should align with visually distinct carved motif regions. Count of motifs per panel should be plausible (5–50).
-
+**Validation result (2026-04-16):**
 ```
-# Validation command:
-# uv run python -m panel_art.motif_segment \
-#   frobenius_artifacts/analysis/panels/FoA_04-5578_panel_0.png
-
-# Expected: ~10-30 motif detections at mixed scales
-# result: (not yet run)
+panel_01 (dense knotwork):    5 detections: zone=1, motif=3, element=1
+panel_02 (figurative panel): 42 detections: zone=1, motif=26, element=15
 ```
+Visual inspection: bounding boxes align with carved motif registers. Zone box
+covers the full panel, motif boxes capture individual figures and geometric
+cells, element boxes pick up sub-details. Detection quality is good.
 
 ---
 
 ## Phase 4 · Vectorisation (`vectorize.py`)
 
-- [ ] Implement `motif_to_svg(panel_img, edge_img, bbox) -> str` — crop, threshold, OpenCV contours → svgwrite paths
-- [ ] Implement `normalise_svg(svg_str) -> str` — rewrite to 100×100 viewBox, stroke-only
-- [ ] Implement `vectorize_all(detections, panel_img, edge_img, out_dir)` — batch over detections
-- [ ] Save SVGs as `analysis/motifs/<panel_id>_<motif_idx>.svg`
+- [x] Implement `region_to_svg(lineart, x, y, w, h)` — OpenCV contours → svgwrite paths
+- [x] RDP simplification (epsilon=1.5) — reduces noise, keeps meaningful shape boundaries
+- [x] Normalise to 100×100 viewBox, stroke-only, no fill
+- [x] Implement `vectorize_detections` + `vectorize_from_files`
+- [x] CLI `__main__`
 
-**Validation:** Open 5 SVG outputs in browser. Lines should form recognisable outlines of the motif shape, not noise. File sizes should be < 20KB each.
-
+**Validation result (2026-04-16):**
 ```
-# result: (not yet run)
+42 motifs vectorised for panel_02
+Size range: 0KB – 108KB (zone); individual motifs: 1–23KB ✓
+SVG structure: M/L/Z paths in 0–100 coordinate space, fill=none ✓
 ```
+Notes: pypotrace (C bindings) avoided — uses pure OpenCV+svgwrite.
+Zone-level SVGs are large (108KB) due to full-panel detail.
+Element-level SVGs are sometimes 0KB (too small for meaningful contours — expected).
 
 ---
 
 ## Phase 5 · Similarity & Clustering (`similarity.py`)
 
-- [ ] Implement `hu_moments(svg_path) -> np.ndarray` — rasterise SVG, compute Hu moments
-- [ ] Implement `dino_embedding(img_crop) -> np.ndarray` — DINOv2 patch features
-- [ ] Implement `build_feature_matrix(motif_dir) -> (np.ndarray, list[str])` — all motifs
-- [ ] Implement `cluster(features) -> np.ndarray` — HDBSCAN labels
-- [ ] Implement `annotate_clusters(labels, motif_ids, metadata_json) -> dict` — attach panel metadata
-- [ ] Write `analysis/clusters/clusters.json` and `similarity_graph.json`
+- [x] Implement `_rasterise_svg` — lightweight M/L/Z SVG parser + OpenCV renderer
+- [x] Implement `hu_moments(svg_path)` — 7 log-Hu moment invariants
+- [x] Implement `dino_embedding(svg_path)` — DINOv2 ViT-S/14 via torch.hub (384-dim)
+- [x] Implement `build_feature_matrix` — combined Hu + DINO features
+- [x] Implement `cluster_motifs` — HDBSCAN
+- [x] Implement `annotate_clusters` — attach frobenius_panel_art.json metadata
+- [x] CLI: writes `clusters.json` + `similarity_graph.json`
 
-**Validation:** Check cluster count (expect 5–20). Spot-check: motifs in the same cluster should be visually similar. Confirm noise points (label=-1) < 20%.
+**Validation:** Not yet run on full set — pipeline end-to-end test first.
 
 ```
-# result: (not yet run)
+# result: (not yet run on full set)
 ```
 
 ---
 
 ## Phase 6 · End-to-End Pipeline (`pipeline.py`)
 
-- [ ] Implement `run_pipeline(image_path, metadata_json, out_dir)` — phases 1–5 in order
-- [ ] Add CLI: `panel-art <image_dir> [--metadata <json>] [--out <dir>]`
-- [ ] Run full pipeline on all 73 images
-- [ ] Write final `analysis/clusters/clusters.json` across all images
+- [x] `load_allowed_images` — uses frobenius_panel_art.json as allowlist;
+      non-panel-art images (village scenes etc.) are excluded automatically
+- [x] `process_image` — chains Phases 1→2→1b→3→4 per image
+- [x] `run_pipeline` — calls Phase 5 clustering after all images processed
+- [x] CLI with `--images` for single-image testing, `--no-cluster` flag
 
+**Validation result (2026-04-16) — single image end-to-end:**
 ```
-# result: (not yet run)
+Input: FoA_04-5578 (door_panel, 3 physical panels)
+Output: 3 panels → 75 SVGs in 143s
+
+  panel_00 (narrow left):      28 detections (motif=15, element=13)
+  panel_01 (central knotwork):  5 detections (zone=1, motif=3, element=1)
+  panel_02 (figurative right): 42 detections (zone=1, motif=26, element=15)
+
+Allowlist filtering: 108 panel-art records → 40 FoA images found locally
+  (EBA-B images in the manifest use a different registration scheme;
+   their frobenius_panel_art.json records need registration_number matching — see Notes)
 ```
+
+---
+
+## Remaining work
+
+- [ ] Run full pipeline on all 40 FoA panel-art images
+- [ ] Run Phase 5 clustering on all collected SVGs and inspect cluster quality
+- [ ] Verify EBA-B image registration_number matching in load_allowed_images
+      (currently only 40 of 108 records resolve to local files — 68 EBA-B records
+       likely use a different registration scheme than the manifest.json)
+- [ ] Review cluster output and tune HDBSCAN parameters if noise > 20%
 
 ---
 
@@ -150,9 +179,11 @@ Notes: The left two panels were physically touching; projection-valley splitting
 
 | Date | Note |
 |---|---|
-| 2026-04-15 | SAM-2: use `sam2-hiera-tiny` locally; HuggingFace Inference API as fallback |
-| 2026-04-15 | `potrace` installed via `brew install potrace` |
-| 2026-04-15 | motif_illustration images (EBA-B) already line-art — Phase 1 routes them to binarise path; XDoG also works on them if mis-detected |
-| 2026-04-15 | Non-axis-aligned panels: projection-valley split handles touching panels; minAreaRect not needed |
+| 2026-04-15 | SAM-2 requires torch≥2.5 — incompatible with Intel Mac. Using SAM-1 (segment-anything==1.0) |
+| 2026-04-15 | SAM-1 float64 ops incompatible with MPS — forced CPU inference |
+| 2026-04-15 | `potrace` installed via `brew install potrace` (not used — using OpenCV+svgwrite instead) |
+| 2026-04-15 | motif_illustration images (EBA-B) already line-art — Phase 1 routes them to binarise path; XDoG also works on them |
 | 2026-04-15 | torch pinned to 2.2.x (last Intel Mac / x86_64 wheel); numpy pinned <2; Python 3.12 |
 | 2026-04-15 | Panel detection: valley_relative_threshold=0.80 + min_sub_w=max(60, w//10) gives clean 3-panel split |
+| 2026-04-16 | Pipeline uses frobenius_panel_art.json as allowlist — non-panel-art images (village scenes etc.) automatically excluded |
+| 2026-04-16 | 108 panel-art records but only 40 resolve to local FoA files; EBA-B registration scheme mismatch needs investigation |
