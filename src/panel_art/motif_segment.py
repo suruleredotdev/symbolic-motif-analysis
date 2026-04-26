@@ -3,11 +3,19 @@ motif_segment.py — Phase 3: SAM automatic motif segmentation
 
 Uses Meta's Segment Anything Model (SAM-1 / ViT-B) to generate zero-shot
 segmentation masks for each panel crop, then filters and classifies them
-into three scale levels:
+into two scale levels:
 
-  zone    — large compositional regions  (> 20% of panel area)
-  motif   — individual carved units      (1–20%)
-  element — sub-components within motifs (0.1–1%)
+  register — large compositional band     (> 25% of panel area)
+             Typically one of the horizontal thirds of a vertical panel:
+             a full knotwork band, a row of figures, a border register.
+
+  motif    — individual carved unit       (3–25%)
+             A complete figure (humanoid, animal), a complete geometric cell,
+             or a self-contained symbolic unit within a register.
+
+Sub-motif fragments (body parts, partial pattern sections) are suppressed
+by a 3% minimum area floor and area-sorted NMS (IoU 0.35) that prefers
+the largest mask when two candidates overlap substantially.
 
 Why SAM over traditional CV: carved wood panels have no colour contrast
 between motif and background (same wood tone throughout). SAM's edge and
@@ -55,23 +63,40 @@ DEFAULT_CHECKPOINT = os.environ.get(
 )
 DEFAULT_MODEL_TYPE = "vit_b"
 
-# Mask quality thresholds
-DEFAULT_IOU_THRESH      = 0.82
-DEFAULT_STABILITY_THRESH = 0.86
-DEFAULT_NMS_IOU         = 0.40   # overlap above which smaller mask is suppressed
-DEFAULT_MIN_AREA        = 0.005  # 0.5% of panel — avoids tiny noise fragments
-DEFAULT_MAX_AREA        = 0.90   # 90% — avoids "whole panel" masks
+# Mask quality thresholds.
+# SAM quality scores are calibrated for clean, distinct objects. Large carved
+# texture regions (whole register bands, full knotwork panels) score lower
+# because they have ambiguous boundaries by SAM's metric. Lowering these lets
+# whole-figure and whole-band masks through; NMS + area filter cleans up the rest.
+DEFAULT_IOU_THRESH       = 0.70
+DEFAULT_STABILITY_THRESH = 0.75
+# NMS: when two boxes overlap > 35%, drop the smaller one.
+# Sort by area so large whole-figure/whole-band masks win over body parts.
+# 0.35 (vs 0.25) avoids suppressing adjacent-but-separate motif cells
+# that have low real overlap despite nearby bounding boxes.
+DEFAULT_NMS_IOU  = 0.35
+# 3% floor eliminates body parts (~1-2%) while keeping complete figures (5%+)
+# and register bands (20%+). Was 0.5% which admitted too many fragments.
+DEFAULT_MIN_AREA = 0.03
+# 85% ceiling: allows large register bands (e.g. a full knotwork body spanning
+# 70-80% of a narrow vertical panel) while still blocking the degenerate
+# "entire panel" catch-all mask that SAM sometimes generates.
+DEFAULT_MAX_AREA = 0.85
 
 # Annotation colours (R, G, B) for each scale level
 SCALE_COLOURS = {
-    "zone":    (255, 80,  80),
-    "motif":   (80,  200, 80),
-    "element": (50,  150, 255),
+    "register": (255, 80,  80),   # red  — full horizontal band (~1/3 of panel)
+    "motif":    (80,  200, 80),   # green — individual carved unit
 }
 
 PALETTE = list(SCALE_COLOURS.values()) + [
     (200, 80, 255), (255, 165, 50), (50, 220, 200), (255, 220, 50),
 ]
+
+# SAM grid density: fewer points → larger, coarser proposals.
+# 16 (vs 32) steers SAM toward whole-figure and whole-band regions rather than
+# fine sub-element detail.
+DEFAULT_POINTS_PER_SIDE = 16
 
 
 # ── Data types ────────────────────────────────────────────────────────────────
@@ -104,15 +129,18 @@ def classify_scale(area_ratio: float) -> str:
     """
     Map mask area (as fraction of panel) to a semantic scale level.
 
-      zone    : > 20%  — compositional regions (register bands, border frames)
-      motif   : 1–20%  — individual carved units (figures, geometric panels)
-      element : < 1%   — sub-components (face details, small symbols)
+      register : > 25%  — a full horizontal band, roughly one third of a
+                          vertical panel (knotwork band, row of figures,
+                          border register).
+      motif    : 3–25% — a complete carved unit: a whole humanoid figure,
+                          a complete geometric cell, a single Ifa symbol.
+                          Sub-motif fragments (arms, legs, partial knots)
+                          are excluded by the 3% min-area floor before
+                          this function is reached.
     """
-    if area_ratio > 0.20:
-        return "zone"
-    if area_ratio >= 0.01:
-        return "motif"
-    return "element"
+    if area_ratio > 0.25:
+        return "register"
+    return "motif"
 
 
 # ── Filtering and NMS ─────────────────────────────────────────────────────────
@@ -164,7 +192,9 @@ def filter_and_nms(
             continue
         kept.append(m)
 
-    kept.sort(key=lambda m: m["predicted_iou"], reverse=True)
+    # Sort by area descending so larger masks (whole figures, whole bands) win
+    # NMS over smaller body-part masks that overlap them.
+    kept.sort(key=lambda m: m["area"], reverse=True)
 
     final, suppressed = [], set()
     for i, m in enumerate(kept):
@@ -196,7 +226,7 @@ def _resolve_device() -> str:
 def load_generator(
     checkpoint: str = DEFAULT_CHECKPOINT,
     model_type: str = DEFAULT_MODEL_TYPE,
-    points_per_side: int = 32,
+    points_per_side: int = DEFAULT_POINTS_PER_SIDE,
 ) -> "SamAutomaticMaskGenerator":
     """
     Load SAM and return a configured automatic mask generator.
@@ -284,7 +314,7 @@ def segment_panel(
             segmentation=m["segmentation"],
         ))
 
-    # Sort largest → smallest so zone-level context comes first
+    # Sort largest → smallest so register-level context comes first
     detections.sort(key=lambda d: d.area_ratio, reverse=True)
     for i, d in enumerate(detections):
         d.index = i
@@ -301,7 +331,7 @@ def annotate_detections(
 ) -> None:
     """
     Draw coloured bounding boxes and scale labels on the panel image.
-    Colour by scale: red=zone, green=motif, blue=element.
+    Colour by scale: red=register, green=motif.
     """
     img = cv2.cvtColor(panel_img, cv2.COLOR_RGB2BGR)
     img_h, img_w = img.shape[:2]
@@ -374,7 +404,7 @@ def _build_parser() -> argparse.ArgumentParser:
                    choices=["vit_b", "vit_l", "vit_h"])
     p.add_argument("--out-dir",
                    default="frobenius_artifacts/analysis/annotated")
-    p.add_argument("--points-per-side", type=int, default=32)
+    p.add_argument("--points-per-side", type=int, default=DEFAULT_POINTS_PER_SIDE)
     p.add_argument("--min-area", type=float, default=DEFAULT_MIN_AREA)
     p.add_argument("--max-area", type=float, default=DEFAULT_MAX_AREA)
     p.add_argument("--nms-iou", type=float, default=DEFAULT_NMS_IOU)

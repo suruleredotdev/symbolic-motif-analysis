@@ -91,14 +91,19 @@ Notes: The left two panels were physically touching; projection-valley splitting
 - [x] CLI `__main__`
 - [x] Forced CPU device (SAM-1 uses float64 ops; MPS doesn't support float64)
 
-**Validation result (2026-04-16):**
+**Validation result (2026-04-18, tuned):**
 ```
-panel_01 (dense knotwork):    5 detections: zone=1, motif=3, element=1
-panel_02 (figurative panel): 42 detections: zone=1, motif=26, element=15
+panel_00 (narrow left):   6 detections: register=1, motif=5
+panel_01 (knotwork):      4 detections: register=1, motif=3
+panel_02 (figurative):   10 detections: motif=10
 ```
-Visual inspection: bounding boxes align with carved motif registers. Zone box
-covers the full panel, motif boxes capture individual figures and geometric
-cells, element boxes pick up sub-details. Detection quality is good.
+Visual inspection: register boxes (red) correctly capture full knotwork body
+(82% of panel_01) and large compositional bands. Motif boxes (green) capture
+whole humanoid figures and complete knotwork sections — no body-part fragments.
+Key tuning vs initial run: lowered quality thresholds (iou 0.70, stability 0.75)
+to admit large carved-texture regions; area-sorted NMS so large masks win;
+max_area raised to 0.85 for full knotwork bodies; points_per_side=16 for coarser
+proposals.
 
 ---
 
@@ -187,3 +192,6 @@ Allowlist filtering: 108 panel-art records → 40 FoA images found locally
 | 2026-04-15 | Panel detection: valley_relative_threshold=0.80 + min_sub_w=max(60, w//10) gives clean 3-panel split |
 | 2026-04-16 | Pipeline uses frobenius_panel_art.json as allowlist — non-panel-art images (village scenes etc.) automatically excluded |
 | 2026-04-16 | 108 panel-art records but only 40 resolve to local FoA files; EBA-B registration scheme mismatch needs investigation |
+| 2026-04-18 | SAM quality thresholds lowered (iou 0.82→0.70, stability 0.86→0.75) — large carved-texture regions score lower in SAM's metric |
+| 2026-04-18 | NMS changed from sort-by-predicted_iou to sort-by-area so large whole-figure masks win over body-part masks |
+| 2026-04-18 | max_area raised 0.70→0.85 to allow full knotwork body (~82% of narrow panel) through as a register |
