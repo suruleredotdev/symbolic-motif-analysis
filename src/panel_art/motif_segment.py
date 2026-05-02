@@ -70,18 +70,22 @@ DEFAULT_MODEL_TYPE = "vit_b"
 # whole-figure and whole-band masks through; NMS + area filter cleans up the rest.
 DEFAULT_IOU_THRESH       = 0.70
 DEFAULT_STABILITY_THRESH = 0.75
-# NMS: when two boxes overlap > 35%, drop the smaller one.
+# NMS: when two boxes overlap > 40%, drop the smaller one.
 # Sort by area so large whole-figure/whole-band masks win over body parts.
-# 0.35 (vs 0.25) avoids suppressing adjacent-but-separate motif cells
-# that have low real overlap despite nearby bounding boxes.
-DEFAULT_NMS_IOU  = 0.35
-# 3% floor eliminates body parts (~1-2%) while keeping complete figures (5%+)
-# and register bands (20%+). Was 0.5% which admitted too many fragments.
-DEFAULT_MIN_AREA = 0.03
+# 0.40 (up from 0.35) avoids over-suppressing adjacent small motifs at the
+# lower 1% min_area floor.
+DEFAULT_NMS_IOU  = 0.40
+# 1% floor: admits individual carved symbols (1–3% of panel area) while
+# suppressing sub-pixel noise. Was 3% which over-suppressed on dense panels
+# such as Ado Ekiti (153/157 raw masks dropped).
+DEFAULT_MIN_AREA = 0.01
 # 85% ceiling: allows large register bands (e.g. a full knotwork body spanning
 # 70-80% of a narrow vertical panel) while still blocking the degenerate
 # "entire panel" catch-all mask that SAM sometimes generates.
 DEFAULT_MAX_AREA = 0.85
+# 7.0 aspect ratio cap: allows tall standing figures (≈2:7 proportions).
+# Was 5.0 which clipped elongated humanoid forms.
+DEFAULT_MAX_ASPECT = 7.0
 
 # Annotation colours (R, G, B) for each scale level
 SCALE_COLOURS = {
@@ -93,10 +97,9 @@ PALETTE = list(SCALE_COLOURS.values()) + [
     (200, 80, 255), (255, 165, 50), (50, 220, 200), (255, 220, 50),
 ]
 
-# SAM grid density: fewer points → larger, coarser proposals.
-# 16 (vs 32) steers SAM toward whole-figure and whole-band regions rather than
-# fine sub-element detail.
-DEFAULT_POINTS_PER_SIDE = 16
+# SAM grid density: 32 points gives better coverage of small carved symbols
+# (1–3% of panel area) without the full cost of 64.
+DEFAULT_POINTS_PER_SIDE = 32
 
 
 # ── Data types ────────────────────────────────────────────────────────────────
@@ -169,7 +172,7 @@ def filter_and_nms(
     iou_thresh: float = DEFAULT_IOU_THRESH,
     stability_thresh: float = DEFAULT_STABILITY_THRESH,
     nms_iou: float = DEFAULT_NMS_IOU,
-    max_aspect: float = 5.0,
+    max_aspect: float = DEFAULT_MAX_ASPECT,
 ) -> list[dict]:
     """
     Quality + geometry filter followed by greedy NMS.
