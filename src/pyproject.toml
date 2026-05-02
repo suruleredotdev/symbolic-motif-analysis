@@ -10,6 +10,10 @@ dependencies = [
     "scikit-image",
     # Computer vision — headless avoids Qt/display deps on servers
     "opencv-python-headless",
+    # SAM (Segment Anything Model) — original ViT-B/L/H checkpoints
+    "segment-anything",
+    # Notebook UI
+    "ipywidgets",
     # Neural models
     # PyTorch 2.2.x is the last release with Intel Mac (x86_64) wheels.
     # macOS arm64 users can remove the version pins.

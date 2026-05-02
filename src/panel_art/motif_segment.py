@@ -137,6 +137,9 @@ def classify_scale(area_ratio: float) -> str:
                           Sub-motif fragments (arms, legs, partial knots)
                           are excluded by the 3% min-area floor before
                           this function is reached.
+
+    Post-inference step for annotation of the detected segmentation masks,
+    for our usecase.
     """
     if area_ratio > 0.25:
         return "register"
