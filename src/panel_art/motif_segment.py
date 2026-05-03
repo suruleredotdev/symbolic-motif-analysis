@@ -78,8 +78,7 @@ DEFAULT_NMS_IOU  = 0.40
 # 1% floor: admits individual carved symbols (1–3% of panel area) while
 # suppressing sub-pixel noise. Was 3% which over-suppressed on dense panels
 # such as Ado Ekiti (153/157 raw masks dropped).
-# UPDATE: Trying 0.003 is 0.003% of panel area.
-DEFAULT_MIN_AREA = 0.003
+DEFAULT_MIN_AREA = 0.01
 # 85% ceiling: allows large register bands (e.g. a full knotwork body spanning
 # 70-80% of a narrow vertical panel) while still blocking the degenerate
 # "entire panel" catch-all mask that SAM sometimes generates.
