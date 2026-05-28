@@ -9,13 +9,16 @@ Usage:
     uv run --project src/python python src/python/extract_crops.py
 
 Options:
-    --detections PATH   Path to detections JSON  (default: auto-resolved)
-    --panels-dir PATH   Directory containing panel PNGs  (default: auto-resolved)
-    --out-dir PATH      Output root directory  (default: auto-resolved)
-    --padding INT       Extra pixels to add on each side of the bbox  (default: 4)
-    --scale SCALE       Only export detections of this scale (motif|register|all)
-    --min-iou FLOAT     Skip detections with pred_iou below this threshold
-    --dry-run           Print what would be written without writing anything
+    --detections PATH        Path to detections JSON  (default: auto-resolved)
+    --panels-dir PATH        Directory containing panel PNGs  (default: auto-resolved)
+    --out-dir PATH           Output root directory  (default: auto-resolved)
+    --padding INT            Extra pixels to add on each side of the bbox  (default: 4)
+    --scale SCALE            Only export detections of this scale (motif|register|all)
+    --min-iou FLOAT          Skip detections with pred_iou below this threshold
+    --filter-containment     Drop detections whose bbox is mostly inside a larger one
+    --containment-threshold  Fraction of smaller bbox that must overlap to suppress it
+                             (default: 0.80)
+    --dry-run                Print what would be written without writing anything
 """
 
 import argparse
@@ -48,9 +51,62 @@ def parse_args():
                    help="Only export this detection scale (default: all)")
     p.add_argument("--min-iou",    type=float, default=0.0,
                    help="Skip detections below this pred_iou")
+    p.add_argument("--filter-containment", action="store_true",
+                   help="Remove detections mostly contained within a larger detection")
+    p.add_argument("--containment-threshold", type=float, default=0.80,
+                   help="Fraction of smaller bbox covered by larger to trigger removal "
+                        "(default: 0.80)")
     p.add_argument("--dry-run",    action="store_true",
                    help="Print planned crops without writing files")
     return p.parse_args()
+
+
+def _containment_ratio(a: dict, b: dict) -> float:
+    """
+    Fraction of the *smaller* bbox area that is covered by the intersection of a and b.
+    Returns 0 if the boxes don't overlap.
+    """
+    ax1, ay1 = a["x"], a["y"]
+    ax2, ay2 = ax1 + a["w"], ay1 + a["h"]
+    bx1, by1 = b["x"], b["y"]
+    bx2, by2 = bx1 + b["w"], by1 + b["h"]
+
+    ix1, iy1 = max(ax1, bx1), max(ay1, by1)
+    ix2, iy2 = min(ax2, bx2), min(ay2, by2)
+    if ix2 <= ix1 or iy2 <= iy1:
+        return 0.0
+
+    inter    = (ix2 - ix1) * (iy2 - iy1)
+    min_area = min(a["w"] * a["h"], b["w"] * b["h"])
+    return inter / min_area if min_area > 0 else 0.0
+
+
+def filter_containment(detections: list, threshold: float) -> list:
+    """
+    Remove detections whose bbox is >= threshold fraction contained within a
+    larger detection.  Larger bboxes (by area) always survive; smaller ones
+    that are mostly inside a larger one are suppressed.
+
+    Returns the filtered list; preserves original ordering of survivors.
+    """
+    n       = len(detections)
+    areas   = [d["bbox"]["w"] * d["bbox"]["h"] for d in detections]
+    # Indices sorted largest → smallest
+    by_size = sorted(range(n), key=lambda i: -areas[i])
+    suppress = [False] * n
+
+    for pos, i in enumerate(by_size):
+        if suppress[i]:
+            continue
+        for j in by_size[pos + 1:]:    # j is always smaller than i
+            if suppress[j]:
+                continue
+            if _containment_ratio(detections[i]["bbox"], detections[j]["bbox"]) >= threshold:
+                suppress[j] = True
+
+    kept    = [d for d, s in zip(detections, suppress) if not s]
+    removed = n - len(kept)
+    return kept, removed
 
 
 def crop_and_save(img: Image.Image, bbox: dict, padding: int,
@@ -112,7 +168,16 @@ def main():
             and d["pred_iou"] >= args.min_iou
         ]
 
-        print(f"\n{filename}  ({len(to_export)}/{len(detections)} detections)")
+        n_containment_removed = 0
+        if args.filter_containment and len(to_export) > 1:
+            to_export, n_containment_removed = filter_containment(
+                to_export, args.containment_threshold
+            )
+
+        suffix = ""
+        if args.filter_containment:
+            suffix = f", -{n_containment_removed} sub-crops"
+        print(f"\n{filename}  ({len(to_export)}/{len(detections)} detections{suffix})")
 
         for det in to_export:
             idx   = det["index"]
