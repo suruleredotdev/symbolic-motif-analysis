@@ -2,19 +2,36 @@
 """
 extract_crops.py — crop detected bounding boxes from panel images.
 
-Reads  frobenius_artifacts/analysis/detections.json
+Two input modes:
+
+  consolidated (default)
+    Reads  frobenius_artifacts/analysis/detections.json
+
+  annotated (--annotated-dir)
+    Reads per-panel JSON files from frobenius_artifacts/analysis/annotated/.
+    For each panel, prefers <panel>_approved.json (written by bbox_review.ipynb)
+    over <panel>_detections.json.  This is the recommended mode after running
+    the review notebook.
+
 Writes frobenius_artifacts/analysis/motifs/<panel_stem>/<index>_<scale>.png
 
 Usage:
+    # from consolidated JSON (legacy):
     uv run --project src/python python src/python/extract_crops.py
 
+    # from annotated / approved JSONs:
+    uv run --project src/python python src/python/extract_crops.py --annotated-dir
+
 Options:
-    --detections PATH        Path to detections JSON  (default: auto-resolved)
+    --detections PATH        Path to consolidated detections JSON (default: auto-resolved)
+    --annotated-dir PATH     Use per-panel JSONs from this directory instead;
+                             approved files take precedence over detections files
+                             (default when flag used: frobenius_artifacts/analysis/annotated)
     --panels-dir PATH        Directory containing panel PNGs  (default: auto-resolved)
     --out-dir PATH           Output root directory  (default: auto-resolved)
     --padding INT            Extra pixels to add on each side of the bbox  (default: 4)
     --scale SCALE            Only export detections of this scale (motif|register|all)
-    --min-iou FLOAT          Skip detections with pred_iou below this threshold
+    --min-iou FLOAT          Skip detections with pred_iou/predicted_iou below this threshold
     --filter-containment     Drop detections whose bbox is mostly inside a larger one
     --containment-threshold  Fraction of smaller bbox that must overlap to suppress it
                              (default: 0.80)
@@ -33,32 +50,94 @@ from PIL import Image
 _HERE = Path(__file__).resolve().parent          # src/python/
 _REPO = _HERE.parent.parent                      # repo root
 
-DEFAULT_DETECTIONS = _REPO / "frobenius_artifacts/analysis/detections.json"
-DEFAULT_PANELS_DIR = _REPO / "frobenius_artifacts/analysis/panels"
-DEFAULT_OUT_DIR    = _REPO / "frobenius_artifacts/analysis/motifs"
+DEFAULT_DETECTIONS   = _REPO / "frobenius_artifacts/analysis/detections.json"
+DEFAULT_PANELS_DIR   = _REPO / "frobenius_artifacts/analysis/panels"
+DEFAULT_OUT_DIR      = _REPO / "frobenius_artifacts/analysis/motifs"
+DEFAULT_ANNOTATED    = _REPO / "frobenius_artifacts/analysis/annotated"
 
 
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--detections", type=Path, default=DEFAULT_DETECTIONS)
-    p.add_argument("--panels-dir", type=Path, default=DEFAULT_PANELS_DIR)
-    p.add_argument("--out-dir",    type=Path, default=DEFAULT_OUT_DIR)
-    p.add_argument("--padding",    type=int,  default=4,
+    p.add_argument("--detections",    type=Path, default=DEFAULT_DETECTIONS)
+    p.add_argument("--annotated-dir", type=Path, nargs="?", const=DEFAULT_ANNOTATED,
+                   default=None,
+                   help="Use per-panel JSONs from this dir (approved > detections)")
+    p.add_argument("--panels-dir",    type=Path, default=DEFAULT_PANELS_DIR)
+    p.add_argument("--out-dir",       type=Path, default=DEFAULT_OUT_DIR)
+    p.add_argument("--padding",       type=int,  default=4,
                    help="Extra pixels on each side of the bounding box")
-    p.add_argument("--scale",      default="all",
+    p.add_argument("--scale",         default="all",
                    choices=["motif", "register", "all"],
                    help="Only export this detection scale (default: all)")
-    p.add_argument("--min-iou",    type=float, default=0.0,
-                   help="Skip detections below this pred_iou")
+    p.add_argument("--min-iou",       type=float, default=0.0,
+                   help="Skip detections below this pred_iou / predicted_iou")
     p.add_argument("--filter-containment", action="store_true",
                    help="Remove detections mostly contained within a larger detection")
     p.add_argument("--containment-threshold", type=float, default=0.80,
                    help="Fraction of smaller bbox covered by larger to trigger removal "
                         "(default: 0.80)")
-    p.add_argument("--dry-run",    action="store_true",
+    p.add_argument("--dry-run",       action="store_true",
                    help="Print planned crops without writing files")
     return p.parse_args()
+
+
+def _iou_field(det: dict) -> float:
+    """Return pred_iou regardless of field name (consolidated vs annotated schemas)."""
+    return det.get("pred_iou", det.get("predicted_iou", 0.0))
+
+
+def load_annotated_panels(annotated_dir: Path, panels_dir: Path) -> list:
+    """
+    Scan annotated_dir for per-panel JSONs.  For each stem, prefer
+    <stem>_approved.json over <stem>_detections.json.
+
+    Returns a list of dicts: {filename, stem, detections, panel_path}
+    with detections normalised to the consolidated schema (pred_iou).
+    """
+    stems = {}
+    for f in sorted(annotated_dir.glob("*_detections.json")):
+        stem = f.stem[: -len("_detections")]
+        stems[stem] = {"detections": f, "approved": None}
+    for f in sorted(annotated_dir.glob("*_approved.json")):
+        stem = f.stem[: -len("_approved")]
+        if stem in stems:
+            stems[stem]["approved"] = f
+
+    panels = []
+    for stem, files in stems.items():
+        src = files["approved"] or files["detections"]
+        source_type = "approved" if files["approved"] else "detections"
+
+        # find panel PNG
+        png = panels_dir / f"{stem}.png"
+        if not png.exists():
+            # try _cropped suffix variant
+            png = panels_dir / f"{stem}_cropped.png"
+        if not png.exists():
+            print(f"  WARNING: no panel PNG for {stem}, skipping", file=sys.stderr)
+            continue
+
+        raw = json.loads(src.read_text())
+
+        # normalise to consolidated schema
+        for d in raw:
+            if "predicted_iou" in d and "pred_iou" not in d:
+                d["pred_iou"] = d["predicted_iou"]
+            if "area_ratio" in d and "area_pct" not in d:
+                d["area_pct"] = d["area_ratio"] * 100
+            if "scale" not in d:
+                d["scale"] = "motif"
+
+        panels.append({
+            "filename"    : png.name,
+            "stem"        : stem,
+            "detections"  : raw,
+            "panel_path"  : png,
+            "source_type" : source_type,
+        })
+
+    return panels
 
 
 def _containment_ratio(a: dict, b: dict) -> float:
@@ -138,34 +217,59 @@ def crop_and_save(img: Image.Image, bbox: dict, padding: int,
 def main():
     args = parse_args()
 
-    if not args.detections.exists():
-        sys.exit(f"Detections file not found: {args.detections}")
     if not args.panels_dir.exists():
         sys.exit(f"Panels directory not found: {args.panels_dir}")
 
-    with open(args.detections) as f:
-        data = json.load(f)
+    # ── Load panel list ───────────────────────────────────────────────────
+    if args.annotated_dir is not None:
+        if not args.annotated_dir.exists():
+            sys.exit(f"Annotated directory not found: {args.annotated_dir}")
+        panel_list = load_annotated_panels(args.annotated_dir, args.panels_dir)
+        print(f"Mode: annotated ({args.annotated_dir.name}/)  "
+              f"— {len(panel_list)} panels")
+        n_approved = sum(1 for p in panel_list if p["source_type"] == "approved")
+        n_auto     = len(panel_list) - n_approved
+        if n_approved:
+            print(f"  {n_approved} panels use approved.json, "
+                  f"{n_auto} fall back to detections.json")
+    else:
+        if not args.detections.exists():
+            sys.exit(f"Detections file not found: {args.detections}")
+        with open(args.detections) as f:
+            data = json.load(f)
+        # convert to unified shape
+        panel_list = []
+        for p in data["panels"]:
+            png = args.panels_dir / p["filename"]
+            panel_list.append({
+                "filename"  : p["filename"],
+                "stem"      : png.stem,
+                "detections": p["detections"],
+                "panel_path": png,
+                "source_type": "consolidated",
+            })
+        print(f"Mode: consolidated ({args.detections.name})  "
+              f"— {len(panel_list)} panels")
 
     total_written = 0
     total_skipped = 0
 
-    for panel in data["panels"]:
-        filename  = panel["filename"]
-        panel_path = args.panels_dir / filename
-
+    for panel in panel_list:
+        panel_path = panel["panel_path"]
         if not panel_path.exists():
-            print(f"WARNING: panel image not found, skipping — {panel_path}", file=sys.stderr)
+            print(f"WARNING: panel image not found, skipping — {panel_path}",
+                  file=sys.stderr)
             continue
 
-        img = Image.open(panel_path).convert("RGB")
-        stem = panel_path.stem                        # filename without .png
+        img           = Image.open(panel_path).convert("RGB")
+        stem          = panel["stem"]
         out_panel_dir = args.out_dir / stem
+        detections    = panel["detections"]
 
-        detections = panel["detections"]
         to_export = [
             d for d in detections
-            if (args.scale == "all" or d["scale"] == args.scale)
-            and d["pred_iou"] >= args.min_iou
+            if (args.scale == "all" or d.get("scale", "motif") == args.scale)
+            and _iou_field(d) >= args.min_iou
         ]
 
         n_containment_removed = 0
@@ -174,15 +278,15 @@ def main():
                 to_export, args.containment_threshold
             )
 
-        suffix = ""
-        if args.filter_containment:
-            suffix = f", -{n_containment_removed} sub-crops"
-        print(f"\n{filename}  ({len(to_export)}/{len(detections)} detections{suffix})")
+        src_tag = f" [{panel['source_type']}]"
+        suffix  = f", -{n_containment_removed} sub-crops" if args.filter_containment else ""
+        print(f"\n{panel_path.name}{src_tag}  "
+              f"({len(to_export)}/{len(detections)} detections{suffix})")
 
         for det in to_export:
             idx   = det["index"]
-            scale = det["scale"]
-            iou   = det["pred_iou"]
+            scale = det.get("scale", "motif")
+            iou   = _iou_field(det)
             out_name = f"{idx:03d}_{scale}_iou{iou:.3f}.png"
             out_path = out_panel_dir / out_name
 
