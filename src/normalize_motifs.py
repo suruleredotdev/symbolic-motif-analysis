@@ -264,7 +264,12 @@ def main():
             written += 1
             continue
 
-        img_rgb = np.array(Image.open(src).convert("RGB"))
+        try:
+            img_rgb = np.array(Image.open(src).convert("RGB"))
+        except OSError as e:
+            print(f"  ⚠ skipping {rel}: {e}")
+            skipped += 1
+            continue
 
         if args.mode == "sketch":
             out_arr = normalize_crop_sketch(
