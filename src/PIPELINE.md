@@ -40,10 +40,12 @@ src/
       motif_segment.py Phase 3: SAM segmentation → detections JSON
       vectorize.py     Phase 4: detection bbox → SVG contour trace
       similarity.py    Phase 5: feature matrix + HDBSCAN clustering (SVG-based)
+    motif_tuning.ipynb          SAM parameter tuning sandbox (run before Phase 3)
     bbox_review.ipynb           Review UI: include/exclude detections per panel
     extract_crops.py            PNG crop extraction (preferred over SVG for CLIP)
     normalize_motifs.py         Medium normalisation (photo/B&W/illustration → uniform)
     motif_similarity.ipynb      CLIP embeddings + t-SNE + HDBSCAN + scatter view
+    motif_labeling.ipynb        Interactive labeling UI with LLM suggestions
     export_html.sh              Convert notebooks to self-contained HTML
     museum_search_script.py     Museum collection search utilities
 ```
@@ -90,8 +92,9 @@ python frobenius_artifacts/download_frobenius_images.py \
 
 ---
 
-### Phases 2–5 — Core pipeline (automated, run via `pipeline.py`)
-**Script:** `src/python/panel_art/pipeline.py`
+### Step 2 — Panel detection (Phase 2)
+
+Run Phase 2 alone first so you have panel crops to tune SAM against:
 
 ```bash
 uv run --project src/python python -m panel_art.pipeline \
@@ -99,14 +102,13 @@ uv run --project src/python python -m panel_art.pipeline \
   --metadata   src/typescript/backend/lib/data/frobenius_panel_art.json \
   --img-manifest frobenius_artifacts/images/manifest.json \
   --checkpoint src/python/sam_vit_b_01ec64.pth \
-  --out-dir    frobenius_artifacts/analysis/
+  --out-dir    frobenius_artifacts/analysis/ \
+  --no-cluster
+# Then Ctrl-C after Phase 2 completes (panels/ is populated), or use a single test image:
+uv run --project src/python python -m panel_art.pipeline \
+  --images frobenius_artifacts/images/<one_image>.png \
+  ... --no-cluster
 ```
-
-Each phase can also be run independently:
-
-**Phase 1 — Line-art preprocessing** (`preprocess.py`)
-Converts source images to high-contrast line-art PNGs.
-Output: `analysis/line_art/<stem>_lineart.png`
 
 **Phase 2 — Panel detection** (`panel_detect.py`)
 Segments multi-panel photos into individual panel crops using Otsu thresholding
@@ -116,6 +118,54 @@ Output: `analysis/panels/<stem>_panel_<NN>.png`
 > Note: a source image showing 3 physical doors side-by-side produces
 > 3 panel PNGs. This is why `panels/` can have more entries than
 > the number of source images.
+
+---
+
+### Step 3a — SAM parameter tuning *(do this before the full Phase 3 run)*
+**Notebook:** `src/python/motif_tuning.ipynb`
+
+Interactive sandbox for dialling in SAM segmentation parameters against a
+sample of panel crops before committing to a full pipeline run.
+
+```
+Open: src/python/motif_tuning.ipynb
+→ Kernel → Restart & Run All
+→ Select representative panels from the list (Ctrl/⌘+click)
+→ Adjust sliders (points/side, iou_thresh, stability, min/max area, nms_iou, max_aspect)
+→ Click "Run segmentation" — inspect annotated image and detection table
+→ Toggle "Show raw SAM masks" to understand why detections are being dropped
+→ Iterate until the result looks right across diverse panel types
+→ Copy the printed parameter block into panel_art/motif_segment.py defaults
+```
+
+The notebook prints a ready-to-paste snippet at the bottom of each run:
+
+```
+# ── Copy these values into panel_art/motif_segment.py ──
+DEFAULT_IOU_THRESH       = 0.75
+DEFAULT_STABILITY_THRESH = 0.80
+DEFAULT_NMS_IOU          = 0.40
+DEFAULT_MIN_AREA         = 0.005
+DEFAULT_MAX_AREA         = 0.70
+DEFAULT_POINTS_PER_SIDE  = 32
+DEFAULT_MAX_ASPECT       = 8.0
+```
+
+---
+
+### Step 3b–5 — Core pipeline: SAM → vectorize → cluster (automated)
+**Script:** `src/python/panel_art/pipeline.py`
+
+After copying tuned parameters into `motif_segment.py`, run the full pipeline:
+
+```bash
+uv run --project src/python python -m panel_art.pipeline \
+  --image-dir  frobenius_artifacts/images/ \
+  --metadata   src/typescript/backend/lib/data/frobenius_panel_art.json \
+  --img-manifest frobenius_artifacts/images/manifest.json \
+  --checkpoint src/python/sam_vit_b_01ec64.pth \
+  --out-dir    frobenius_artifacts/analysis/
+```
 
 **Phase 3 — SAM segmentation** (`motif_segment.py`)
 Uses Meta's Segment Anything Model (ViT-B) to detect motif bounding boxes
@@ -156,7 +206,7 @@ Approved files take precedence over detections files in the next step.
 
 ---
 
-### Step 7 — Crop extraction
+### Step 7 — Crop extraction  *(after bbox_review)*
 **Script:** `src/python/extract_crops.py`
 
 Extracts PNG crops from panel images using the detection bounding boxes.
@@ -239,7 +289,7 @@ of defence after geometric containment filtering in extract_crops.py.
 | `images/` | varies | gitignored, local only |
 | `panels/` | 62 PNGs | Phase 2 output; some source images yield 2–5 panels |
 | `annotated/` | 57 `_detections.json` | Phase 3 output; 5 panels not yet SAM-segmented |
-| `motifs/` (subdirs) | 56 subdirs, ~131 PNGs | Phase 7 extract_crops output |
+| `motifs/` (subdirs) | 56 subdirs, ~131 PNGs | Step 7 extract_crops output |
 | `motifs/` (root SVGs) | 288 SVGs | Phase 4 vectorize output |
 | `motifs_norm/` | — | Deleted; regenerate with normalize_motifs.py |
 
@@ -256,15 +306,21 @@ To process these, run Phase 3 (`motif_segment.py`) on those specific panel PNGs.
 
 ## End-to-end flow for the CLIP similarity workflow
 
-This is the currently active workflow connecting bbox_review → motif_similarity:
+Full sequence including the tuning step:
 
 ```
+images/<source>.png
+    │
+    ▼  (pipeline.py Phase 2 — panel_detect.py)
 panels/<panel>.png
     │
-    ▼  (motif_segment.py — Phase 3)
+    ▼  (motif_tuning.ipynb — interactive, tune before bulk run)
+panel_art/motif_segment.py  ← paste tuned defaults here
+    │
+    ▼  (pipeline.py Phase 3 — motif_segment.py with tuned params)
 annotated/<panel>_detections.json
     │
-    ▼  (bbox_review.ipynb — optional curation)
+    ▼  (bbox_review.ipynb — optional per-panel curation)
 annotated/<panel>_approved.json    ← overrides detections
     │
     ▼  (extract_crops.py --annotated-dir [--filter-containment])
@@ -274,10 +330,15 @@ motifs/<panel>/<NNN>_<scale>_iou<X.XXX>.png
 motifs_norm/<panel>/<NNN>_<scale>_iou<X.XXX>.png
     │
     ▼  (motif_similarity.ipynb  USE_NORMALIZED=True)
-scatter plot, cluster gallery, nearest-neighbour explorer
+motif_embeddings_*.npy + motif_paths_*.txt
+    │
+    ▼  (motif_labeling.ipynb)
+motif_labels.json
 ```
 
 ### Quick re-run after bbox_review curation
+
+Steps 7–10 only (parameters already tuned, Phase 3 already run):
 
 ```bash
 # 1. Regenerate crops (annotated dir mode, with containment filter)
@@ -291,6 +352,8 @@ uv run --project src/python python src/python/normalize_motifs.py \
 
 # 3. Re-run motif_similarity.ipynb from cell 3 (embedding cell)
 #    USE_NORMALIZED = True
+
+# 4. Re-run motif_labeling.ipynb (all cells) — labels are preserved in motif_labels.json
 ```
 
 ---
