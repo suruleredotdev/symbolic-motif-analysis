@@ -100,6 +100,19 @@ if not _emb_file.exists():
 embeddings = np.load(_emb_file).astype(np.float32)
 _raw_paths = _paths_file.read_text().splitlines()
 
+# ── Stale-input check (Phase 0b) ──────────────────────────────────────────────
+# Warn if motifs_norm/ has files newer than the saved embeddings.
+# This means motifs changed after the last motif_similarity run — re-run it first.
+_npy_mtime   = _emb_file.stat().st_mtime
+_norm_files  = list(MOTIFS_NORM.rglob("*.png")) if MOTIFS_NORM.exists() else []
+if _norm_files:
+    _newest_norm = max(f.stat().st_mtime for f in _norm_files)
+    if _newest_norm > _npy_mtime:
+        import datetime as _dt
+        _delta = _dt.datetime.fromtimestamp(_newest_norm) - _dt.datetime.fromtimestamp(_npy_mtime)
+        print(f"  ⚠ motifs_norm/ has files {_delta} newer than embeddings.")
+        print(f"    Re-run motif_similarity.ipynb before labeling for accurate results.")
+
 # ── Artifact metadata ──────────────────────────────────────────────────────────
 _meta_by_reg: dict = {}
 try:

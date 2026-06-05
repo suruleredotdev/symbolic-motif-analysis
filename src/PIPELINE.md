@@ -55,17 +55,20 @@ src/
 ## Pipeline stages
 
 ### Step 0 — Metadata filter
+
 **Script:** `src/python/scripts/filter_frobenius_panel_art.py`
 
 Reads `frobenius_all.json` (full archive dump) and produces `frobenius_panel_art.json`
 containing only records categorised as:
 
-| Category | What it includes |
-|----------|-----------------|
-| `door_panel` | Carved wooden doors, door panels, wall boards |
-| `ifa_board` | Ifa divination boards (opon Ifa), oracle boards, iroke |
-| `figurine` | Bronze/wood cult figures, Ogboni edan, ivory carvings |
-| `motif_illustration` | Non-photographic drawings of carved relief motifs |
+
+| Category             | What it includes                                       |
+| -------------------- | ------------------------------------------------------ |
+| `door_panel`         | Carved wooden doors, door panels, wall boards          |
+| `ifa_board`          | Ifa divination boards (opon Ifa), oracle boards, iroke |
+| `figurine`           | Bronze/wood cult figures, Ogboni edan, ivory carvings  |
+| `motif_illustration` | Non-photographic drawings of carved relief motifs      |
+
 
 ```bash
 python3 src/python/scripts/filter_frobenius_panel_art.py
@@ -76,6 +79,7 @@ python3 src/python/scripts/filter_frobenius_panel_art.py
 ---
 
 ### Step 1 — Image download
+
 **Script:** `frobenius_artifacts/download_frobenius_images.py`
 
 Downloads full-resolution images from the Frobenius Institute archive.
@@ -112,7 +116,8 @@ uv run --project src/python python -m panel_art.pipeline \
 
 **Phase 2 — Panel detection** (`panel_detect.py`)
 Segments multi-panel photos into individual panel crops using Otsu thresholding
-+ connected components + vertical projection valley splitting.
+
+- connected components + vertical projection valley splitting.
 Output: `analysis/panels/<stem>_panel_<NN>.png`
 
 > Note: a source image showing 3 physical doors side-by-side produces
@@ -122,6 +127,7 @@ Output: `analysis/panels/<stem>_panel_<NN>.png`
 ---
 
 ### Step 3a — SAM parameter tuning *(do this before the full Phase 3 run)*
+
 **Notebook:** `src/python/motif_tuning.ipynb`
 
 Interactive sandbox for dialling in SAM segmentation parameters against a
@@ -154,6 +160,7 @@ DEFAULT_MAX_ASPECT       = 8.0
 ---
 
 ### Step 3b–5 — Core pipeline: SAM → vectorize → cluster (automated)
+
 **Script:** `src/python/panel_art/pipeline.py`
 
 After copying tuned parameters into `motif_segment.py`, run the full pipeline:
@@ -172,6 +179,7 @@ Uses Meta's Segment Anything Model (ViT-B) to detect motif bounding boxes
 within each panel crop. NMS + area/quality filters suppress noise and
 sub-motif fragments.
 Output:
+
 - `analysis/annotated/<panel>_detections.json` — bbox list with `predicted_iou`, `stability_score`, `scale`
 - `analysis/annotated/<panel>_annotated.jpg` — visualisation (green=motif, red=register)
 
@@ -189,6 +197,7 @@ Output: `analysis/clusters/clusters.json`
 ---
 
 ### Step 6 — Bounding-box review (optional manual curation)
+
 **Notebook:** `src/python/bbox_review.ipynb`
 
 Interactive UI to include/exclude detections per panel before cropping.
@@ -207,6 +216,7 @@ Approved files take precedence over detections files in the next step.
 ---
 
 ### Step 7 — Crop extraction  *(after bbox_review)*
+
 **Script:** `src/python/extract_crops.py`
 
 Extracts PNG crops from panel images using the detection bounding boxes.
@@ -237,6 +247,7 @@ upstream to Phase 3 (segment level) in a future rewrite.
 ---
 
 ### Step 8 — Normalisation
+
 **Script:** `src/python/normalize_motifs.py`
 
 Converts diverse source media (colour photo, B&W archival scan, ink drawing)
@@ -253,8 +264,9 @@ uv run --project src/python python src/python/normalize_motifs.py \
 ```
 
 Modes:
+
 - `lines` — adaptive Gaussian threshold → dark grooves on white background.
-  Works uniformly across photographs, B&W scans, and illustrations.
+Works uniformly across photographs, B&W scans, and illustrations.
 - `sketch` — soft DoG edge emphasis, retains tonal information.
 
 Output: `analysis/motifs_norm/<panel_stem>/<crop>.png`
@@ -265,16 +277,19 @@ and apply normalisation without leaving the notebook.
 ---
 
 ### Step 9 — Visual similarity analysis
+
 **Notebook:** `src/python/motif_similarity.ipynb`
 
 CLIP ViT-B/32 embeddings + t-SNE layout + HDBSCAN clustering.
 
 Key toggles at the top of the notebook:
 
-| Variable | Values | Effect |
-|----------|--------|--------|
-| `USE_NORMALIZED` | `True` / `False` | Use `motifs_norm/` or raw `motifs/` |
-| `PREPROCESS_MODE` | `"lines"` / `"sketch"` / `"grayscale"` | Embedding preprocessing |
+
+| Variable          | Values                                 | Effect                              |
+| ----------------- | -------------------------------------- | ----------------------------------- |
+| `USE_NORMALIZED`  | `True` / `False`                       | Use `motifs_norm/` or raw `motifs/` |
+| `PREPROCESS_MODE` | `"lines"` / `"sketch"` / `"grayscale"` | Embedding preprocessing             |
+
 
 The notebook also has an **embedding near-duplicate filter** (cell 4.5) that
 drops crops which are high cosine similarity to a larger crop — a second line
@@ -284,16 +299,19 @@ of defence after geometric containment filtering in extract_crops.py.
 
 ## Current artifact counts (as of last pipeline run)
 
-| Directory | Count | Notes |
-|-----------|-------|-------|
-| `images/` | varies | gitignored, local only |
-| `panels/` | 62 PNGs | Phase 2 output; some source images yield 2–5 panels |
-| `annotated/` | 57 `_detections.json` | Phase 3 output; 5 panels not yet SAM-segmented |
-| `motifs/` (subdirs) | 56 subdirs, ~131 PNGs | Step 7 extract_crops output |
-| `motifs/` (root SVGs) | 288 SVGs | Phase 4 vectorize output |
-| `motifs_norm/` | — | Deleted; regenerate with normalize_motifs.py |
+
+| Directory             | Count                 | Notes                                               |
+| --------------------- | --------------------- | --------------------------------------------------- |
+| `images/`             | varies                | gitignored, local only                              |
+| `panels/`             | 62 PNGs               | Phase 2 output; some source images yield 2–5 panels |
+| `annotated/`          | 57 `_detections.json` | Phase 3 output; 5 panels not yet SAM-segmented      |
+| `motifs/` (subdirs)   | 56 subdirs, ~131 PNGs | Step 7 extract_crops output                         |
+| `motifs/` (root SVGs) | 288 SVGs              | Phase 4 vectorize output                            |
+| `motifs_norm/`        | —                     | Deleted; regenerate with normalize_motifs.py        |
+
 
 **The 5 panels in `panels/` with no `_detections.json`:**
+
 - `EBA-B_00425_Ibadan_q97912_i1_panel_0_cropped` — legacy manual crop, non-standard name; use `panel_00` variant instead
 - `FoA_04-5029_Ilorin_q48653_i1_panel_00`
 - `FoA_04-5042_Ilorin_q48649_i1_panel_00`
@@ -348,7 +366,7 @@ uv run --project src/python python src/python/extract_crops.py \
 
 # 2. Regenerate normalised versions
 uv run --project src/python python src/python/normalize_motifs.py \
-  --mode lines --force
+  --mode=lines --shadow-sigma=40.0 --clahe-clip=2.50 --bilateral-d=7 --force --block-size=9 --adapt-c=8.0 --morph-open=0
 
 # 3. Re-run motif_similarity.ipynb from cell 3 (embedding cell)
 #    USE_NORMALIZED = True
@@ -379,3 +397,4 @@ Netlify, Vercel, or `python3 -m http.server 8080 --directory frobenius_artifacts
 > Widgets (sliders, dropdowns) are not interactive in static HTML. For best
 > results: run the notebook fully in JupyterLab → File → Save Notebook
 > (embeds last widget state) → then run export_html.sh.
+

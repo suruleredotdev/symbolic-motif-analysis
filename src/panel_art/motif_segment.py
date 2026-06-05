@@ -374,6 +374,11 @@ def segment_to_files(
     """
     Segment a panel image, save annotated JPEG and patches JSON.
     Returns list of detection dicts (without segmentation masks).
+
+    Writes two JSON files:
+      <stem>_detections_raw.json — all SAM masks before any filtering
+                                   (candidate pool for bbox_review Phase 1b)
+      <stem>_detections.json     — filtered + NMS detections (pipeline default)
     """
     path = Path(panel_image_path)
     out_dir = Path(out_dir)
@@ -382,7 +387,53 @@ def segment_to_files(
     img_pil = Image.open(path).convert("RGB")
     img_np = np.array(img_pil)
 
-    detections = segment_panel(img_np, generator, **kwargs)
+    img_h, img_w = img_np.shape[:2]
+    img_area = img_h * img_w
+
+    # Run SAM once — reuse raw masks for both raw JSON and filtered detections
+    raw_masks = generator.generate(img_np)
+
+    # ── _detections_raw.json: all masks before filtering (Phase 1a) ────────────
+    raw_meta = []
+    for idx, m in enumerate(raw_masks):
+        x, y, w, h = [int(v) for v in m["bbox"]]
+        raw_meta.append({
+            "index": idx,
+            "bbox": {"x": x, "y": y, "w": w, "h": h},
+            "area_ratio": round(m["area"] / img_area, 5),
+            "predicted_iou": round(float(m["predicted_iou"]), 4),
+            "stability_score": round(float(m["stability_score"]), 4),
+        })
+    raw_json_path = out_dir / f"{path.stem}_detections_raw.json"
+    with open(raw_json_path, "w") as f:
+        json.dump(raw_meta, f, indent=2)
+
+    # ── Filter + NMS → Detection objects ───────────────────────────────────────
+    min_area = kwargs.get("min_area", DEFAULT_MIN_AREA)
+    max_area = kwargs.get("max_area", DEFAULT_MAX_AREA)
+    nms_iou  = kwargs.get("nms_iou",  DEFAULT_NMS_IOU)
+
+    kept = filter_and_nms(raw_masks, img_area,
+                          min_area=min_area, max_area=max_area, nms_iou=nms_iou)
+
+    detections = []
+    for idx, m in enumerate(kept):
+        x, y, w, h = [int(v) for v in m["bbox"]]
+        area_ratio = m["area"] / img_area
+        detections.append(Detection(
+            index=idx,
+            bbox={"x": x, "y": y, "w": w, "h": h},
+            scale=classify_scale(area_ratio),
+            area_ratio=area_ratio,
+            predicted_iou=float(m["predicted_iou"]),
+            stability_score=float(m["stability_score"]),
+            segmentation=m["segmentation"],
+        ))
+
+    # Sort largest → smallest so register-level context comes first
+    detections.sort(key=lambda d: d.area_ratio, reverse=True)
+    for i, d in enumerate(detections):
+        d.index = i
 
     # Annotated image
     ann_path = out_dir / f"{path.stem}_annotated.jpg"
