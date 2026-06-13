@@ -50,7 +50,11 @@ from PIL import Image
 # SAM is optional — pipeline degrades gracefully if unavailable
 try:
     import torch
-    from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
+    from segment_anything import (
+        SamAutomaticMaskGenerator,
+        SamPredictor,
+        sam_model_registry,
+    )
     SAM_AVAILABLE = True
 except ImportError:
     SAM_AVAILABLE = False
@@ -100,6 +104,14 @@ PALETTE = list(SCALE_COLOURS.values()) + [
 # SAM grid density: 32 points gives better coverage of small carved symbols
 # (1–3% of panel area) without the full cost of 64.
 DEFAULT_POINTS_PER_SIDE = 32
+
+# Raw candidate pool thresholds — much lower than the quality gate so
+# _detections_raw.json contains masks the main filter rejects.
+# These are passed to SamAutomaticMaskGenerator internally; our own
+# filter_and_nms() then applies DEFAULT_IOU_THRESH / DEFAULT_STABILITY_THRESH
+# for the curated _detections.json output.
+RAW_IOU_THRESH       = 0.40
+RAW_STABILITY_THRESH = 0.50
 
 
 # ── Data types ────────────────────────────────────────────────────────────────
@@ -216,6 +228,7 @@ def filter_and_nms(
 
 # ── Model loading ─────────────────────────────────────────────────────────────
 
+_sam_model_cache: dict[str, object] = {}
 _generator_cache: dict[str, "SamAutomaticMaskGenerator"] = {}
 
 
@@ -229,15 +242,11 @@ def _resolve_device() -> str:
     return "cpu"
 
 
-def load_generator(
+def _load_sam_model(
     checkpoint: str = DEFAULT_CHECKPOINT,
     model_type: str = DEFAULT_MODEL_TYPE,
-    points_per_side: int = DEFAULT_POINTS_PER_SIDE,
-) -> "SamAutomaticMaskGenerator":
-    """
-    Load SAM and return a configured automatic mask generator.
-    Results are cached by checkpoint path so the model is only loaded once.
-    """
+) -> object:
+    """Load and cache the SAM model — shared between generator and predictor."""
     if not SAM_AVAILABLE:
         raise ImportError(
             "SAM not available. Install with:\n"
@@ -246,9 +255,9 @@ def load_generator(
             "  wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth"
         )
 
-    cache_key = f"{checkpoint}:{model_type}:{points_per_side}"
-    if cache_key in _generator_cache:
-        return _generator_cache[cache_key]
+    cache_key = f"{checkpoint}:{model_type}"
+    if cache_key in _sam_model_cache:
+        return _sam_model_cache[cache_key]
 
     if not Path(checkpoint).exists():
         raise FileNotFoundError(
@@ -260,12 +269,33 @@ def load_generator(
     print(f"  Loading SAM {model_type} on {device} …", flush=True)
     sam = sam_model_registry[model_type](checkpoint=checkpoint)
     sam.to(device=device)
+    _sam_model_cache[cache_key] = sam
+    return sam
 
+
+def load_generator(
+    checkpoint: str = DEFAULT_CHECKPOINT,
+    model_type: str = DEFAULT_MODEL_TYPE,
+    points_per_side: int = DEFAULT_POINTS_PER_SIDE,
+) -> "SamAutomaticMaskGenerator":
+    """
+    Load SAM and return a configured automatic mask generator.
+    Results are cached by checkpoint path so the model is only loaded once.
+    """
+    cache_key = f"{checkpoint}:{model_type}:{points_per_side}"
+    if cache_key in _generator_cache:
+        return _generator_cache[cache_key]
+
+    sam = _load_sam_model(checkpoint, model_type)
+
+    # Use low internal thresholds so generator.generate() returns a wide
+    # candidate pool.  Our filter_and_nms() applies the stricter quality
+    # gate (DEFAULT_IOU_THRESH / DEFAULT_STABILITY_THRESH) for curated output.
     generator = SamAutomaticMaskGenerator(
         model=sam,
         points_per_side=points_per_side,
-        pred_iou_thresh=DEFAULT_IOU_THRESH,
-        stability_score_thresh=DEFAULT_STABILITY_THRESH,
+        pred_iou_thresh=RAW_IOU_THRESH,
+        stability_score_thresh=RAW_STABILITY_THRESH,
         min_mask_region_area=200,   # absolute px² — drops sub-pixel noise
     )
     _generator_cache[cache_key] = generator
@@ -324,6 +354,180 @@ def segment_panel(
     detections.sort(key=lambda d: d.area_ratio, reverse=True)
     for i, d in enumerate(detections):
         d.index = i
+
+    return detections
+
+
+# ── Prompted re-segmentation (HITL feedback) ─────────────────────────────────
+
+def _size_envelope(templates: list[dict], margin: float = 0.5):
+    """Compute (w_lo, w_hi, h_lo, h_hi) from approved bbox templates.
+
+    Uses the 10th–90th percentile of widths/heights, expanded by *margin*
+    (0.5 = 50%).  Returns None if fewer than 3 templates.
+    """
+    if len(templates) < 3:
+        return None
+    widths  = sorted(t["w"] for t in templates)
+    heights = sorted(t["h"] for t in templates)
+    n = len(widths)
+    p10, p90 = max(n // 10, 0), min(n - 1 - n // 10, n - 1)
+    w_lo = int(widths[p10]  * (1 - margin))
+    w_hi = int(widths[p90]  * (1 + margin))
+    h_lo = int(heights[p10] * (1 - margin))
+    h_hi = int(heights[p90] * (1 + margin))
+    med_w = widths[n // 2]
+    med_h = heights[n // 2]
+    return w_lo, w_hi, h_lo, h_hi, med_w, med_h
+
+
+def prompted_segment(
+    panel_img: np.ndarray,
+    existing_bboxes: list[dict],
+    approved_templates: list[dict] | None = None,
+    checkpoint: str = DEFAULT_CHECKPOINT,
+    model_type: str = DEFAULT_MODEL_TYPE,
+    min_score: float = 0.80,
+    grid_spacing: int = 80,
+) -> list[Detection]:
+    """
+    Find motifs shaped like approved templates in uncovered areas.
+
+    Strategy
+    --------
+    1. Compute a **size envelope** (width/height range) from
+       approved_templates — only masks matching those dimensions are kept.
+    2. Prioritise probing **edges of existing bboxes** (adjacent motifs)
+       plus a sparse grid over uncovered space.
+    3. For each probe point, pass a box prompt at the median template size
+       so SAM knows what scale to segment at.
+    4. Keep masks that score >= min_score, fall within the size envelope,
+       and don't overlap existing bboxes.
+
+    Parameters
+    ----------
+    panel_img           : H×W×3 uint8 RGB array
+    existing_bboxes     : bboxes already on this panel (skipped in output)
+    approved_templates  : bbox dicts from approved panels — defines what a
+                          "good motif" looks like (size, aspect ratio)
+    min_score           : minimum predicted_iou to keep a mask
+    grid_spacing        : pixel spacing for the sparse exploration grid
+    """
+    sam = _load_sam_model(checkpoint, model_type)
+    predictor = SamPredictor(sam)
+    predictor.set_image(panel_img)
+
+    img_h, img_w = panel_img.shape[:2]
+    img_area = img_h * img_w
+
+    # ── Size envelope from approved templates ─────────────────────────────
+    envelope = _size_envelope(approved_templates or [])
+    if envelope:
+        w_lo, w_hi, h_lo, h_hi, med_w, med_h = envelope
+    else:
+        # No template data — permissive defaults
+        w_lo, h_lo = 20, 20
+        w_hi, h_hi = img_w // 2, img_h // 2
+        med_w, med_h = img_w // 4, img_h // 4
+
+    # ── Occupancy map ─────────────────────────────────────────────────────
+    occupied = np.zeros((img_h, img_w), dtype=bool)
+    for bb in existing_bboxes:
+        x, y, w, h = bb["x"], bb["y"], bb["w"], bb["h"]
+        occupied[max(0, y):min(img_h, y + h), max(0, x):min(img_w, x + w)] = True
+
+    # ── Probe points — edges first, then sparse grid ──────────────────────
+    points: list[tuple[int, int]] = []
+
+    # 1) Edge points just outside each existing bbox (highest value)
+    for bb in existing_bboxes:
+        x, y, w, h = bb["x"], bb["y"], bb["w"], bb["h"]
+        margin = max(med_w, med_h) // 2   # probe at ~half a motif away
+        for ex, ey in [
+            (x - margin, y + h // 2),       # left
+            (x + w + margin, y + h // 2),    # right
+            (x + w // 2, y - margin),        # top
+            (x + w // 2, y + h + margin),    # bottom
+            (x - margin, y),                 # top-left
+            (x + w + margin, y),             # top-right
+            (x - margin, y + h),             # bottom-left
+            (x + w + margin, y + h),         # bottom-right
+        ]:
+            ex, ey = int(ex), int(ey)
+            if 0 <= ex < img_w and 0 <= ey < img_h and not occupied[ey, ex]:
+                points.append((ex, ey))
+
+    # 2) Sparse grid over remaining uncovered areas
+    half = grid_spacing // 2
+    for py in range(half, img_h, grid_spacing):
+        for px in range(half, img_w, grid_spacing):
+            r = grid_spacing // 4
+            y1c, y2c = max(0, py - r), min(img_h, py + r)
+            x1c, x2c = max(0, px - r), min(img_w, px + r)
+            if occupied[y1c:y2c, x1c:x2c].mean() < 0.5:
+                points.append((px, py))
+
+    if not points:
+        return []
+
+    # ── Probe each point with a template-sized box prompt ─────────────────
+    detections: list[Detection] = []
+    seen: list[list[int]] = []
+
+    for px, py in points:
+        coords = np.array([[px, py]])
+        labels = np.array([1])
+
+        # Box prompt centred on the probe point, sized to median template
+        bx1 = max(0, px - med_w // 2)
+        by1 = max(0, py - med_h // 2)
+        bx2 = min(img_w, px + med_w // 2)
+        by2 = min(img_h, py + med_h // 2)
+
+        masks, scores, _ = predictor.predict(
+            point_coords=coords,
+            point_labels=labels,
+            box=np.array([bx1, by1, bx2, by2]),
+            multimask_output=True,
+        )
+
+        for mi in range(len(scores)):
+            if float(scores[mi]) < min_score:
+                continue
+            mask = masks[mi]
+            ys, xs = np.where(mask)
+            if len(xs) == 0:
+                continue
+            mx, my_c = int(xs.min()), int(ys.min())
+            mw, mh = int(xs.max()) - mx, int(ys.max()) - my_c
+            if mw <= 0 or mh <= 0:
+                continue
+
+            # ── Size envelope filter — the key precision gate ─────────
+            if mw < w_lo or mw > w_hi or mh < h_lo or mh > h_hi:
+                continue
+
+            area_ratio = int(mask.sum()) / img_area
+            bb_list = [mx, my_c, mw, mh]
+
+            # Skip if overlapping existing bboxes
+            if any(_iou(bb_list, [e["x"], e["y"], e["w"], e["h"]]) > 0.3
+                   for e in existing_bboxes):
+                continue
+            # Internal dedup
+            if any(_iou(bb_list, s) > 0.3 for s in seen):
+                continue
+
+            detections.append(Detection(
+                index=len(detections),
+                bbox={"x": mx, "y": my_c, "w": mw, "h": mh},
+                scale=classify_scale(area_ratio),
+                area_ratio=area_ratio,
+                predicted_iou=float(scores[mi]),
+                stability_score=float(scores[mi]),
+                segmentation=mask,
+            ))
+            seen.append(bb_list)
 
     return detections
 
@@ -465,11 +669,84 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--min-area", type=float, default=DEFAULT_MIN_AREA)
     p.add_argument("--max-area", type=float, default=DEFAULT_MAX_AREA)
     p.add_argument("--nms-iou", type=float, default=DEFAULT_NMS_IOU)
+    p.add_argument(
+        "--resegment", action="store_true",
+        help="HITL mode: read manual bboxes from _approved.json and use them "
+             "as SamPredictor box prompts to get refined masks. Merges results "
+             "back into _approved.json with source='sam_prompted'.",
+    )
     return p
+
+
+def _resegment_from_approved(
+    panel_path: Path, out_dir: Path, checkpoint: str, model_type: str,
+) -> None:
+    """Probe uncovered areas of a panel using existing bboxes + cross-panel sizes."""
+    stem = panel_path.stem
+    out_dir = Path(out_dir)
+    approved_path = out_dir / f"{stem}_approved.json"
+    if not approved_path.exists():
+        print(f"  skip — no _approved.json")
+        return
+
+    approved = json.loads(approved_path.read_text())
+    existing = [d["bbox"] for d in approved]
+    if not existing:
+        print(f"  skip — no bboxes in approved")
+        return
+
+    # Collect approved bbox templates from all other panels
+    templates: list[dict] = []
+    for ap in out_dir.glob("*_approved.json"):
+        if stem in ap.stem:
+            continue
+        try:
+            for r in json.loads(ap.read_text()):
+                b = r.get("bbox", {})
+                if b.get("w", 0) > 0 and b.get("h", 0) > 0:
+                    templates.append(b)
+        except Exception:
+            pass
+
+    print(f"  {len(existing)} existing bbox(es), "
+          f"{len(templates)} approved templates → probing uncovered areas")
+
+    img_np = np.array(Image.open(panel_path).convert("RGB"))
+
+    prompted = prompted_segment(
+        img_np, existing,
+        approved_templates=templates or None,
+        checkpoint=checkpoint, model_type=model_type,
+    )
+
+    next_idx = max((d.get("index", 0) for d in approved), default=-1) + 1
+    added = 0
+    for det in prompted:
+        d = det.to_dict()
+        d["source"] = "sam_prompted"
+        d["index"] = next_idx
+        approved.append(d)
+        next_idx += 1
+        added += 1
+
+    approved_path.write_text(json.dumps(approved, indent=2))
+    print(f"  +{added} prompted masks → {approved_path.name} "
+          f"(total {len(approved)})")
 
 
 def main(argv: list[str] | None = None) -> None:
     args = _build_parser().parse_args(argv)
+
+    if args.resegment:
+        for img_path in args.images:
+            path = Path(img_path)
+            print(f"\n{path.name}")
+            _resegment_from_approved(
+                path, args.out_dir,
+                checkpoint=args.checkpoint,
+                model_type=args.model_type,
+            )
+        return
 
     generator = load_generator(
         checkpoint=args.checkpoint,

@@ -34,6 +34,7 @@ dependencies = [
     "anthropic",
     # Visualisation
     "matplotlib",
+    "ipympl",              # interactive matplotlib figures in Jupyter (drag-draw)
 ]
 
 [project.optional-dependencies]

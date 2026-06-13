@@ -86,8 +86,16 @@ print(f"Labels: {LABELS_PATH}")\
 
 # ── Cell 2: data load ──────────────────────────────────────────────────────────
 cells.append(code("ml-2", """\
-# ── Toggle: must match the embedding file you want to use ─────────────────────
-PREPROCESS_MODE = "grayscale"   # "grayscale" | "edges"
+# ── Auto-detect mode from most recent params sidecar, fallback to "edges" ─────
+_params_files = sorted(_NB.glob("motif_params_*.json"),
+                       key=lambda f: f.stat().st_mtime, reverse=True)
+PREPROCESS_MODE = "edges"  # default
+if _params_files:
+    try:
+        PREPROCESS_MODE = json.loads(_params_files[0].read_text())["PREPROCESS_MODE"]
+        print(f"Auto-detected PREPROCESS_MODE={PREPROCESS_MODE!r} from {_params_files[0].name}")
+    except Exception:
+        pass
 
 _emb_file   = _NB / f"motif_embeddings_{PREPROCESS_MODE}.npy"
 _paths_file = _NB / f"motif_paths_{PREPROCESS_MODE}.txt"
