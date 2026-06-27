@@ -381,6 +381,33 @@ def _size_envelope(templates: list[dict], margin: float = 0.5):
     return w_lo, w_hi, h_lo, h_hi, med_w, med_h
 
 
+def _edge_density(img_gray: np.ndarray, mask: np.ndarray) -> float:
+    """Fraction of mask pixels that are Canny edges.
+
+    Carved motifs have grooves and relief boundaries → high edge density
+    (typically 5–15%).  Flat background wood grain → low (<2%).
+    """
+    edges = cv2.Canny(img_gray, 50, 150)
+    mask_px = int(mask.sum())
+    if mask_px == 0:
+        return 0.0
+    return float((edges[mask] > 0).sum()) / mask_px
+
+
+def _containment_ratio(inner: list[int], outer: dict) -> float:
+    """Fraction of inner bbox area that falls inside outer bbox."""
+    ix1, iy1 = inner[0], inner[1]
+    ix2, iy2 = ix1 + inner[2], iy1 + inner[3]
+    ox1, oy1 = outer["x"], outer["y"]
+    ox2, oy2 = ox1 + outer["w"], oy1 + outer["h"]
+    inter_w = max(0, min(ix2, ox2) - max(ix1, ox1))
+    inter_h = max(0, min(iy2, oy2) - max(iy1, oy1))
+    inner_area = inner[2] * inner[3]
+    if inner_area == 0:
+        return 0.0
+    return (inter_w * inter_h) / inner_area
+
+
 def prompted_segment(
     panel_img: np.ndarray,
     existing_bboxes: list[dict],
@@ -388,7 +415,12 @@ def prompted_segment(
     checkpoint: str = DEFAULT_CHECKPOINT,
     model_type: str = DEFAULT_MODEL_TYPE,
     min_score: float = 0.80,
+    min_area: float = 0.01,
+    max_area: float = 0.50,
+    min_edge_density: float = 0.03,
+    containment_thresh: float = 0.70,
     grid_spacing: int = 80,
+    verbose: bool = False,
 ) -> list[Detection]:
     """
     Find motifs shaped like approved templates in uncovered areas.
@@ -401,8 +433,14 @@ def prompted_segment(
        plus a sparse grid over uncovered space.
     3. For each probe point, pass a box prompt at the median template size
        so SAM knows what scale to segment at.
-    4. Keep masks that score >= min_score, fall within the size envelope,
-       and don't overlap existing bboxes.
+    4. Filter pipeline (each mask must pass ALL):
+       a. SAM score >= min_score
+       b. Mask area between min_area and max_area (fraction of panel)
+       c. Size within template envelope (if templates available)
+       d. Edge density >= min_edge_density (rejects featureless background)
+       e. Not >containment_thresh contained in any existing bbox (rejects
+          sub-motif fragments that are part of an already-detected motif)
+       f. IoU < 0.3 with existing bboxes and previously found masks
 
     Parameters
     ----------
@@ -411,6 +449,12 @@ def prompted_segment(
     approved_templates  : bbox dicts from approved panels — defines what a
                           "good motif" looks like (size, aspect ratio)
     min_score           : minimum predicted_iou to keep a mask
+    min_area            : minimum mask area as fraction of panel (0.01 = 1%)
+    max_area            : maximum mask area as fraction of panel (0.50 = 50%)
+    min_edge_density    : minimum Canny edge fraction inside the mask;
+                          rejects flat/featureless regions (0.03 = 3%)
+    containment_thresh  : if this fraction of the new mask's bbox falls
+                          inside an existing bbox, reject it as a sub-motif
     grid_spacing        : pixel spacing for the sparse exploration grid
     """
     sam = _load_sam_model(checkpoint, model_type)
@@ -419,16 +463,28 @@ def prompted_segment(
 
     img_h, img_w = panel_img.shape[:2]
     img_area = img_h * img_w
+    img_gray = cv2.cvtColor(panel_img, cv2.COLOR_RGB2GRAY)
 
     # ── Size envelope from approved templates ─────────────────────────────
     envelope = _size_envelope(approved_templates or [])
     if envelope:
         w_lo, w_hi, h_lo, h_hi, med_w, med_h = envelope
     else:
-        # No template data — permissive defaults
         w_lo, h_lo = 20, 20
         w_hi, h_hi = img_w // 2, img_h // 2
         med_w, med_h = img_w // 4, img_h // 4
+
+    if verbose:
+        n_t = len(approved_templates or [])
+        print(f"  Templates: {n_t} manual bboxes")
+        print(f"  Size envelope: w=[{w_lo}–{w_hi}], h=[{h_lo}–{h_hi}], "
+              f"median={med_w}x{med_h}")
+        print(f"  Filters: score>={min_score}, area=[{min_area:.1%}–{max_area:.0%}], "
+              f"edge>={min_edge_density:.1%}, containment<{containment_thresh:.0%}")
+
+    # Filter rejection counters
+    _rej = {"score": 0, "area": 0, "size": 0, "edge": 0,
+            "containment": 0, "iou": 0, "dedup": 0, "empty": 0}
 
     # ── Occupancy map ─────────────────────────────────────────────────────
     occupied = np.zeros((img_h, img_w), dtype=bool)
@@ -439,25 +495,23 @@ def prompted_segment(
     # ── Probe points — edges first, then sparse grid ──────────────────────
     points: list[tuple[int, int]] = []
 
-    # 1) Edge points just outside each existing bbox (highest value)
     for bb in existing_bboxes:
         x, y, w, h = bb["x"], bb["y"], bb["w"], bb["h"]
-        margin = max(med_w, med_h) // 2   # probe at ~half a motif away
+        margin = max(med_w, med_h) // 2
         for ex, ey in [
-            (x - margin, y + h // 2),       # left
-            (x + w + margin, y + h // 2),    # right
-            (x + w // 2, y - margin),        # top
-            (x + w // 2, y + h + margin),    # bottom
-            (x - margin, y),                 # top-left
-            (x + w + margin, y),             # top-right
-            (x - margin, y + h),             # bottom-left
-            (x + w + margin, y + h),         # bottom-right
+            (x - margin, y + h // 2),
+            (x + w + margin, y + h // 2),
+            (x + w // 2, y - margin),
+            (x + w // 2, y + h + margin),
+            (x - margin, y),
+            (x + w + margin, y),
+            (x - margin, y + h),
+            (x + w + margin, y + h),
         ]:
             ex, ey = int(ex), int(ey)
             if 0 <= ex < img_w and 0 <= ey < img_h and not occupied[ey, ex]:
                 points.append((ex, ey))
 
-    # 2) Sparse grid over remaining uncovered areas
     half = grid_spacing // 2
     for py in range(half, img_h, grid_spacing):
         for px in range(half, img_w, grid_spacing):
@@ -467,18 +521,24 @@ def prompted_segment(
             if occupied[y1c:y2c, x1c:x2c].mean() < 0.5:
                 points.append((px, py))
 
+    if verbose:
+        print(f"  Probe points: {len(points)} "
+              f"({img_h}x{img_w} panel, {int(occupied.mean()*100)}% occupied)")
+
     if not points:
+        if verbose:
+            print("  No probe points — panel fully occupied")
         return []
 
-    # ── Probe each point with a template-sized box prompt ─────────────────
+    # ── Probe each point ──────────────────────────────────────────────────
     detections: list[Detection] = []
     seen: list[list[int]] = []
+    _total_masks = 0
 
     for px, py in points:
         coords = np.array([[px, py]])
         labels = np.array([1])
 
-        # Box prompt centred on the probe point, sized to median template
         bx1 = max(0, px - med_w // 2)
         by1 = max(0, py - med_h // 2)
         bx2 = min(img_w, px + med_w // 2)
@@ -492,42 +552,66 @@ def prompted_segment(
         )
 
         for mi in range(len(scores)):
-            if float(scores[mi]) < min_score:
-                continue
+            _total_masks += 1
+            score = float(scores[mi])
+            if score < min_score:
+                _rej["score"] += 1; continue
             mask = masks[mi]
             ys, xs = np.where(mask)
             if len(xs) == 0:
-                continue
+                _rej["empty"] += 1; continue
             mx, my_c = int(xs.min()), int(ys.min())
             mw, mh = int(xs.max()) - mx, int(ys.max()) - my_c
             if mw <= 0 or mh <= 0:
-                continue
+                _rej["empty"] += 1; continue
 
-            # ── Size envelope filter — the key precision gate ─────────
-            if mw < w_lo or mw > w_hi or mh < h_lo or mh > h_hi:
-                continue
-
+            # (a) Area ratio bounds
             area_ratio = int(mask.sum()) / img_area
+            if area_ratio < min_area or area_ratio > max_area:
+                _rej["area"] += 1; continue
+
+            # (b) Size envelope
+            if envelope and (mw < w_lo or mw > w_hi or mh < h_lo or mh > h_hi):
+                _rej["size"] += 1; continue
+
+            # (c) Edge density — reject featureless background
+            ed = _edge_density(img_gray, mask)
+            if ed < min_edge_density:
+                _rej["edge"] += 1; continue
+
             bb_list = [mx, my_c, mw, mh]
 
-            # Skip if overlapping existing bboxes
+            # (d) Containment — reject sub-motif fragments inside existing
+            if any(_containment_ratio(bb_list, e) > containment_thresh
+                   for e in existing_bboxes):
+                _rej["containment"] += 1; continue
+
+            # (e) IoU overlap with existing
             if any(_iou(bb_list, [e["x"], e["y"], e["w"], e["h"]]) > 0.3
                    for e in existing_bboxes):
-                continue
-            # Internal dedup
+                _rej["iou"] += 1; continue
+            # (f) Internal dedup
             if any(_iou(bb_list, s) > 0.3 for s in seen):
-                continue
+                _rej["dedup"] += 1; continue
 
             detections.append(Detection(
                 index=len(detections),
                 bbox={"x": mx, "y": my_c, "w": mw, "h": mh},
                 scale=classify_scale(area_ratio),
                 area_ratio=area_ratio,
-                predicted_iou=float(scores[mi]),
-                stability_score=float(scores[mi]),
+                predicted_iou=score,
+                stability_score=score,
                 segmentation=mask,
             ))
             seen.append(bb_list)
+
+    if verbose:
+        print(f"  SAM returned {_total_masks} masks from {len(points)} probes")
+        print(f"  Rejected: score={_rej['score']}, area={_rej['area']}, "
+              f"size={_rej['size']}, edge={_rej['edge']}, "
+              f"containment={_rej['containment']}, iou={_rej['iou']}, "
+              f"dedup={_rej['dedup']}")
+        print(f"  Kept: {len(detections)}")
 
     return detections
 
