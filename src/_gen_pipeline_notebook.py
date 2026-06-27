@@ -720,6 +720,303 @@ display(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# Cell 4: Cluster — Embeddings + t-SNE + HDBSCAN
+# ══════════════════════════════════════════════════════════════════════════════
+cells.append(code("mp-4", """\
+## ── Stage 2: Cluster — CLIP Embeddings + HDBSCAN ────────────────────────────
+#
+# Computes CLIP embeddings from in-memory crops (no disk files needed),
+# runs t-SNE for 2D layout, HDBSCAN for clustering.
+# Cluster assignments are stored back on PS.motifs[].cluster.
+
+import cv2 as _cv2
+import torch as _torch
+import open_clip as _oc
+from sklearn.manifold import TSNE as _TSNE
+from sklearn.metrics.pairwise import cosine_similarity as _cos_sim
+from sklearn.cluster import AgglomerativeClustering as _Agglom
+import hdbscan as _hdbscan
+
+# ── Preprocessing mode ────────────────────────────────────────────────────────
+CLIP_MODEL  = "ViT-B-32"
+CLIP_WEIGHTS = "openai"
+BATCH = 32
+
+def _preprocess_crop(img, mode):
+    # Apply mode transform before CLIP
+    img = img.convert("RGB")
+    arr = np.array(img)
+    if mode == "color":
+        return img
+    elif mode == "grayscale":
+        gray = _cv2.cvtColor(arr, _cv2.COLOR_RGB2GRAY)
+        return Image.fromarray(np.stack([gray]*3, axis=-1))
+    elif mode == "edges":
+        gray = _cv2.cvtColor(arr, _cv2.COLOR_RGB2GRAY)
+        med = float(np.median(gray))
+        edges = _cv2.Canny(gray, max(0, 0.5*med), min(255, 1.5*med))
+        edges = 255 - edges
+        return Image.fromarray(np.stack([edges]*3, axis=-1))
+    elif mode == "clahe":
+        lab = _cv2.cvtColor(arr, _cv2.COLOR_RGB2LAB).astype(np.uint8)
+        cl = _cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4))
+        lab[:,:,0] = cl.apply(lab[:,:,0])
+        return Image.fromarray(_cv2.cvtColor(lab, _cv2.COLOR_LAB2RGB))
+    return img
+
+_clip_cache = {}
+def _get_clip():
+    if not _clip_cache:
+        device = "cuda" if _torch.cuda.is_available() else "cpu"
+        print(f"Loading CLIP {CLIP_MODEL} on {device}...")
+        model, _, prep = _oc.create_model_and_transforms(CLIP_MODEL, pretrained=CLIP_WEIGHTS)
+        model = model.to(device).eval()
+        _clip_cache.update(model=model, prep=prep, device=device)
+    return _clip_cache["model"], _clip_cache["prep"], _clip_cache["device"]
+
+
+# ── Widgets ───────────────────────────────────────────────────────────────────
+_cl_sl = dict(continuous_update=False, style={"description_width": "160px"},
+              layout=widgets.Layout(width="55%"))
+
+w_prep_mode = widgets.ToggleButtons(
+    options=["edges", "grayscale", "color", "clahe"], value="edges",
+    description="Preprocessing:", style={"description_width": "120px", "button_width": "80px"})
+
+btn_embed = widgets.Button(description="Compute Embeddings", button_style="info",
+    layout=widgets.Layout(width="200px"))
+
+w_mcs    = widgets.IntSlider(min=2, max=20, step=1, value=3,
+    description="min_cluster_size", **_cl_sl)
+w_ms     = widgets.IntSlider(min=1, max=10, step=1, value=1,
+    description="min_samples", **_cl_sl)
+w_method = widgets.ToggleButtons(options=["leaf", "eom"], value="leaf",
+    description="selection method",
+    style={"description_width": "160px", "button_width": "70px"})
+w_pass2  = widgets.Checkbox(value=True,
+    description="Sub-cluster noise points (pass 2)",
+    style={"description_width": "initial"})
+w_nsub   = widgets.IntSlider(min=2, max=30, step=1, value=8,
+    description="pass-2 sub-clusters", **_cl_sl)
+
+out_embed  = widgets.Output()
+out_clust  = widgets.Output()
+out_scatter = widgets.Output()
+
+# ── State ─────────────────────────────────────────────────────────────────────
+_cl_state = {
+    "motif_keys": [],     # ordered keys matching embeddings rows
+    "embeddings": None,
+    "coords": None,       # t-SNE 2D
+    "sim_matrix": None,
+    "labels": None,
+    "n_clusters": 0,
+}
+
+
+def _compute_embeddings(_=None):
+    mode = w_prep_mode.value
+    included = PS.included_motifs()
+    if not included:
+        with out_embed: print("No included motifs — approve some in Stage 1 first")
+        return
+
+    btn_embed.description = "Computing..."
+    btn_embed.disabled = True
+    out_embed.clear_output()
+
+    try:
+        model, prep, device = _get_clip()
+        keys, all_feats = [], []
+        with out_embed:
+            print(f"Embedding {len(included)} motifs (mode={mode})...")
+
+        for i in range(0, len(included), BATCH):
+            batch = included[i:i+BATCH]
+            imgs = _torch.stack([
+                prep(_preprocess_crop(PS.crop(m), mode)) for m in batch
+            ]).to(device)
+            with _torch.no_grad():
+                feats = model.encode_image(imgs)
+                feats = feats / feats.norm(dim=-1, keepdim=True)
+            all_feats.append(feats.cpu().float().numpy())
+            keys.extend(m.motif_key for m in batch)
+
+        embs = np.vstack(all_feats)
+        N = len(keys)
+
+        # t-SNE
+        with out_embed:
+            print(f"Running t-SNE (n={N})...")
+        perp = min(30, max(5, N // 8))
+        import sklearn as _sk
+        _ver = tuple(int(x) for x in _sk.__version__.split(".")[:2])
+        _ik = "max_iter" if _ver >= (1, 5) else "n_iter"
+        coords = _TSNE(n_components=2, perplexity=perp, metric="euclidean",
+                        random_state=42, init="pca", **{_ik: 1500}).fit_transform(embs)
+
+        sim = _cos_sim(embs)
+
+        _cl_state["motif_keys"] = keys
+        _cl_state["embeddings"] = embs
+        _cl_state["coords"] = coords
+        _cl_state["sim_matrix"] = sim
+        PS.embeddings = embs
+        PS.tsne_xy = coords
+        PS.sim_matrix = sim
+
+        out_embed.clear_output()
+        with out_embed:
+            print(f"Done: {embs.shape} embeddings, t-SNE coords ready")
+
+        # Run initial clustering
+        _run_clustering()
+    except Exception:
+        out_embed.clear_output()
+        with out_embed:
+            import traceback; traceback.print_exc()
+    finally:
+        btn_embed.description = "Compute Embeddings"
+        btn_embed.disabled = False
+
+
+def _run_clustering(_=None):
+    embs = _cl_state["embeddings"]
+    if embs is None:
+        with out_clust: print("Compute embeddings first")
+        return
+
+    mcs, ms = w_mcs.value, w_ms.value
+    method = w_method.value
+    do_pass2, n_sub = w_pass2.value, w_nsub.value
+
+    cl = _hdbscan.HDBSCAN(min_cluster_size=mcs, min_samples=ms,
+                           metric="euclidean", cluster_selection_method=method)
+    lbl = cl.fit_predict(embs).copy()
+    nc1 = len(set(lbl)) - (1 if -1 in lbl else 0)
+    nn = int((lbl == -1).sum())
+
+    nc2 = 0
+    if do_pass2 and nn > 0:
+        noise_idx = np.where(lbl == -1)[0]
+        n_sub_real = min(n_sub, len(noise_idx))
+        if n_sub_real >= 2:
+            sub_lbl = _Agglom(n_clusters=n_sub_real).fit_predict(embs[noise_idx])
+            for i, ni in enumerate(noise_idx):
+                lbl[ni] = nc1 + sub_lbl[i]
+            nc2 = n_sub_real
+
+    _cl_state["labels"] = lbl
+    _cl_state["n_clusters"] = nc1 + nc2
+
+    # Write back to PS.motifs
+    keys = _cl_state["motif_keys"]
+    key_to_lbl = dict(zip(keys, lbl))
+    for m in PS.motifs:
+        if m.motif_key in key_to_lbl:
+            m.cluster = int(key_to_lbl[m.motif_key])
+
+    remaining = int((lbl == -1).sum())
+    out_clust.clear_output()
+    with out_clust:
+        print(f"Pass 1: {nc1} clusters, {nn} noise  [mcs={mcs}, ms={ms}, {method}]")
+        if do_pass2 and nc2:
+            print(f"Pass 2: {nc2} sub-clusters from {nn} noise points")
+        print(f"Total: {nc1+nc2} clusters, {remaining} unclustered")
+        for c in sorted(set(lbl)):
+            tag = "noise" if c == -1 else f"C{c:2d}"
+            n = int((lbl == c).sum())
+            bar = "█" * min(40, n)
+            print(f"  {tag}: {n:3d}  {bar}")
+
+    _draw_scatter()
+
+
+def _draw_scatter():
+    coords = _cl_state["coords"]
+    lbl = _cl_state["labels"]
+    if coords is None or lbl is None: return
+
+    included = PS.included_motifs()
+    THUMB = 38
+    ZOOM = 0.48
+    PAL = list(plt.cm.tab20.colors) + list(plt.cm.tab20b.colors)
+    NOISE_COL = (0.45, 0.45, 0.45)
+
+    def cc(l):
+        return NOISE_COL if l == -1 else PAL[l % len(PAL)]
+
+    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+
+    # Load thumbnails from in-memory crops
+    thumbs = []
+    for m in included:
+        crop = PS.crop(m)
+        crop.thumbnail((THUMB, THUMB))
+        sq = Image.new("RGB", (THUMB, THUMB), (25, 25, 25))
+        sq.paste(crop, ((THUMB - crop.width)//2, (THUMB - crop.height)//2))
+        thumbs.append(np.array(sq))
+
+    fig, ax = plt.subplots(figsize=(16, 12), dpi=120)
+    ax.set_facecolor("#111"); fig.patch.set_facecolor("#111")
+
+    half = ZOOM * THUMB / 2
+    BD = 2
+    for i, (x, y) in enumerate(coords):
+        ax.add_patch(plt.Rectangle(
+            (x - half - BD, y - half - BD), 2*half + 2*BD, 2*half + 2*BD,
+            color=cc(lbl[i]), zorder=1, linewidth=0))
+
+    for i, (thumb, (x, y)) in enumerate(zip(thumbs, coords)):
+        ab = AnnotationBbox(OffsetImage(thumb, zoom=ZOOM), (x, y),
+                            frameon=False, zorder=2)
+        ax.add_artist(ab)
+
+    for i, (m, (x, y)) in enumerate(zip(included, coords)):
+        ax.text(x, y - half - BD - 1, f"#{m.index}",
+                fontsize=3.5, color="white", ha="center", va="top", zorder=3, alpha=0.85)
+
+    ax.autoscale_view()
+    margin = THUMB * 1.2
+    ax.set_xlim(coords[:,0].min()-margin, coords[:,0].max()+margin)
+    ax.set_ylim(coords[:,1].min()-margin, coords[:,1].max()+margin)
+    ax.axis("off")
+    ax.set_title(f"Motif similarity — {len(included)} crops, "
+                 f"{_cl_state['n_clusters']} clusters  [{w_prep_mode.value}]",
+                 color="white", fontsize=10, pad=8)
+    plt.tight_layout()
+
+    out_scatter.clear_output(wait=True)
+    with out_scatter:
+        plt.show()
+    plt.close(fig)
+
+
+# ── Wire up ───────────────────────────────────────────────────────────────────
+btn_embed.on_click(_compute_embeddings)
+for _w in (w_mcs, w_ms, w_method, w_pass2, w_nsub):
+    _w.observe(_run_clustering, names="value")
+
+
+# ── Layout ────────────────────────────────────────────────────────────────────
+display(
+    widgets.HTML("<h3 style='margin:4px 0'>Stage 2: Cluster</h3>"),
+    widgets.HTML("<div style='font-size:12px;color:#999;margin-bottom:4px'>"
+        "Select preprocessing mode, compute embeddings, then tune clustering. "
+        "Cluster assignments are saved on each motif record.</div>"),
+    w_prep_mode, btn_embed, out_embed,
+    widgets.HTML("<b style='font-size:13px;margin-top:8px'>HDBSCAN clustering</b>"),
+    w_mcs, w_ms, w_method,
+    widgets.HTML("<b>Pass 2 — sub-cluster noise</b>"),
+    w_pass2, w_nsub,
+    out_clust,
+    widgets.HTML("<b style='font-size:13px;margin-top:8px'>Scatter map</b>"),
+    out_scatter,
+)\
+"""))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Write notebook
 # ══════════════════════════════════════════════════════════════════════════════
 nb = {
