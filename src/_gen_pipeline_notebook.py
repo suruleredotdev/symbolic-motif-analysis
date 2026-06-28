@@ -1017,6 +1017,661 @@ display(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# Cell 5: Gallery — Browse + Group
+# ══════════════════════════════════════════════════════════════════════════════
+cells.append(code("mp-5", """\
+## ── Stage 3: Gallery ────────────────────────────────────────────────────────
+#
+# Browse motifs grouped by cluster, panel, or label.
+# Click a thumbnail to select it as active for the Label stage.
+
+import io as _gio
+
+THUMB_PX = 72
+
+_gal_state = {"cursor": 0, "selected": set()}
+_gal_cards: dict = {}
+_gal_dots: dict = {}
+_gal_chks: dict = {}
+
+out_gallery = widgets.Output()
+out_context = widgets.Output()
+out_nn_strip = widgets.Output()
+
+w_group_by = widgets.ToggleButtons(
+    options=["cluster", "panel", "label"], value="cluster",
+    description="Group by:", style={"description_width": "80px", "button_width": "80px"})
+
+
+def _gal_png(img):
+    buf = _gio.BytesIO(); img.save(buf, "PNG"); return buf.getvalue()
+
+
+def _gal_thumb(motif, size=THUMB_PX):
+    # In-memory crop thumbnail
+    try:
+        crop = PS.crop(motif)
+        crop.thumbnail((size, size), Image.LANCZOS)
+        sq = Image.new("RGB", (size, size), (50, 50, 50))
+        sq.paste(crop, ((size - crop.width)//2, (size - crop.height)//2))
+        return _gal_png(sq)
+    except Exception:
+        return _gal_png(Image.new("RGB", (size, size), (80, 80, 80)))
+
+
+def _gal_dot(motif):
+    c = "#44cc44" if motif.label else "#666"
+    return f'<div style="width:8px;height:8px;border-radius:50%;background:{c};margin:2px auto"></div>'
+
+
+def _gal_refresh_context():
+    out_context.clear_output(wait=True)
+    included = PS.included_motifs()
+    if not included: return
+    idx = _gal_state["cursor"]
+    if idx >= len(included): idx = 0
+    m = included[idx]
+    with out_context:
+        # Show panel with highlighted bbox + zoomed crop
+        panel_img = PS.panel_image(m.panel_stem)
+        from PIL import ImageDraw
+        pdraw = panel_img.copy()
+        drw = ImageDraw.Draw(pdraw)
+        b = m.bbox
+        drw.rectangle([b["x"], b["y"], b["x"]+b["w"], b["y"]+b["h"]],
+                      outline=(0, 255, 64), width=3)
+        # Zoomed crop
+        pad = 30
+        iw, ih = panel_img.size
+        zoom = panel_img.crop((max(0, b["x"]-pad), max(0, b["y"]-pad),
+                               min(iw, b["x"]+b["w"]+pad), min(ih, b["y"]+b["h"]+pad)))
+        zoom.thumbnail((220, 420), Image.LANCZOS)
+        pdraw.thumbnail((560, 700), Image.LANCZOS)
+        row = []
+        row.append(widgets.VBox([
+            widgets.HTML("<b style='color:#ccc'>Crop</b>"),
+            widgets.Image(value=_gal_png(zoom), format="png",
+                          layout=widgets.Layout(max_width="220px")),
+        ]))
+        row.append(widgets.VBox([
+            widgets.HTML("<b style='color:#ccc'>Panel context</b>"),
+            widgets.Image(value=_gal_png(pdraw), format="png",
+                          layout=widgets.Layout(max_width="560px")),
+        ]))
+        display(widgets.HBox(row, layout=widgets.Layout(gap="16px")))
+        # Info line
+        info = (f"<b>{m.panel_stem}</b> idx={m.index} {m.scale} "
+                f"cluster={m.cluster} source={m.source}")
+        if m.label:
+            info += f" label=<b>{m.label}</b>"
+        display(widgets.HTML(f"<div style='color:#aaa;font-size:12px;margin-top:4px'>{info}</div>"))
+
+
+def _gal_refresh_nn():
+    out_nn_strip.clear_output(wait=True)
+    included = PS.included_motifs()
+    if not included or PS.sim_matrix is None: return
+    idx = _gal_state["cursor"]
+    if idx >= len(included): return
+    sim_row = PS.sim_matrix[idx].copy()
+    sim_row[idx] = -1
+    top_k = np.argsort(-sim_row)[:6]
+    with out_nn_strip:
+        ws = []
+        for ni in top_k:
+            if ni >= len(included): continue
+            nm = included[ni]
+            tb = _gal_thumb(nm)
+            sim_v = float(sim_row[ni])
+            lbl_txt = nm.label or ""
+            ws.append(widgets.VBox([
+                widgets.Image(value=tb, format="png",
+                              layout=widgets.Layout(width=f"{THUMB_PX}px")),
+                widgets.HTML(f"<div style='font-size:9px;color:#888;text-align:center'>"
+                             f"{sim_v:.2f}<br>{lbl_txt}</div>"),
+            ], layout=widgets.Layout(width=f"{THUMB_PX+8}px", margin="3px")))
+        if ws:
+            display(widgets.HTML("<b style='color:#888;font-size:11px'>Nearest neighbours:</b>"))
+            display(widgets.HBox(ws))
+
+
+def _build_gallery(_=None):
+    _gal_cards.clear(); _gal_dots.clear(); _gal_chks.clear()
+    included = PS.included_motifs()
+    if not included:
+        out_gallery.clear_output(wait=True)
+        with out_gallery: display(widgets.HTML("<i>No included motifs</i>"))
+        return
+
+    mode = w_group_by.value
+    groups = {}
+    for i, m in enumerate(included):
+        if mode == "cluster":
+            key = f"C{m.cluster}" if m.cluster >= 0 else "Noise"
+        elif mode == "panel":
+            key = m.panel_stem
+        else:
+            key = m.label or "(unlabeled)"
+        groups.setdefault(key, []).append((i, m))
+
+    tab_kids, tab_titles = [], []
+    for gname in sorted(groups.keys()):
+        items = groups[gname]
+        cards = []
+        for gi, m in items:
+            tb = _gal_thumb(m)
+            imgw = widgets.Image(value=tb, format="png",
+                layout=widgets.Layout(width=f"{THUMB_PX}px", height=f"{THUMB_PX}px"))
+            dot = widgets.HTML(_gal_dot(m), layout=widgets.Layout(height="12px"))
+            sel_btn = widgets.Button(description=str(gi),
+                layout=widgets.Layout(width=f"{THUMB_PX}px", height="18px", padding="0"))
+            def _on_sel(b, idx=gi):
+                _gal_state["cursor"] = idx
+                # Update borders
+                for ci, card in _gal_cards.items():
+                    card.layout.border = "2px solid #44aaff" if ci == idx else "2px solid transparent"
+                _gal_refresh_context()
+                _gal_refresh_nn()
+            sel_btn.on_click(_on_sel)
+            card = widgets.VBox([imgw, dot, sel_btn],
+                layout=widgets.Layout(width=f"{THUMB_PX+6}px", margin="3px",
+                    padding="1px", border="2px solid transparent"))
+            _gal_cards[gi] = card
+            _gal_dots[gi] = dot
+            cards.append(card)
+        grid = widgets.HBox(cards,
+            layout=widgets.Layout(flex_flow="row wrap", max_height="280px",
+                overflow_y="auto", overflow_x="auto"))
+        tab_kids.append(grid)
+        tab_titles.append(f"{gname} ({len(items)})")
+
+    tab = widgets.Tab(children=tab_kids)
+    for i, t in enumerate(tab_titles):
+        tab.set_title(i, t)
+
+    out_gallery.clear_output(wait=True)
+    with out_gallery: display(tab)
+    _gal_refresh_context()
+    _gal_refresh_nn()
+
+
+w_group_by.observe(_build_gallery, names="value")
+
+btn_rebuild_gal = widgets.Button(description="Refresh Gallery", button_style="info",
+    layout=widgets.Layout(width="150px"))
+btn_rebuild_gal.on_click(_build_gallery)
+
+display(
+    widgets.HTML("<h3 style='margin:4px 0'>Stage 3: Gallery</h3>"),
+    widgets.HBox([w_group_by, btn_rebuild_gal]),
+    out_gallery,
+    widgets.HTML("<b style='font-size:13px;margin-top:8px'>Context</b>"),
+    out_context,
+    out_nn_strip,
+)
+_build_gallery()\
+"""))
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Cell 6: Label — Editor + LLM Suggest
+# ══════════════════════════════════════════════════════════════════════════════
+cells.append(code("mp-6", """\
+## ── Stage 4: Label ──────────────────────────────────────────────────────────
+#
+# Edit labels for the currently selected motif from the Gallery.
+# LLM Suggest sends the crop + context to Claude for a pre-fill.
+
+import os as _os
+import base64 as _b64mod
+
+try:
+    import anthropic as _anthropic
+    _ANTHROPIC_OK = True
+except ImportError:
+    _ANTHROPIC_OK = False
+
+_WL = widgets.Layout
+_si = {"description_width": "110px"}
+_fw = _WL(width="480px")
+
+w_lbl_info  = widgets.HTML("<i>Select a motif in the Gallery</i>")
+w_lbl_label = widgets.Text(placeholder="e.g. interlaced_knotwork",
+    description="Label", layout=_fw, style=_si)
+w_lbl_desc  = widgets.Textarea(placeholder="One sentence on what is visually present",
+    description="Description", rows=2, layout=_fw, style=_si)
+w_lbl_icon  = widgets.Textarea(placeholder="Iconographic significance",
+    description="Iconography", rows=2, layout=_fw, style=_si)
+w_lbl_notes = widgets.Text(placeholder="Cross-references, observations",
+    description="Notes", layout=_fw, style=_si)
+
+btn_lbl_llm  = widgets.Button(description="LLM Suggest", button_style="info",
+    layout=_WL(width="140px"))
+btn_lbl_save = widgets.Button(description="Save", button_style="success",
+    layout=_WL(width="100px"))
+btn_lbl_prev = widgets.Button(description="Prev", layout=_WL(width="80px"))
+btn_lbl_next = widgets.Button(description="Next", layout=_WL(width="80px"))
+btn_lbl_nxtu = widgets.Button(description="Next Unlabeled", layout=_WL(width="140px"))
+
+out_lbl_status = widgets.Output()
+out_lbl_llm    = widgets.Output()
+
+_lbl_llm_data = [None]  # mutable ref for LLM suggestion
+
+
+def _lbl_load_fields():
+    included = PS.included_motifs()
+    idx = _gal_state.get("cursor", 0)
+    if idx >= len(included):
+        w_lbl_info.value = "<i>No motif selected</i>"
+        return
+    m = included[idx]
+    info = f"<b>{m.panel_stem}</b> idx={m.index} {m.scale} cluster={m.cluster}"
+    w_lbl_info.value = info
+    w_lbl_label.value = m.label or ""
+    w_lbl_desc.value = m.description or ""
+    w_lbl_icon.value = m.iconography or ""
+    w_lbl_notes.value = m.notes or ""
+    _lbl_llm_data[0] = None
+
+
+def _lbl_save(_=None):
+    included = PS.included_motifs()
+    idx = _gal_state.get("cursor", 0)
+    if idx >= len(included): return
+    m = included[idx]
+    ld = _lbl_llm_data[0]
+    src = "human"
+    if ld:
+        src = "llm" if w_lbl_label.value.strip() == ld.get("label", "").strip() else "llm-edited"
+    PS.save_label(m, w_lbl_label.value, w_lbl_desc.value,
+                  w_lbl_icon.value, w_lbl_notes.value, source=src)
+    _lbl_llm_data[0] = None
+    # Update gallery dot
+    if idx in _gal_dots:
+        _gal_dots[idx].value = _gal_dot(m)
+    out_lbl_status.clear_output()
+    with out_lbl_status:
+        n_labeled = sum(1 for mm in PS.motifs if mm.label)
+        total = len(included)
+        print(f"Saved. {n_labeled}/{total} labeled ({n_labeled/total*100:.0f}%)")
+
+
+def _lbl_navigate(delta):
+    included = PS.included_motifs()
+    if not included: return
+    _gal_state["cursor"] = (_gal_state["cursor"] + delta) % len(included)
+    _lbl_load_fields()
+    _gal_refresh_context()
+    _gal_refresh_nn()
+    # Update gallery card borders
+    for ci, card in _gal_cards.items():
+        card.layout.border = ("2px solid #44aaff" if ci == _gal_state["cursor"]
+                              else "2px solid transparent")
+
+
+def _lbl_next_unlabeled(_=None):
+    included = PS.included_motifs()
+    start = _gal_state.get("cursor", 0)
+    for off in range(1, len(included) + 1):
+        idx = (start + off) % len(included)
+        if not included[idx].label:
+            _gal_state["cursor"] = idx
+            _lbl_load_fields()
+            _gal_refresh_context()
+            _gal_refresh_nn()
+            for ci, card in _gal_cards.items():
+                card.layout.border = ("2px solid #44aaff" if ci == idx
+                                      else "2px solid transparent")
+            return
+    out_lbl_status.clear_output()
+    with out_lbl_status: print("All motifs labeled!")
+
+
+def _lbl_llm_suggest(_=None):
+    included = PS.included_motifs()
+    idx = _gal_state.get("cursor", 0)
+    if idx >= len(included): return
+    m = included[idx]
+
+    key = _os.environ.get("ANTHROPIC_API_KEY")
+    if not key or not _ANTHROPIC_OK:
+        with out_lbl_llm: print("ANTHROPIC_API_KEY not set or anthropic not installed")
+        return
+
+    btn_lbl_llm.description = "Thinking..."
+    btn_lbl_llm.disabled = True
+    out_lbl_llm.clear_output()
+
+    try:
+        client = _anthropic.Anthropic(api_key=key)
+        content = []
+
+        # Send crop image
+        crop = PS.crop(m)
+        crop_resized = crop.copy()
+        crop_resized.thumbnail((512, 512), Image.LANCZOS)
+        buf = _gio.BytesIO(); crop_resized.save(buf, "PNG")
+        b64_crop = _b64mod.standard_b64encode(buf.getvalue()).decode()
+
+        content.append({"type": "text", "text": "Image 1 — motif crop:"})
+        content.append({"type": "image",
+            "source": {"type": "base64", "media_type": "image/png", "data": b64_crop}})
+
+        # Context
+        info = (f"Yoruba carved door panel. Panel: {m.panel_stem}. "
+                f"Scale: {m.scale}. Cluster: {m.cluster}.")
+        content.append({"type": "text", "text":
+            f"{info}\\n\\nDescribe this carved motif. "
+            "Respond with JSON only:\\n"
+            '{\\n  "label": "2-4 words snake_case",\\n'
+            '  "description": "one sentence on what is visually present",\\n'
+            '  "iconography": "cultural significance in Yoruba art"\\n}'
+        })
+
+        resp = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=400,
+            messages=[{"role": "user", "content": content}],
+        )
+        raw = resp.content[0].text
+        # Parse JSON from response
+        import re as _re_lbl
+        jm = _re_lbl.search(r'\\{[^}]+\\}', raw, _re_lbl.DOTALL)
+        if jm:
+            data = json.loads(jm.group())
+            _lbl_llm_data[0] = data
+            w_lbl_label.value = data.get("label", "")
+            w_lbl_desc.value = data.get("description", "")
+            w_lbl_icon.value = data.get("iconography", "")
+            out_lbl_llm.clear_output()
+            with out_lbl_llm:
+                print(f"LLM suggested: {data.get('label', '?')}")
+                print(f"Edit and Save, or Next to skip.")
+        else:
+            out_lbl_llm.clear_output()
+            with out_lbl_llm:
+                print(f"Could not parse LLM response:\\n{raw[:300]}")
+    except Exception:
+        out_lbl_llm.clear_output()
+        with out_lbl_llm:
+            import traceback; traceback.print_exc()
+    finally:
+        btn_lbl_llm.description = "LLM Suggest"
+        btn_lbl_llm.disabled = False
+
+
+btn_lbl_save.on_click(_lbl_save)
+btn_lbl_prev.on_click(lambda b: _lbl_navigate(-1))
+btn_lbl_next.on_click(lambda b: _lbl_navigate(+1))
+btn_lbl_nxtu.on_click(_lbl_next_unlabeled)
+btn_lbl_llm.on_click(_lbl_llm_suggest)
+
+display(
+    widgets.HTML("<h3 style='margin:4px 0'>Stage 4: Label</h3>"),
+    w_lbl_info,
+    w_lbl_label, w_lbl_desc, w_lbl_icon, w_lbl_notes,
+    widgets.HBox([btn_lbl_llm, btn_lbl_save, btn_lbl_prev,
+                  btn_lbl_next, btn_lbl_nxtu]),
+    out_lbl_llm, out_lbl_status,
+)
+_lbl_load_fields()\
+"""))
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Cell 7: Interpret — LLM Context Analysis
+# ══════════════════════════════════════════════════════════════════════════════
+cells.append(code("mp-7", """\
+## ── Stage 5: Interpret ──────────────────────────────────────────────────────
+#
+# LLM-powered interpretation of motifs individually and in panel context.
+
+import os as _os7
+import base64 as _b647
+
+try:
+    import anthropic as _ant7
+    _ANT7_OK = True
+except ImportError:
+    _ANT7_OK = False
+
+btn_interp_motif = widgets.Button(description="Interpret Motif", button_style="info",
+    layout=widgets.Layout(width="160px"))
+btn_interp_panel = widgets.Button(description="Interpret Panel", button_style="",
+    layout=widgets.Layout(width="160px"))
+out_interp = widgets.Output()
+
+
+def _img_b64(pil_img, max_d=512):
+    img = pil_img.copy()
+    img.thumbnail((max_d, max_d), Image.LANCZOS)
+    buf = _gio.BytesIO(); img.save(buf, "PNG")
+    return _b647.standard_b64encode(buf.getvalue()).decode()
+
+
+def _interp_motif(_=None):
+    included = PS.included_motifs()
+    idx = _gal_state.get("cursor", 0)
+    if idx >= len(included): return
+    m = included[idx]
+    key = _os7.environ.get("ANTHROPIC_API_KEY")
+    if not key or not _ANT7_OK:
+        with out_interp: print("ANTHROPIC_API_KEY not set"); return
+
+    btn_interp_motif.description = "Thinking..."
+    btn_interp_motif.disabled = True
+    out_interp.clear_output()
+
+    try:
+        client = _ant7.Anthropic(api_key=key)
+        content = []
+
+        # Crop
+        crop_b64 = _img_b64(PS.crop(m))
+        content.append({"type": "text", "text": "Motif crop:"})
+        content.append({"type": "image",
+            "source": {"type": "base64", "media_type": "image/png", "data": crop_b64}})
+
+        # Panel context
+        panel_img = PS.panel_image(m.panel_stem)
+        from PIL import ImageDraw
+        pdraw = panel_img.copy()
+        drw = ImageDraw.Draw(pdraw)
+        b = m.bbox
+        drw.rectangle([b["x"], b["y"], b["x"]+b["w"], b["y"]+b["h"]],
+                      outline=(0, 255, 64), width=4)
+        panel_b64 = _img_b64(pdraw, max_d=800)
+        content.append({"type": "text", "text": "Full panel (motif highlighted in green):"})
+        content.append({"type": "image",
+            "source": {"type": "base64", "media_type": "image/png", "data": panel_b64}})
+
+        label_ctx = f" Currently labeled: {m.label}." if m.label else ""
+        content.append({"type": "text", "text":
+            f"This is a carved motif from a Yoruba door panel (Frobenius archive). "
+            f"Panel: {m.panel_stem}. Scale: {m.scale}. Cluster: {m.cluster}.{label_ctx}\\n\\n"
+            "Provide a detailed interpretation of this motif:\\n"
+            "1. What does it depict visually?\\n"
+            "2. What is its likely cultural/iconographic significance in Yoruba art?\\n"
+            "3. How does it relate to the surrounding panel composition?"
+        })
+
+        resp = client.messages.create(
+            model="claude-sonnet-4-20250514", max_tokens=800,
+            messages=[{"role": "user", "content": content}])
+        out_interp.clear_output()
+        with out_interp:
+            print(resp.content[0].text)
+    except Exception:
+        out_interp.clear_output()
+        with out_interp: import traceback; traceback.print_exc()
+    finally:
+        btn_interp_motif.description = "Interpret Motif"
+        btn_interp_motif.disabled = False
+
+
+def _interp_panel(_=None):
+    stem = _seg_state.get("stem")
+    if not stem:
+        with out_interp: print("Select a panel in Stage 1 first"); return
+    key = _os7.environ.get("ANTHROPIC_API_KEY")
+    if not key or not _ANT7_OK:
+        with out_interp: print("ANTHROPIC_API_KEY not set"); return
+
+    btn_interp_panel.description = "Thinking..."
+    btn_interp_panel.disabled = True
+    out_interp.clear_output()
+
+    try:
+        client = _ant7.Anthropic(api_key=key)
+        content = []
+
+        # Panel image with all bboxes drawn
+        panel_img = PS.panel_image(stem)
+        from PIL import ImageDraw
+        pdraw = panel_img.copy()
+        drw = ImageDraw.Draw(pdraw)
+        motifs = [m for m in PS.motifs_for_panel(stem) if m.included]
+        motif_desc = []
+        for m in motifs:
+            b = m.bbox
+            drw.rectangle([b["x"], b["y"], b["x"]+b["w"], b["y"]+b["h"]],
+                          outline=(0, 255, 64), width=3)
+            drw.text((b["x"]+4, b["y"]+4), str(m.index), fill=(0, 255, 64))
+            desc = f"#{m.index} ({m.scale})"
+            if m.label: desc += f" - {m.label}"
+            motif_desc.append(desc)
+
+        panel_b64 = _img_b64(pdraw, max_d=1000)
+        content.append({"type": "text", "text": "Panel with all detected motifs highlighted:"})
+        content.append({"type": "image",
+            "source": {"type": "base64", "media_type": "image/png", "data": panel_b64}})
+
+        motif_list = "\\n".join(motif_desc)
+        content.append({"type": "text", "text":
+            f"This is a Yoruba carved door panel: {stem}\\n"
+            f"Detected motifs:\\n{motif_list}\\n\\n"
+            "Interpret the panel as a whole:\\n"
+            "1. What narrative or scene does it depict?\\n"
+            "2. How do the individual motifs relate to each other compositionally?\\n"
+            "3. What cultural/ceremonial context might this panel represent?"
+        })
+
+        resp = client.messages.create(
+            model="claude-sonnet-4-20250514", max_tokens=1000,
+            messages=[{"role": "user", "content": content}])
+        out_interp.clear_output()
+        with out_interp:
+            print(resp.content[0].text)
+    except Exception:
+        out_interp.clear_output()
+        with out_interp: import traceback; traceback.print_exc()
+    finally:
+        btn_interp_panel.description = "Interpret Panel"
+        btn_interp_panel.disabled = False
+
+
+btn_interp_motif.on_click(_interp_motif)
+btn_interp_panel.on_click(_interp_panel)
+
+display(
+    widgets.HTML("<h3 style='margin:4px 0'>Stage 5: Interpret</h3>"),
+    widgets.HTML("<div style='font-size:12px;color:#999;margin-bottom:6px'>"
+        "Interpret Motif: the selected motif in its panel context. "
+        "Interpret Panel: all motifs on the current panel as a composition.</div>"),
+    widgets.HBox([btn_interp_motif, btn_interp_panel]),
+    out_interp,
+)\
+"""))
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Cell 8: Export + Progress
+# ══════════════════════════════════════════════════════════════════════════════
+cells.append(code("mp-8", """\
+## ── Stage 6: Export + Progress ──────────────────────────────────────────────
+
+btn_export_crops = widgets.Button(description="Export Crops to Disk",
+    button_style="success", layout=widgets.Layout(width="200px"))
+btn_save_labels = widgets.Button(description="Save All Labels",
+    button_style="success", layout=widgets.Layout(width="200px"))
+btn_save_all_approved = widgets.Button(description="Save All Approved",
+    button_style="", layout=widgets.Layout(width="200px"))
+out_export = widgets.Output()
+out_progress = widgets.Output()
+
+
+def _on_export_crops(_=None):
+    out_dir = _ANA / "motifs"
+    out_export.clear_output()
+    with out_export:
+        n = PS.export_crops(out_dir)
+        print(f"Exported {n} crops to {out_dir}")
+
+
+def _on_save_labels(_=None):
+    out_export.clear_output()
+    with out_export:
+        path = PS.save_all_labels(LABELS_PATH)
+        n = sum(1 for m in PS.motifs if m.label)
+        print(f"Saved {n} labels to {path}")
+
+
+def _on_save_all_approved(_=None):
+    out_export.clear_output()
+    with out_export:
+        saved = 0
+        for stem in PS.panels:
+            motifs = PS.motifs_for_panel(stem)
+            if any(m.included for m in motifs):
+                PS.save_approved(stem)
+                saved += 1
+        print(f"Saved approved bboxes for {saved} panels")
+
+
+def _show_progress(_=None):
+    included = PS.included_motifs()
+    n_total = len(included)
+    n_labeled = sum(1 for m in included if m.label)
+    n_clustered = sum(1 for m in included if m.cluster >= 0)
+    n_panels = len(set(m.panel_stem for m in included))
+    n_manual = sum(1 for m in included if m.source == "manual")
+    n_sam = sum(1 for m in included if m.source in ("sam_auto", "sam_prompted"))
+
+    out_progress.clear_output(wait=True)
+    with out_progress:
+        print(f"Pipeline Progress")
+        print(f"{'='*40}")
+        print(f"Panels:      {n_panels}")
+        print(f"Motifs:      {n_total}")
+        print(f"  manual:    {n_manual}")
+        print(f"  SAM:       {n_sam}")
+        print(f"Clustered:   {n_clustered}/{n_total} ({n_clustered/n_total*100:.0f}%)" if n_total else "")
+        print(f"Labeled:     {n_labeled}/{n_total} ({n_labeled/n_total*100:.0f}%)" if n_total else "")
+
+        if n_labeled > 0:
+            # Label frequency
+            from collections import Counter
+            lbl_counts = Counter(m.label for m in included if m.label)
+            print(f"\\nTop labels:")
+            for lbl, cnt in lbl_counts.most_common(15):
+                bar = "█" * min(30, cnt)
+                print(f"  {lbl:30s} {cnt:3d}  {bar}")
+
+
+btn_export_crops.on_click(_on_export_crops)
+btn_save_labels.on_click(_on_save_labels)
+btn_save_all_approved.on_click(_on_save_all_approved)
+
+display(
+    widgets.HTML("<h3 style='margin:4px 0'>Stage 6: Export + Progress</h3>"),
+    widgets.HBox([btn_export_crops, btn_save_labels, btn_save_all_approved]),
+    out_export,
+    widgets.HTML("<hr style='border-color:#444'>"),
+    out_progress,
+)
+_show_progress()\
+"""))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Write notebook
 # ══════════════════════════════════════════════════════════════════════════════
 nb = {
