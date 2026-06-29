@@ -1033,10 +1033,13 @@ _gal_state = {"cursor": 0, "selected": set()}
 _gal_cards: dict = {}
 _gal_dots: dict = {}
 _gal_chks: dict = {}
+# Callbacks that fire when gallery selection changes — label cell registers into this
+_gal_on_select_cbs: list = []
 
 out_gallery = widgets.Output()
 out_context = widgets.Output()
 out_nn_strip = widgets.Output()
+out_gal_scatter = widgets.Output()
 
 w_group_by = widgets.ToggleButtons(
     options=["cluster", "panel", "label"], value="cluster",
@@ -1172,6 +1175,10 @@ def _build_gallery(_=None):
                     card.layout.border = "2px solid #44aaff" if ci == idx else "2px solid transparent"
                 _gal_refresh_context()
                 _gal_refresh_nn()
+                # Notify label cell (and any other listeners)
+                for cb in _gal_on_select_cbs:
+                    try: cb()
+                    except Exception: pass
             sel_btn.on_click(_on_sel)
             card = widgets.VBox([imgw, dot, sel_btn],
                 layout=widgets.Layout(width=f"{THUMB_PX+6}px", margin="3px",
@@ -1201,15 +1208,166 @@ btn_rebuild_gal = widgets.Button(description="Refresh Gallery", button_style="in
     layout=widgets.Layout(width="150px"))
 btn_rebuild_gal.on_click(_build_gallery)
 
+
+# ── Interactive scatter map (click to select, drag to reassign cluster) ───────
+_scat_fig, _scat_ax = plt.subplots(1, 1, figsize=(14, 10), dpi=100)
+_scat_fig.patch.set_facecolor("#111")
+_scat_ax.set_facecolor("#111")
+_scat_ax.axis("off")
+_scat_drag = {"active": False, "idx": -1, "start_xy": None}
+
+_SPAL = list(plt.cm.tab20.colors) + list(plt.cm.tab20b.colors)
+_SNOISE = (0.45, 0.45, 0.45)
+def _scc(l):
+    return _SNOISE if l == -1 else _SPAL[l % len(_SPAL)]
+
+
+def _gal_draw_scatter(_=None):
+    # Draw scatter from PS state (coords + clusters)
+    included = PS.included_motifs()
+    coords = PS.tsne_xy
+    if coords is None or len(included) == 0:
+        _scat_ax.clear(); _scat_ax.axis("off")
+        _scat_ax.text(0.5, 0.5, "Run Compute Embeddings in Stage 2 first",
+            transform=_scat_ax.transAxes, ha="center", va="center",
+            color="#888", fontsize=12)
+        _scat_fig.canvas.draw_idle()
+        return
+
+    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+    THUMB = 32; ZOOM = 0.45; BD = 2
+    half = ZOOM * THUMB / 2
+
+    _scat_ax.clear(); _scat_ax.axis("off")
+
+    # Load thumbnails
+    for i, m in enumerate(included):
+        if i >= len(coords): break
+        x, y = coords[i]
+        col = _scc(m.cluster)
+        _scat_ax.add_patch(plt.Rectangle(
+            (x - half - BD, y - half - BD), 2*half + 2*BD, 2*half + 2*BD,
+            color=col, zorder=1, linewidth=0))
+
+        crop = PS.crop(m)
+        crop.thumbnail((THUMB, THUMB))
+        sq = Image.new("RGB", (THUMB, THUMB), (25, 25, 25))
+        sq.paste(crop, ((THUMB - crop.width)//2, (THUMB - crop.height)//2))
+        ab = AnnotationBbox(OffsetImage(np.array(sq), zoom=ZOOM), (x, y),
+                            frameon=False, zorder=2)
+        _scat_ax.add_artist(ab)
+
+        _scat_ax.text(x, y - half - BD - 1, f"#{m.index}",
+            fontsize=3.5, color="white", ha="center", va="top", zorder=3, alpha=0.85)
+
+    # Highlight selected
+    cursor = _gal_state.get("cursor", 0)
+    if cursor < len(coords):
+        cx, cy = coords[cursor]
+        _scat_ax.add_patch(plt.Rectangle(
+            (cx - half - BD - 2, cy - half - BD - 2),
+            2*half + 2*BD + 4, 2*half + 2*BD + 4,
+            edgecolor="#44aaff", facecolor="none", linewidth=2.5, zorder=4))
+
+    _scat_ax.autoscale_view()
+    margin = THUMB * 1.2
+    _scat_ax.set_xlim(coords[:,0].min()-margin, coords[:,0].max()+margin)
+    _scat_ax.set_ylim(coords[:,1].min()-margin, coords[:,1].max()+margin)
+
+    n_cl = len(set(m.cluster for m in included)) - (1 if any(m.cluster == -1 for m in included) else 0)
+    _scat_ax.set_title(
+        f"Cluster scatter — {len(included)} motifs, {n_cl} clusters  "
+        f"(click to select, drag onto another cluster to reassign)",
+        color="white", fontsize=9, pad=6)
+    _scat_fig.canvas.draw_idle()
+
+
+def _scat_find_nearest(event):
+    # Find the motif nearest to the click position
+    coords = PS.tsne_xy
+    if coords is None or event.xdata is None: return -1
+    dists = (coords[:,0] - event.xdata)**2 + (coords[:,1] - event.ydata)**2
+    idx = int(np.argmin(dists))
+    # Only match if reasonably close
+    if dists[idx] > (50**2): return -1
+    return idx
+
+
+def _scat_on_press(event):
+    if event.inaxes != _scat_ax or event.button != 1: return
+    idx = _scat_find_nearest(event)
+    if idx < 0: return
+    _scat_drag["active"] = True
+    _scat_drag["idx"] = idx
+    _scat_drag["start_xy"] = (event.xdata, event.ydata)
+    # Select this motif
+    _gal_state["cursor"] = idx
+    for ci, card in _gal_cards.items():
+        card.layout.border = "2px solid #44aaff" if ci == idx else "2px solid transparent"
+    _gal_refresh_context()
+    _gal_refresh_nn()
+    for cb in _gal_on_select_cbs:
+        try: cb()
+        except: pass
+    _gal_draw_scatter()
+
+
+def _scat_on_release(event):
+    if not _scat_drag["active"]: return
+    _scat_drag["active"] = False
+    if event.inaxes != _scat_ax or event.xdata is None: return
+
+    src_idx = _scat_drag["idx"]
+    sx, sy = _scat_drag["start_xy"]
+    dx = abs(event.xdata - sx)
+    dy = abs(event.ydata - sy)
+
+    # Only reassign if dragged a meaningful distance
+    if dx + dy < 5: return
+
+    # Find which motif we dropped near
+    target_idx = _scat_find_nearest(event)
+    if target_idx < 0 or target_idx == src_idx: return
+
+    included = PS.included_motifs()
+    if src_idx >= len(included) or target_idx >= len(included): return
+
+    # Reassign source motif to the target motif cluster
+    old_cluster = included[src_idx].cluster
+    new_cluster = included[target_idx].cluster
+    if old_cluster == new_cluster: return
+
+    included[src_idx].cluster = new_cluster
+    out_context.clear_output()
+    with out_context:
+        display(widgets.HTML(
+            f"<div style='color:#ffaa22'>Moved motif #{included[src_idx].index} "
+            f"from cluster {old_cluster} to {new_cluster}</div>"))
+    _gal_draw_scatter()
+
+_scat_fig.canvas.mpl_connect("button_press_event", _scat_on_press)
+_scat_fig.canvas.mpl_connect("button_release_event", _scat_on_release)
+
+
+btn_refresh_scatter = widgets.Button(description="Refresh Scatter", button_style="",
+    layout=widgets.Layout(width="150px"))
+btn_refresh_scatter.on_click(_gal_draw_scatter)
+
 display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 3: Gallery</h3>"),
     widgets.HBox([w_group_by, btn_rebuild_gal]),
     out_gallery,
+    widgets.HTML("<b style='font-size:13px;margin-top:8px'>Cluster scatter map</b>"
+        "<div style='font-size:11px;color:#888'>Click a motif to select it. "
+        "Drag a motif onto another cluster to reassign it.</div>"),
+    widgets.HBox([btn_refresh_scatter]),
+    _scat_fig.canvas,
     widgets.HTML("<b style='font-size:13px;margin-top:8px'>Context</b>"),
     out_context,
     out_nn_strip,
 )
-_build_gallery()\
+_build_gallery()
+_gal_draw_scatter()\
 """))
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1414,6 +1572,8 @@ display(
                   btn_lbl_next, btn_lbl_nxtu]),
     out_lbl_llm, out_lbl_status,
 )
+# Register with gallery so clicking a card also updates the label editor
+_gal_on_select_cbs.append(_lbl_load_fields)
 _lbl_load_fields()\
 """))
 
@@ -1588,14 +1748,31 @@ display(
 cells.append(code("mp-8", """\
 ## ── Stage 6: Export + Progress ──────────────────────────────────────────────
 
-btn_export_crops = widgets.Button(description="Export Crops to Disk",
-    button_style="success", layout=widgets.Layout(width="200px"))
-btn_save_labels = widgets.Button(description="Save All Labels",
-    button_style="success", layout=widgets.Layout(width="200px"))
-btn_save_all_approved = widgets.Button(description="Save All Approved",
-    button_style="", layout=widgets.Layout(width="200px"))
+btn_save_state = widgets.Button(description="Save All State",
+    button_style="success", layout=widgets.Layout(width="160px"),
+    tooltip="Save approved bboxes + labels + cluster assignments to disk")
+btn_export_crops = widgets.Button(description="Export Crop Images",
+    button_style="", layout=widgets.Layout(width="170px"),
+    tooltip="Write cropped PNG images to disk (optional — bbox metadata is saved separately)")
 out_export = widgets.Output()
 out_progress = widgets.Output()
+
+
+def _on_save_state(_=None):
+    # Save everything: approved bboxes + labels
+    out_export.clear_output()
+    with out_export:
+        saved_panels = 0
+        for stem in PS.panels:
+            motifs = PS.motifs_for_panel(stem)
+            if any(m.included for m in motifs):
+                PS.save_approved(stem)
+                saved_panels += 1
+        path = PS.save_all_labels(LABELS_PATH)
+        n_lbl = sum(1 for m in PS.motifs if m.label)
+        print(f"Saved: {saved_panels} panel _approved.json files "
+              f"(bboxes + source + timestamps)")
+        print(f"Saved: {n_lbl} labels + cluster assignments to {path.name}")
 
 
 def _on_export_crops(_=None):
@@ -1603,27 +1780,8 @@ def _on_export_crops(_=None):
     out_export.clear_output()
     with out_export:
         n = PS.export_crops(out_dir)
-        print(f"Exported {n} crops to {out_dir}")
-
-
-def _on_save_labels(_=None):
-    out_export.clear_output()
-    with out_export:
-        path = PS.save_all_labels(LABELS_PATH)
-        n = sum(1 for m in PS.motifs if m.label)
-        print(f"Saved {n} labels to {path}")
-
-
-def _on_save_all_approved(_=None):
-    out_export.clear_output()
-    with out_export:
-        saved = 0
-        for stem in PS.panels:
-            motifs = PS.motifs_for_panel(stem)
-            if any(m.included for m in motifs):
-                PS.save_approved(stem)
-                saved += 1
-        print(f"Saved approved bboxes for {saved} panels")
+        print(f"Exported {n} crop PNGs to {out_dir}")
+        print(f"(bbox metadata is already saved via Save All State)")
 
 
 def _show_progress(_=None):
@@ -1656,13 +1814,17 @@ def _show_progress(_=None):
                 print(f"  {lbl:30s} {cnt:3d}  {bar}")
 
 
+btn_save_state.on_click(_on_save_state)
 btn_export_crops.on_click(_on_export_crops)
-btn_save_labels.on_click(_on_save_labels)
-btn_save_all_approved.on_click(_on_save_all_approved)
 
 display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 6: Export + Progress</h3>"),
-    widgets.HBox([btn_export_crops, btn_save_labels, btn_save_all_approved]),
+    widgets.HTML("<div style='font-size:12px;color:#999;margin-bottom:4px'>"
+        "<b>Save All State</b>: writes _approved.json (bbox metadata) + "
+        "motif_labels.json (labels + clusters) to disk.<br>"
+        "<b>Export Crop Images</b>: optional — writes actual PNG sub-images "
+        "(bbox metadata is saved separately).</div>"),
+    widgets.HBox([btn_save_state, btn_export_crops]),
     out_export,
     widgets.HTML("<hr style='border-color:#444'>"),
     out_progress,
