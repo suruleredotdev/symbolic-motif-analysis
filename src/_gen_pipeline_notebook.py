@@ -1255,6 +1255,79 @@ btn_refresh_scatter = widgets.Button(description="Refresh Scatter", button_style
     layout=widgets.Layout(width="150px"))
 btn_refresh_scatter.on_click(_gal_draw_scatter)
 
+
+# ── Spotlight launcher (web-based scatter UI) ─────────────────────────────────
+btn_spotlight = widgets.Button(description="Launch Spotlight", button_style="info",
+    layout=widgets.Layout(width="170px"),
+    tooltip="Open interactive web scatter in a new browser tab")
+out_spotlight = widgets.Output()
+
+
+def _launch_spotlight(_=None):
+    included = PS.included_motifs()
+    coords = PS.tsne_xy
+    if not included or coords is None:
+        with out_spotlight: print("Compute embeddings in Stage 2 first")
+        return
+
+    btn_spotlight.description = "Starting..."
+    btn_spotlight.disabled = True
+    out_spotlight.clear_output()
+
+    try:
+        import pandas as pd
+        from renumics import spotlight
+
+        # Save crops to a temp dir so Spotlight can load them as images
+        import tempfile, shutil
+        _spot_dir = Path(tempfile.mkdtemp(prefix="spotlight_crops_"))
+
+        rows = []
+        for i, m in enumerate(included):
+            if i >= len(coords): break
+            # Write crop to temp file for Spotlight
+            crop_path = _spot_dir / f"{m.panel_stem}_{m.index:03d}.png"
+            PS.crop(m).save(crop_path)
+            rows.append({
+                "image": str(crop_path),
+                "panel": m.panel_stem,
+                "index": m.index,
+                "scale": m.scale,
+                "cluster": m.cluster,
+                "label": m.label or "",
+                "source": m.source,
+                "predicted_iou": m.predicted_iou,
+                "area_ratio": m.area_ratio,
+                "tsne_x": float(coords[i, 0]),
+                "tsne_y": float(coords[i, 1]),
+            })
+            # Add embedding dimensions
+            if PS.embeddings is not None and i < len(PS.embeddings):
+                rows[-1]["embedding"] = PS.embeddings[i].tolist()
+
+        df = pd.DataFrame(rows)
+        with out_spotlight:
+            print(f"Spotlight: {len(df)} motifs, temp crops in {_spot_dir}")
+            print("Opening in browser... (close the Spotlight tab to stop the server)")
+
+        spotlight.show(
+            df,
+            dtype={"image": spotlight.Image, "embedding": spotlight.Embedding},
+            port=8765,
+            no_browser=False,
+        )
+    except Exception:
+        out_spotlight.clear_output()
+        with out_spotlight:
+            import traceback; traceback.print_exc()
+    finally:
+        btn_spotlight.description = "Launch Spotlight"
+        btn_spotlight.disabled = False
+
+
+btn_spotlight.on_click(_launch_spotlight)
+
+
 display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 3: Gallery</h3>"),
     widgets.HBox([w_group_by, btn_rebuild_gal]),
@@ -1262,7 +1335,8 @@ display(
     widgets.HTML("<b style='font-size:13px;margin-top:8px'>Cluster scatter map</b>"
         "<div style='font-size:11px;color:#888'>Click a motif to select it. "
         "Drag a motif onto another cluster to reassign it.</div>"),
-    widgets.HBox([btn_refresh_scatter]),
+    widgets.HBox([btn_refresh_scatter, btn_spotlight]),
+    out_spotlight,
     _scat_fig.canvas,
     widgets.HTML("<b style='font-size:13px;margin-top:8px'>Context</b>"),
     out_context,
