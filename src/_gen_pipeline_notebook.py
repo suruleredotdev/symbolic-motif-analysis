@@ -32,13 +32,12 @@ Unified pipeline for motif segmentation, clustering, labeling, and interpretatio
 | Cell | Stage | What it does |
 |------|-------|-------------|
 | 1 | Setup | Load panels, approved bboxes, labels into shared state |
-| 2 | Segment | Review detections, manual draw, include/exclude |
-| 3 | SAM Draft | One-at-a-time SAM suggestions — Accept or Skip each |
-| 4 | Cluster | CLIP embeddings + HDBSCAN clustering |
-| 5 | Gallery | Browse motifs grouped by cluster / panel / label |
-| 6 | Label | Edit labels + LLM Suggest via Claude |
-| 7 | Interpret | LLM-powered motif and panel interpretation |
-| 8 | Export | Export crops, save session, progress charts |
+| 2 | Segment | Review detections, manual draw, SAM Refine — all in one UI |
+| 3 | Cluster | CLIP embeddings + HDBSCAN clustering |
+| 4 | Gallery | Browse motifs grouped by cluster / panel / label |
+| 5 | Label | Edit labels + LLM Suggest via Claude |
+| 6 | Interpret | LLM-powered motif and panel interpretation |
+| 7 | Export | Save state, export crops, progress charts |
 
 **Data provenance**: every bbox, label, and cluster assignment records its source
 (`manual`, `sam_prompted`, `llm`, `human`) and timestamp.\
@@ -416,17 +415,27 @@ def _seg_on_draw_toggle(_=None):
 
 
 def _seg_on_add(_=None):
+    # Add pending bbox — works for both manual draws and SAM candidates
     stem = _seg_state["stem"]
     if not stem: return
     bbox = {"x": w_mx.value, "y": w_my.value, "w": w_mw.value, "h": w_mh.value}
     if bbox["w"] <= 0 or bbox["h"] <= 0: return
-    m = PS.add_motif(stem, bbox, source="manual")
+    cand = PS.next_draft(stem)
+    if cand is not None:
+        rec = PS.accept_draft(stem, adjusted_bbox=bbox)
+        tag = "sam_prompted"
+        _seg_load_next_candidate()
+        _seg_show_sam_status()
+    else:
+        rec = PS.add_motif(stem, bbox, source="manual")
+        tag = "manual"
     _seg_mark_dirty()
     _seg_build_cards()
-    _seg_redraw()
+    has_next = PS.next_draft(stem) is not None
+    _seg_redraw(with_pending=has_next)
     out_seg_status.clear_output()
     with out_seg_status:
-        print(f"Added manual bbox #{m.index}: ({bbox['x']},{bbox['y']}) {bbox['w']}×{bbox['h']}")
+        print(f"Added {tag} bbox #{rec.index}: ({bbox['x']},{bbox['y']}) {bbox['w']}×{bbox['h']}")
 
 
 def _seg_on_slider(_=None):
@@ -437,6 +446,120 @@ def _seg_on_filter(_=None):
     _seg_build_cards()
     _seg_redraw()
 
+
+# ── SAM Refine (integrated) ──────────────────────────────────────────────────
+import panel_art.motif_segment as _ms
+import importlib; importlib.reload(_ms)
+
+_ref_sl = dict(continuous_update=False, style={"description_width": "130px"},
+               layout=widgets.Layout(width="48%"))
+w_sam_score = widgets.FloatSlider(min=0.50, max=0.99, step=0.01, value=0.85,
+    description="min SAM score", readout_format=".2f", **_ref_sl)
+w_sam_min_area = widgets.FloatSlider(min=0.005, max=0.20, step=0.005, value=0.01,
+    description="min area %", readout_format=".1%", **_ref_sl)
+w_sam_max_area = widgets.FloatSlider(min=0.10, max=0.80, step=0.05, value=0.50,
+    description="max area %", readout_format=".0%", **_ref_sl)
+w_sam_edge = widgets.FloatSlider(min=0.0, max=0.15, step=0.005, value=0.03,
+    description="min edge density", readout_format=".1%", **_ref_sl)
+
+btn_sam_gen  = widgets.Button(description="SAM Generate", button_style="",
+    layout=widgets.Layout(width="140px"))
+btn_sam_skip = widgets.Button(description="Skip →", button_style="warning",
+    layout=widgets.Layout(width="90px"), disabled=True)
+btn_sam_reset = widgets.Button(description="Reset Queue", button_style="",
+    layout=widgets.Layout(width="110px"))
+out_sam_status = widgets.Output()
+
+
+def _seg_load_next_candidate():
+    stem = _seg_state["stem"]
+    if not stem: return
+    cand = PS.next_draft(stem)
+    if cand is None:
+        btn_sam_skip.disabled = True
+        return
+    btn_sam_skip.disabled = False
+    rec = cand["record"]
+    b = rec.bbox
+    info = PS.panels[stem]
+    _seg_no_obs[0] = True
+    w_mx.max = info.width - 1; w_my.max = info.height - 1
+    w_mw.max = info.width; w_mh.max = info.height
+    w_mx.value = b["x"]; w_my.value = b["y"]
+    w_mw.value = b["w"]; w_mh.value = b["h"]
+    _seg_no_obs[0] = False
+    _seg_redraw(with_pending=True)
+
+
+def _seg_show_sam_status():
+    stem = _seg_state["stem"]
+    if not stem: return
+    total, cursor, accepted, skipped = PS.draft_count(stem)
+    cand = PS.next_draft(stem)
+    out_sam_status.clear_output()
+    with out_sam_status:
+        if cand is None:
+            if total > 0:
+                print(f"Queue done. Accepted: {accepted}, Skipped: {skipped}/{total}")
+            btn_sam_skip.disabled = True
+        else:
+            rec = cand["record"]
+            print(f"SAM {cursor+1}/{total} — score={rec.predicted_iou:.3f}, "
+                  f"edge={cand['edge_density']:.2f}, novelty={cand['novelty']:.2f}")
+            print(f"Accepted: {accepted} | Skipped: {skipped} | Remaining: {total - cursor}")
+            print("Adjust with drag/sliders, then Add bbox or Skip")
+            btn_sam_skip.disabled = False
+
+
+def _seg_on_sam_gen(_=None):
+    stem = _seg_state["stem"]
+    if not stem: return
+    btn_sam_gen.description = "Running SAM..."
+    btn_sam_gen.disabled = True
+    out_sam_status.clear_output()
+    with out_sam_status: print("Loading SAM...")
+    try:
+        existing = [m.bbox for m in PS.motifs_for_panel(stem) if m.included]
+        templates = PS.manual_templates()
+        img_np = np.array(PS.panel_image(stem))
+        candidates = _ms.prompted_segment(
+            img_np, existing,
+            approved_templates=templates or None,
+            min_score=w_sam_score.value,
+            min_area=w_sam_min_area.value,
+            max_area=w_sam_max_area.value,
+            min_edge_density=w_sam_edge.value,
+            verbose=True,
+        )
+        n = PS.cache_sam_candidates(stem, candidates)
+        out_sam_status.clear_output()
+        with out_sam_status: print(f"Generated {n} candidates")
+        _seg_load_next_candidate()
+        _seg_show_sam_status()
+    except Exception:
+        out_sam_status.clear_output()
+        with out_sam_status: import traceback; traceback.print_exc()
+    finally:
+        btn_sam_gen.description = "SAM Generate"
+        btn_sam_gen.disabled = False
+
+
+def _seg_on_sam_skip(_=None):
+    stem = _seg_state["stem"]
+    if not stem: return
+    PS.skip_draft(stem)
+    _seg_load_next_candidate()
+    _seg_show_sam_status()
+
+
+def _seg_on_sam_reset(_=None):
+    stem = _seg_state["stem"]
+    if not stem: return
+    PS.reset_draft_queue(stem)
+    _seg_load_next_candidate()
+    _seg_show_sam_status()
+
+
 # ── Wire up ───────────────────────────────────────────────────────────────────
 w_seg_panel.observe(_seg_load_panel, names="value")
 w_subcrop.observe(_seg_on_filter, names="value")
@@ -445,6 +568,9 @@ btn_save.on_click(_seg_save)
 btn_revert.on_click(_seg_revert)
 btn_draw.on_click(_seg_on_draw_toggle)
 btn_add.on_click(_seg_on_add)
+btn_sam_gen.on_click(_seg_on_sam_gen)
+btn_sam_skip.on_click(_seg_on_sam_skip)
+btn_sam_reset.on_click(_seg_on_sam_reset)
 for _w in (w_mx, w_my, w_mw, w_mh):
     _w.observe(_seg_on_slider, names="value")
 
@@ -458,16 +584,26 @@ _filter_help = widgets.HTML(
 
 _draw_section = widgets.VBox([
     widgets.HTML("<b style='font-size:12px;color:#00cccc'>"
-                 "Pending bbox — drag on image or use sliders:</b>"),
+                 "Pending bbox — drag on image, use sliders, or SAM Generate:</b>"),
     widgets.HBox([
         widgets.VBox([widgets.HBox([w_mx]), widgets.HBox([w_my])],
                      layout=widgets.Layout(width="50%")),
         widgets.VBox([widgets.HBox([w_mw]), widgets.HBox([w_mh])],
                      layout=widgets.Layout(width="50%")),
     ]),
-    btn_add,
+    widgets.HBox([btn_add, btn_sam_skip]),
 ], layout=widgets.Layout(border="1px solid #006666", padding="6px 10px",
                          margin="4px 0", background="#001a1a"))
+
+_sam_section = widgets.VBox([
+    widgets.HTML("<b style='font-size:12px;color:#dd8800'>"
+                 "SAM Refine — candidates appear one at a time as pending bboxes:</b>"),
+    widgets.HBox([w_sam_score, w_sam_min_area]),
+    widgets.HBox([w_sam_max_area, w_sam_edge]),
+    widgets.HBox([btn_sam_gen, btn_sam_reset]),
+    out_sam_status,
+], layout=widgets.Layout(border="1px solid #664400", padding="6px 10px",
+                         margin="4px 0", background="#1a0d00"))
 
 display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 1: Segment</h3>"),
@@ -477,252 +613,18 @@ display(
     out_seg_status,
     _seg_fig.canvas,
     _draw_section,
+    _sam_section,
     widgets.HTML("<b style='font-size:13px'>Detection cards</b>"),
     out_seg_cards,
 )
 _seg_load_panel()\
 """))
 
+
 # ══════════════════════════════════════════════════════════════════════════════
-# Cell 3: SAM Draft Bbox Review
+# Cell 3: Cluster — Embeddings + t-SNE + HDBSCAN
 # ══════════════════════════════════════════════════════════════════════════════
 cells.append(code("mp-3", """\
-## ── Stage 1b: SAM Draft Review ──────────────────────────────────────────────
-#
-# One candidate at a time.  Click "Generate" to run SAM, then Accept/Skip
-# through candidates.  Each acceptance feeds back as a template.
-
-import panel_art.motif_segment as _ms
-import importlib; importlib.reload(_ms)
-
-# ── Widgets ───────────────────────────────────────────────────────────────────
-_ref_sl = dict(continuous_update=False, style={"description_width": "130px"},
-               layout=widgets.Layout(width="48%"))
-
-w_dr_score = widgets.FloatSlider(min=0.50, max=0.99, step=0.01, value=0.85,
-    description="min SAM score", readout_format=".2f", **_ref_sl)
-w_dr_min_area = widgets.FloatSlider(min=0.005, max=0.20, step=0.005, value=0.01,
-    description="min area %", readout_format=".1%", **_ref_sl)
-w_dr_max_area = widgets.FloatSlider(min=0.10, max=0.80, step=0.05, value=0.50,
-    description="max area %", readout_format=".0%", **_ref_sl)
-w_dr_edge = widgets.FloatSlider(min=0.0, max=0.15, step=0.005, value=0.03,
-    description="min edge density", readout_format=".1%", **_ref_sl)
-
-btn_dr_generate = widgets.Button(description="Generate SAM Candidates",
-    button_style="", layout=widgets.Layout(width="220px"))
-btn_dr_accept = widgets.Button(description="Accept ✓", button_style="success",
-    layout=widgets.Layout(width="110px"))
-btn_dr_skip = widgets.Button(description="Skip →", button_style="warning",
-    layout=widgets.Layout(width="100px"))
-btn_dr_reset = widgets.Button(description="Reset Queue", button_style="",
-    layout=widgets.Layout(width="120px"))
-
-# Draft bbox adjustment sliders (synced from Cell 2's draw sliders concept)
-_dsl = dict(continuous_update=True, style={"description_width": "18px"},
-            layout=widgets.Layout(width="44%"))
-w_dx = widgets.IntSlider(value=0, min=0, max=2000, step=1, description="x", **_dsl)
-w_dy = widgets.IntSlider(value=0, min=0, max=2000, step=1, description="y", **_dsl)
-w_dw = widgets.IntSlider(value=100, min=1, max=2000, step=1, description="w", **_dsl)
-w_dh = widgets.IntSlider(value=100, min=1, max=2000, step=1, description="h", **_dsl)
-
-out_draft = widgets.Output()
-out_draft_status = widgets.Output()
-
-# ── Draft figure (separate from Cell 2) ───────────────────────────────────────
-_dr_fig, _dr_ax = plt.subplots(1, 1, dpi=96,
-    gridspec_kw={"left": 0, "right": 1, "top": 1, "bottom": 0})
-_dr_fig.patch.set_facecolor("#111")
-_dr_ax.set_facecolor("#111")
-_dr_ax.axis("off")
-_dr_img_cache = {"stem": None, "arr": None, "scale": 1.0}
-
-
-def _dr_redraw():
-    # Draw panel with existing bboxes (green) + current draft candidate (cyan).
-    stem = _seg_state.get("stem") or (w_seg_panel.value if 'w_seg_panel' in dir() else None)
-    if not stem or stem not in PS.panels: return
-
-    panel_img = PS.panel_image(stem)
-    iw, ih = panel_img.size
-    scale = min(1.0, MAX_DISPLAY_W / iw)
-    dw, dh = int(iw * scale), int(ih * scale)
-
-    _dr_ax.clear(); _dr_ax.axis("off")
-    if _dr_img_cache["stem"] != stem:
-        _dr_img_cache["arr"] = np.array(panel_img.resize((dw, dh), Image.LANCZOS))
-        _dr_img_cache["stem"] = stem
-        _dr_img_cache["scale"] = scale
-    _dr_ax.imshow(_dr_img_cache["arr"])
-
-    # Existing included bboxes (green, thin)
-    for m in PS.motifs_for_panel(stem):
-        if not m.included: continue
-        b = m.bbox
-        x, y, w, h = b["x"]*scale, b["y"]*scale, b["w"]*scale, b["h"]*scale
-        _dr_ax.add_patch(mpatches.Rectangle((x, y), w, h,
-            linewidth=1.5, edgecolor="#44dd44", facecolor="none", alpha=0.6))
-
-    # Current draft candidate (cyan, bold)
-    pb = {"x": w_dx.value, "y": w_dy.value, "w": w_dw.value, "h": w_dh.value}
-    if pb["w"] > 0 and pb["h"] > 0:
-        x, y = pb["x"]*scale, pb["y"]*scale
-        w2, h2 = pb["w"]*scale, pb["h"]*scale
-        _dr_ax.add_patch(mpatches.Rectangle((x, y), w2, h2,
-            linewidth=0, facecolor="#00ffff", alpha=0.12))
-        _dr_ax.add_patch(mpatches.Rectangle((x, y), w2, h2,
-            linewidth=2.5, edgecolor="#00ffff", facecolor="none",
-            alpha=0.95, linestyle=(0, (6, 3))))
-        _dr_ax.text(x+4, y+4, "draft",
-            fontsize=10, color="#00ffff", va="top", fontweight="bold",
-            bbox=dict(facecolor="black", alpha=0.45, pad=1, linewidth=0))
-
-    _dr_fig.canvas.draw_idle()
-
-
-def _dr_show_candidate():
-    # Display the current draft candidate info and update sliders.
-    stem = _seg_state.get("stem")
-    if not stem: return
-
-    cand = PS.next_draft(stem)
-    total, cursor, accepted, skipped = PS.draft_count(stem)
-
-    out_draft_status.clear_output()
-    with out_draft_status:
-        if cand is None:
-            print(f"No more candidates for this panel. "
-                  f"(Accepted: {accepted}, Skipped: {skipped}/{total})")
-            print("Click 'Reset Queue' to review again, or 'Generate' with new settings.")
-            btn_dr_accept.disabled = True
-            btn_dr_skip.disabled = True
-            return
-
-        btn_dr_accept.disabled = False
-        btn_dr_skip.disabled = False
-        rec = cand["record"]
-        print(f"Candidate {cursor+1}/{total} — "
-              f"SAM score={rec.predicted_iou:.3f}, "
-              f"edge={cand['edge_density']:.3f}, "
-              f"novelty={cand['novelty']:.2f}, "
-              f"composite={cand['score']:.3f}")
-        print(f"Accepted: {accepted} | Skipped: {skipped} | "
-              f"Remaining: {total - cursor}")
-
-        # Set sliders to candidate bbox
-        b = rec.bbox
-        info = PS.panels[stem]
-        w_dx.max = info.width - 1; w_dy.max = info.height - 1
-        w_dw.max = info.width; w_dh.max = info.height
-        w_dx.value = b["x"]; w_dy.value = b["y"]
-        w_dw.value = b["w"]; w_dh.value = b["h"]
-
-    _dr_redraw()
-
-
-# ── Handlers ──────────────────────────────────────────────────────────────────
-def _dr_generate(_=None):
-    stem = _seg_state.get("stem")
-    if not stem:
-        with out_draft_status: print("Select a panel in Cell 2 first")
-        return
-
-    btn_dr_generate.description = "Running SAM…"
-    btn_dr_generate.disabled = True
-
-    out_draft_status.clear_output()
-    with out_draft_status:
-        existing = [m.bbox for m in PS.motifs_for_panel(stem) if m.included]
-        templates = PS.manual_templates()
-        print(f"SamPredictor: {len(existing)} existing bboxes, "
-              f"{len(templates)} manual templates…")
-
-    try:
-        img_np = np.array(PS.panel_image(stem))
-        candidates = _ms.prompted_segment(
-            img_np, existing,
-            approved_templates=templates or None,
-            min_score=w_dr_score.value,
-            min_area=w_dr_min_area.value,
-            max_area=w_dr_max_area.value,
-            min_edge_density=w_dr_edge.value,
-            verbose=True,
-        )
-        n = PS.cache_sam_candidates(stem, candidates)
-        out_draft_status.clear_output()
-        with out_draft_status:
-            print(f"Generated {n} candidates, sorted by composite score")
-        _dr_show_candidate()
-    except Exception:
-        out_draft_status.clear_output()
-        with out_draft_status:
-            import traceback; traceback.print_exc()
-    finally:
-        btn_dr_generate.description = "Generate SAM Candidates"
-        btn_dr_generate.disabled = False
-
-
-def _dr_accept(_=None):
-    stem = _seg_state.get("stem")
-    if not stem: return
-    adjusted = {"x": w_dx.value, "y": w_dy.value, "w": w_dw.value, "h": w_dh.value}
-    rec = PS.accept_draft(stem, adjusted_bbox=adjusted)
-    # Rebuild Cell 2 cards to show the new detection
-    _seg_build_cards()
-    _seg_redraw()
-    _seg_mark_dirty()
-    _dr_show_candidate()
-
-
-def _dr_skip(_=None):
-    stem = _seg_state.get("stem")
-    if not stem: return
-    PS.skip_draft(stem)
-    _dr_show_candidate()
-
-
-def _dr_reset(_=None):
-    stem = _seg_state.get("stem")
-    if not stem: return
-    PS.reset_draft_queue(stem)
-    _dr_show_candidate()
-
-
-def _dr_on_slider(_=None):
-    _dr_redraw()
-
-
-# ── Wire up ───────────────────────────────────────────────────────────────────
-btn_dr_generate.on_click(_dr_generate)
-btn_dr_accept.on_click(_dr_accept)
-btn_dr_skip.on_click(_dr_skip)
-btn_dr_reset.on_click(_dr_reset)
-for _w in (w_dx, w_dy, w_dw, w_dh):
-    _w.observe(_dr_on_slider, names="value")
-
-
-# ── Layout ────────────────────────────────────────────────────────────────────
-display(
-    widgets.HTML("<h3 style='margin:4px 0'>Stage 1b: SAM Draft Review</h3>"),
-    widgets.HTML(
-        "<div style='font-size:12px;color:#dd8800;margin-bottom:6px'>"
-        "Adjust SAM settings, click Generate, then Accept/Skip each candidate. "
-        "Each acceptance tightens the template for future suggestions.</div>"),
-    widgets.HBox([w_dr_score, w_dr_min_area]),
-    widgets.HBox([w_dr_max_area, w_dr_edge]),
-    widgets.HBox([btn_dr_generate, btn_dr_accept, btn_dr_skip, btn_dr_reset]),
-    out_draft_status,
-    _dr_fig.canvas,
-    widgets.HTML("<b style='font-size:12px;color:#00cccc'>Adjust draft bbox:</b>"),
-    widgets.HBox([w_dx, w_dy]),
-    widgets.HBox([w_dw, w_dh]),
-)\
-"""))
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Cell 4: Cluster — Embeddings + t-SNE + HDBSCAN
-# ══════════════════════════════════════════════════════════════════════════════
-cells.append(code("mp-4", """\
 ## ── Stage 2: Cluster — CLIP Embeddings + HDBSCAN ────────────────────────────
 #
 # Computes CLIP embeddings from in-memory crops (no disk files needed),
@@ -1017,9 +919,9 @@ display(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Cell 5: Gallery — Browse + Group
+# Cell 4: Gallery — Browse + Group
 # ══════════════════════════════════════════════════════════════════════════════
-cells.append(code("mp-5", """\
+cells.append(code("mp-4", """\
 ## ── Stage 3: Gallery ────────────────────────────────────────────────────────
 #
 # Browse motifs grouped by cluster, panel, or label.
@@ -1371,9 +1273,9 @@ _gal_draw_scatter()\
 """))
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Cell 6: Label — Editor + LLM Suggest
+# Cell 5: Label — Editor + LLM Suggest
 # ══════════════════════════════════════════════════════════════════════════════
-cells.append(code("mp-6", """\
+cells.append(code("mp-5", """\
 ## ── Stage 4: Label ──────────────────────────────────────────────────────────
 #
 # Edit labels for the currently selected motif from the Gallery.
@@ -1578,9 +1480,9 @@ _lbl_load_fields()\
 """))
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Cell 7: Interpret — LLM Context Analysis
+# Cell 6: Interpret — LLM Context Analysis
 # ══════════════════════════════════════════════════════════════════════════════
-cells.append(code("mp-7", """\
+cells.append(code("mp-6", """\
 ## ── Stage 5: Interpret ──────────────────────────────────────────────────────
 #
 # LLM-powered interpretation of motifs individually and in panel context.
@@ -1743,9 +1645,9 @@ display(
 """))
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Cell 8: Export + Progress
+# Cell 7: Export + Progress
 # ══════════════════════════════════════════════════════════════════════════════
-cells.append(code("mp-8", """\
+cells.append(code("mp-7", """\
 ## ── Stage 6: Export + Progress ──────────────────────────────────────────────
 
 btn_save_state = widgets.Button(description="Save All State",
