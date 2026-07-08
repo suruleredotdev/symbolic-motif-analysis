@@ -1040,8 +1040,14 @@ def _gal_refresh_nn():
             display(widgets.HBox(ws))
 
 
+def _update_move_count():
+    n = len(_gal_state["selected"])
+    btn_move.description = f"Move {n} to cluster" if n else "Move to cluster"
+    btn_move.disabled = (n == 0)
+
 def _build_gallery(_=None):
     _gal_cards.clear(); _gal_dots.clear(); _gal_chks.clear()
+    _gal_state["selected"].clear()
     included = PS.included_motifs()
     if not included:
         out_gallery.clear_output(wait=True)
@@ -1067,22 +1073,28 @@ def _build_gallery(_=None):
             tb = _gal_thumb(m)
             imgw = widgets.Image(value=tb, format="png",
                 layout=widgets.Layout(width=f"{THUMB_PX}px", height=f"{THUMB_PX}px"))
+            chk = widgets.Checkbox(value=False, indent=False,
+                layout=widgets.Layout(width="18px", height="18px"))
+            def _on_chk(change, idx=gi):
+                if change["new"]: _gal_state["selected"].add(idx)
+                else: _gal_state["selected"].discard(idx)
+                _update_move_count()
+            chk.observe(_on_chk, names="value")
             dot = widgets.HTML(_gal_dot(m), layout=widgets.Layout(height="12px"))
             sel_btn = widgets.Button(description=str(gi),
                 layout=widgets.Layout(width=f"{THUMB_PX}px", height="18px", padding="0"))
             def _on_sel(b, idx=gi):
                 _gal_state["cursor"] = idx
-                # Update borders
                 for ci, card in _gal_cards.items():
                     card.layout.border = "2px solid #44aaff" if ci == idx else "2px solid transparent"
                 _gal_refresh_context()
                 _gal_refresh_nn()
-                # Notify label cell (and any other listeners)
                 for cb in _gal_on_select_cbs:
                     try: cb()
                     except Exception: pass
             sel_btn.on_click(_on_sel)
-            card = widgets.VBox([imgw, dot, sel_btn],
+            _gal_chks[gi] = chk
+            card = widgets.VBox([imgw, chk, dot, sel_btn],
                 layout=widgets.Layout(width=f"{THUMB_PX+6}px", margin="3px",
                     padding="1px", border="2px solid transparent"))
             _gal_cards[gi] = card
@@ -1109,6 +1121,49 @@ w_group_by.observe(_build_gallery, names="value")
 btn_rebuild_gal = widgets.Button(description="Refresh Gallery", button_style="info",
     layout=widgets.Layout(width="150px"))
 btn_rebuild_gal.on_click(_build_gallery)
+
+# ── Move to cluster ──────────────────────────────────────────────────────────
+def _cluster_options():
+    included = PS.included_motifs()
+    ids = sorted(set(m.cluster for m in included))
+    opts = [(f"C{c}" if c >= 0 else "Noise", c) for c in ids]
+    # Add "New cluster" option
+    next_id = max(ids, default=-1) + 1
+    if next_id < 0: next_id = 0
+    opts.append((f"New (C{next_id})", next_id))
+    return opts
+
+w_move_target = widgets.Dropdown(
+    options=_cluster_options(),
+    description="Target:",
+    style={"description_width": "55px"},
+    layout=widgets.Layout(width="200px"))
+
+btn_move = widgets.Button(description="Move to cluster", button_style="warning",
+    layout=widgets.Layout(width="170px"), disabled=True)
+out_move = widgets.Output()
+
+
+def _on_move(_=None):
+    sel = _gal_state["selected"]
+    if not sel: return
+    target = w_move_target.value
+    included = PS.included_motifs()
+    moved = 0
+    for idx in sel:
+        if idx < len(included):
+            included[idx].cluster = target
+            moved += 1
+    _gal_state["selected"].clear()
+    # Update dropdown options (new cluster may have been created)
+    w_move_target.options = _cluster_options()
+    _build_gallery()
+    _gal_draw_scatter()
+    out_move.clear_output()
+    with out_move:
+        print(f"Moved {moved} motif(s) to cluster {target}")
+
+btn_move.on_click(_on_move)
 
 
 # ── Interactive scatter map (click to select, drag to reassign cluster) ───────
@@ -1331,6 +1386,9 @@ btn_spotlight.on_click(_launch_spotlight)
 display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 3: Gallery</h3>"),
     widgets.HBox([w_group_by, btn_rebuild_gal]),
+    widgets.HBox([w_move_target, btn_move],
+        layout=widgets.Layout(margin="4px 0")),
+    out_move,
     out_gallery,
     widgets.HTML("<b style='font-size:13px;margin-top:8px'>Cluster scatter map</b>"
         "<div style='font-size:11px;color:#888'>Click a motif to select it. "
