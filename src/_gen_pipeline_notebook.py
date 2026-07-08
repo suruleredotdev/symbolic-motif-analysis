@@ -944,8 +944,8 @@ out_nn_strip = widgets.Output()
 out_gal_scatter = widgets.Output()
 
 w_group_by = widgets.ToggleButtons(
-    options=["cluster", "panel", "label"], value="cluster",
-    description="Group by:", style={"description_width": "80px", "button_width": "80px"})
+    options=["cluster", "panel", "label", "all clusters", "all panels"], value="cluster",
+    description="Group by:", style={"description_width": "80px", "button_width": "90px"})
 
 
 def _gal_png(img):
@@ -1106,12 +1106,63 @@ def _build_gallery(_=None):
         tab_kids.append(grid)
         tab_titles.append(f"{gname} ({len(items)})")
 
-    tab = widgets.Tab(children=tab_kids)
-    for i, t in enumerate(tab_titles):
-        tab.set_title(i, t)
+    if mode in ("all clusters", "all panels"):
+        # Vertical stack: one row per group, all visible at once
+        rows_vbox = []
+        for gname in sorted(groups.keys()):
+            items = groups[gname]
+            cards_in_row = []
+            for gi, m in items:
+                tb = _gal_thumb(m)
+                imgw = widgets.Image(value=tb, format="png",
+                    layout=widgets.Layout(width=f"{THUMB_PX}px", height=f"{THUMB_PX}px"))
+                chk = widgets.Checkbox(value=False, indent=False,
+                    layout=widgets.Layout(width="18px", height="18px"))
+                def _on_chk_r(change, idx=gi):
+                    if change["new"]: _gal_state["selected"].add(idx)
+                    else: _gal_state["selected"].discard(idx)
+                    _update_move_count()
+                chk.observe(_on_chk_r, names="value")
+                dot = widgets.HTML(_gal_dot(m), layout=widgets.Layout(height="12px"))
+                sel_btn = widgets.Button(description=str(gi),
+                    layout=widgets.Layout(width=f"{THUMB_PX}px", height="18px", padding="0"))
+                def _on_sel_r(b, idx=gi):
+                    _gal_state["cursor"] = idx
+                    for ci, card in _gal_cards.items():
+                        card.layout.border = "2px solid #44aaff" if ci == idx else "2px solid transparent"
+                    _gal_refresh_context()
+                    _gal_refresh_nn()
+                    for cb in _gal_on_select_cbs:
+                        try: cb()
+                        except Exception: pass
+                sel_btn.on_click(_on_sel_r)
+                _gal_chks[gi] = chk
+                card = widgets.VBox([imgw, chk, dot, sel_btn],
+                    layout=widgets.Layout(width=f"{THUMB_PX+6}px", margin="2px",
+                        padding="1px", border="2px solid transparent"))
+                _gal_cards[gi] = card
+                _gal_dots[gi] = dot
+                cards_in_row.append(card)
+            row_grid = widgets.HBox(cards_in_row,
+                layout=widgets.Layout(flex_flow="row wrap", overflow_x="auto"))
+            row_label = widgets.HTML(
+                f"<div style='font-weight:600;color:#ccc;font-size:13px;"
+                f"margin:8px 0 2px 0;border-bottom:1px solid #444;"
+                f"padding-bottom:2px'>{gname} ({len(items)})</div>")
+            rows_vbox.append(widgets.VBox([row_label, row_grid]))
 
-    out_gallery.clear_output(wait=True)
-    with out_gallery: display(tab)
+        out_gallery.clear_output(wait=True)
+        with out_gallery:
+            display(widgets.VBox(rows_vbox,
+                layout=widgets.Layout(max_height="600px", overflow_y="auto")))
+    else:
+        # Tab view (existing)
+        tab = widgets.Tab(children=tab_kids)
+        for i, t in enumerate(tab_titles):
+            tab.set_title(i, t)
+        out_gallery.clear_output(wait=True)
+        with out_gallery: display(tab)
+
     _gal_refresh_context()
     _gal_refresh_nn()
 
