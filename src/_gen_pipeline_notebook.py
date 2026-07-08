@@ -703,7 +703,6 @@ w_nsub   = widgets.IntSlider(min=2, max=30, step=1, value=8,
 
 out_embed  = widgets.Output()
 out_clust  = widgets.Output()
-out_scatter = widgets.Output()
 
 # ── State ─────────────────────────────────────────────────────────────────────
 _cl_state = {
@@ -831,67 +830,8 @@ def _run_clustering(_=None):
             bar = "█" * min(40, n)
             print(f"  {tag}: {n:3d}  {bar}")
 
-    _draw_scatter()
 
 
-def _draw_scatter():
-    coords = _cl_state["coords"]
-    lbl = _cl_state["labels"]
-    if coords is None or lbl is None: return
-
-    included = PS.included_motifs()
-    THUMB = 38
-    ZOOM = 0.48
-    PAL = list(plt.cm.tab20.colors) + list(plt.cm.tab20b.colors)
-    NOISE_COL = (0.45, 0.45, 0.45)
-
-    def cc(l):
-        return NOISE_COL if l == -1 else PAL[l % len(PAL)]
-
-    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-
-    # Load thumbnails from in-memory crops
-    thumbs = []
-    for m in included:
-        crop = PS.crop(m)
-        crop.thumbnail((THUMB, THUMB))
-        sq = Image.new("RGB", (THUMB, THUMB), (25, 25, 25))
-        sq.paste(crop, ((THUMB - crop.width)//2, (THUMB - crop.height)//2))
-        thumbs.append(np.array(sq))
-
-    fig, ax = plt.subplots(figsize=(16, 12), dpi=120)
-    ax.set_facecolor("#111"); fig.patch.set_facecolor("#111")
-
-    half = ZOOM * THUMB / 2
-    BD = 2
-    for i, (x, y) in enumerate(coords):
-        ax.add_patch(plt.Rectangle(
-            (x - half - BD, y - half - BD), 2*half + 2*BD, 2*half + 2*BD,
-            color=cc(lbl[i]), zorder=1, linewidth=0))
-
-    for i, (thumb, (x, y)) in enumerate(zip(thumbs, coords)):
-        ab = AnnotationBbox(OffsetImage(thumb, zoom=ZOOM), (x, y),
-                            frameon=False, zorder=2)
-        ax.add_artist(ab)
-
-    for i, (m, (x, y)) in enumerate(zip(included, coords)):
-        ax.text(x, y - half - BD - 1, f"#{m.index}",
-                fontsize=3.5, color="white", ha="center", va="top", zorder=3, alpha=0.85)
-
-    ax.autoscale_view()
-    margin = THUMB * 1.2
-    ax.set_xlim(coords[:,0].min()-margin, coords[:,0].max()+margin)
-    ax.set_ylim(coords[:,1].min()-margin, coords[:,1].max()+margin)
-    ax.axis("off")
-    ax.set_title(f"Motif similarity — {len(included)} crops, "
-                 f"{_cl_state['n_clusters']} clusters  [{w_prep_mode.value}]",
-                 color="white", fontsize=10, pad=8)
-    plt.tight_layout()
-
-    out_scatter.clear_output(wait=True)
-    with out_scatter:
-        plt.show()
-    plt.close(fig)
 
 
 # ── Wire up ───────────────────────────────────────────────────────────────────
@@ -905,15 +845,14 @@ display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 2: Cluster</h3>"),
     widgets.HTML("<div style='font-size:12px;color:#999;margin-bottom:4px'>"
         "Select preprocessing mode, compute embeddings, then tune clustering. "
-        "Cluster assignments are saved on each motif record.</div>"),
+        "Cluster assignments are saved on each motif record. "
+        "View scatter map in Stage 3 (Gallery).</div>"),
     w_prep_mode, btn_embed, out_embed,
     widgets.HTML("<b style='font-size:13px;margin-top:8px'>HDBSCAN clustering</b>"),
     w_mcs, w_ms, w_method,
     widgets.HTML("<b>Pass 2 — sub-cluster noise</b>"),
     w_pass2, w_nsub,
     out_clust,
-    widgets.HTML("<b style='font-size:13px;margin-top:8px'>Scatter map</b>"),
-    out_scatter,
 )\
 """))
 
@@ -1048,6 +987,8 @@ def _update_move_count():
 def _build_gallery(_=None):
     _gal_cards.clear(); _gal_dots.clear(); _gal_chks.clear()
     _gal_state["selected"].clear()
+    _update_move_count()
+    w_move_target.options = _cluster_options()
     included = PS.included_motifs()
     if not included:
         out_gallery.clear_output(wait=True)
@@ -1057,10 +998,12 @@ def _build_gallery(_=None):
     mode = w_group_by.value
     groups = {}
     for i, m in enumerate(included):
-        if mode == "cluster":
+        if mode in ("cluster", "all clusters"):
             key = f"C{m.cluster}" if m.cluster >= 0 else "Noise"
-        elif mode == "panel":
+        elif mode in ("panel", "all panels"):
             key = m.panel_stem
+        elif mode == "label":
+            key = m.label or "(unlabeled)"
         else:
             key = m.label or "(unlabeled)"
         groups.setdefault(key, []).append((i, m))
