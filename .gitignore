@@ -1,0 +1,23 @@
+# Generated analysis outputs — large, regenerable, not committed
+analysis/
+frobenius_artifacts/
+
+# Source images (gitignored — fetch/download separately)
+images/
+
+# Python toolchain
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Model checkpoints (large binaries — download separately, see README)
+*.pth
+*.pt
+sam2*.yaml
+
+# OS / editor cruft
+.DS_Store
+*.swp
