@@ -21,8 +21,8 @@ Two modes:
     groove width rather than pixel transitions.
 
 Usage:
-    uv run --project src/python python src/python/normalize_motifs.py
-    uv run --project src/python python src/python/normalize_motifs.py --mode lines
+    uv run python normalize_motifs.py
+    uv run python normalize_motifs.py --mode lines
 
 Options:
     --in-dir PATH          Source motifs root   (default: auto-resolved)

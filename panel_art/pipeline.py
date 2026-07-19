@@ -26,17 +26,17 @@ CLI usage:
   # Process all panel-art images
   uv run python -m panel_art.pipeline \\
     --image-dir frobenius_artifacts/images/ \\
-    --metadata  src/typescript/backend/lib/data/frobenius_panel_art.json \\
+    --metadata  panel_art_dataset/frobenius_panel_art.json \\
     --img-manifest frobenius_artifacts/images/manifest.json \\
-    --checkpoint src/python/sam_vit_b_01ec64.pth \\
+    --checkpoint sam_vit_b_01ec64.pth \\
     --out-dir   frobenius_artifacts/analysis/
 
   # Single image (useful for testing)
   uv run python -m panel_art.pipeline \\
     --images frobenius_artifacts/images/FoA_04-5578_Modakeke_(Ife)_q48628_i1.png \\
-    --metadata src/typescript/backend/lib/data/frobenius_panel_art.json \\
+    --metadata panel_art_dataset/frobenius_panel_art.json \\
     --img-manifest frobenius_artifacts/images/manifest.json \\
-    --checkpoint src/python/sam_vit_b_01ec64.pth \\
+    --checkpoint sam_vit_b_01ec64.pth \\
     --out-dir frobenius_artifacts/analysis/
 
   # Skip clustering (useful when iterating on Phases 1–4)
@@ -280,15 +280,15 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--images", nargs="*", metavar="IMAGE",
                    help="Process only these specific image files")
     p.add_argument("--metadata",
-                   default="src/typescript/backend/lib/data/frobenius_panel_art.json",
-                   help="frobenius_panel_art.json — curated allowlist")
+                   default="panel_art_dataset/frobenius_panel_art.json",
+                   help="curated allowlist JSON (see panel_art_dataset/README.md for schema)")
     p.add_argument("--img-manifest",
                    default="frobenius_artifacts/images/manifest.json",
                    help="images/manifest.json (registration_number → filename)")
 
     # SAM
     p.add_argument("--checkpoint",
-                   default="src/python/sam_vit_b_01ec64.pth",
+                   default="sam_vit_b_01ec64.pth",
                    help="SAM checkpoint .pth file")
 
     # Output

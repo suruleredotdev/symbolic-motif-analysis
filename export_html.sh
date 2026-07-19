@@ -2,10 +2,10 @@
 # export_html.sh — convert executed notebooks to self-contained HTML
 #
 # Usage:
-#   ./src/python/export_html.sh                  # convert all notebooks
-#   ./src/python/export_html.sh motif_similarity  # convert one by name
+#   ./export_html.sh                  # convert all notebooks
+#   ./export_html.sh motif_similarity  # convert one by name
 #
-# Output: frobenius_artifacts/site/<notebook>.html
+# Output: analysis/site/<notebook>.html
 #
 # Notes:
 #   • Runs with --no-input by default (hides code cells); pass --with-code to show them.
@@ -16,9 +16,9 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-NB_DIR="$REPO_ROOT/src/python"
-SITE_DIR="$REPO_ROOT/frobenius_artifacts/site"
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+NB_DIR="$REPO_ROOT"
+SITE_DIR="$REPO_ROOT/analysis/site"
 mkdir -p "$SITE_DIR"
 
 # ── Parse args ─────────────────────────────────────────────────────────────
@@ -89,6 +89,6 @@ else
 fi
 
 echo ""
-echo "Done. Host frobenius_artifacts/site/ on any static server."
+echo "Done. Host analysis/site/ on any static server."
 echo "  Quick local preview:"
 echo "    python3 -m http.server 8080 --directory $SITE_DIR"

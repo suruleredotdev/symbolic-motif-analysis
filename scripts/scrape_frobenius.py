@@ -18,7 +18,7 @@ Key URL patterns observed:
       http://bildarchiv.frobenius-katalog.de/zvimg.FAU?sid=...&DM=1&qpos=...&ipos=1&erg=A&hst=1&rpos=...png
 
 Usage:
-  python3 src/python/scripts/scrape_frobenius.py
+  python3 scripts/scrape_frobenius.py
 
 Output:
   panel_art_dataset/raw/frobenius_raw.json   — raw scraped records
@@ -53,7 +53,7 @@ except ImportError:
     print(
         "ERROR: Install dependencies first:\n"
         "  pip install requests beautifulsoup4 lxml\n"
-        "(or: pip install -r src/python/requirements.txt)"
+        "(or: pip install -r requirements.txt)"
     )
     sys.exit(1)
 

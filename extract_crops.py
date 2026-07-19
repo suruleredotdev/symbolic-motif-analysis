@@ -17,10 +17,10 @@ Writes frobenius_artifacts/analysis/motifs/<panel_stem>/<index>_<scale>.png
 
 Usage:
     # from consolidated JSON (legacy):
-    uv run --project src/python python src/python/extract_crops.py
+    uv run python extract_crops.py
 
     # from annotated / approved JSONs:
-    uv run --project src/python python src/python/extract_crops.py --annotated-dir
+    uv run python extract_crops.py --annotated-dir
 
 Options:
     --detections PATH        Path to consolidated detections JSON (default: auto-resolved)

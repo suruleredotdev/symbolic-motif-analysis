@@ -17,7 +17,7 @@ Each output record preserves all original fields and adds:
   "matched_terms": ["door", ...]      — the specific terms that triggered
 
 Usage:
-  python3 src/python/scripts/filter_frobenius_panel_art.py
+  python3 scripts/filter_frobenius_panel_art.py
 """
 
 import json
