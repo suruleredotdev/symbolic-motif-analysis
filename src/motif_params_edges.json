@@ -1,0 +1,8 @@
+{
+  "PREPROCESS_MODE": "edges",
+  "CLIP_MODEL": "ViT-B-32",
+  "CLIP_WEIGHTS": "openai",
+  "USE_NORMALIZED": true,
+  "n_motifs": 147,
+  "written": "2026-06-08T22:44:07.903427"
+}
