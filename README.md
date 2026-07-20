@@ -6,32 +6,44 @@ panels, Ifa divination boards (opon Ifa), and Benin relief plaques — so that
 recurring symbolic elements can be found, compared, and labeled across a
 scattered archival record.
 
-This repository was extracted, with full commit history, from
-[`african-artifacts` PR #14](https://github.com/suruleredotdev/african-artifacts/pull/14),
-where it was originally developed as part of a broader museum-cataloguing
-project. It stands alone here because the motif-analysis pipeline has no
-dependency on that project's web app or database — only on a directory of
-images and a JSON metadata file describing them.
+<img width="500" alt="Screenshot 2026-07-19 at 4 53 31 PM" src="https://github.com/user-attachments/assets/c98874f7-35c5-4c87-a880-1eea64030217" />
+<!-- <img width="400" alt="Screenshot 2026-07-19 at 4 45 43 PM" src="https://github.com/user-attachments/assets/d29d8812-ae54-46d3-9dc3-655a382f1f95" /> -->
+<img height="400" alt="25bc53f9-d6dc-4ea2-a960-15d963894e62_1188x1712" src="https://github.com/user-attachments/assets/266e8e97-4db9-4ea5-98f9-d4a6aebcc633" />
+
+
+This is built upon earlier inquiries into [African symbolic systems](https://suruleredotdev.substack.com/p/african-symbolism-inquiry)
+and [Yoruba art as historic storytelling](https://suruleredotdev.substack.com/p/on-yoruba-art-as-historic-storytelling),
+as well as using some of the data aggregation tooling developed as part of our
+earlier project [indexing African artifacts](https://suruleredotdev.substack.com/p/indexing-african-artifacts)
+
 
 ## Why this exists
 
 Carved door panels and divination boards from Yoruba, Ifa, and related West
 African traditions encode recurring visual vocabularies — figures, knotwork,
-geometric borders, registers of narrative scenes — that are scattered across
-museum collections and archival photo libraries (in this case, the
-[Frobenius Institut Bildarchiv](http://bildarchiv.frobenius-katalog.de/), with
-supplementary records from the Art Institute of Chicago, Staatliche Museen zu
-Berlin, and the British Museum). No single collection catalogues the *motifs
-themselves* — only the objects containing them.
+geometric borders, registers of narrative scenes - which we argue are not merely aesthetic but communicative in function.
+Other symbolic/writing systems like Egyptian or Mayan hieroglyphs have been the subject of much inquiry and interpretation,
+using established computational techniques. Our goal is to use such techniques - as well
+as knowledge of history, mythology and cross-cultural semiotics - to establish an interpretive
+framework that may be used to expand/enrich the corpus of Yoruba history.
 
-This pipeline treats "find and cluster the motifs" as a computer-vision
-problem: segment carved regions out of photographs of wildly inconsistent
+As far as the history of such inqury, the Leo Frobenius-led [German archeaological expeditions of 1910-1912](https://archive.org/details/voiceofafricabei02frobuoft/page/n11/mode/thumb)
+as welll as museum collections and archival photo libraries of the
+[Frobenius Institut Bildarchiv](http://bildarchiv.frobenius-katalog.de/), provide a rich set of archaic panels with rich symbolic forms, as well as apparent inquiry into specific motifs and their meaning
+
+<img height="300" alt="EBA-Div_00303_Ado_Ekiti_q166559_i1_panel_00" src="https://github.com/user-attachments/assets/405e279f-38fa-4b6d-b3b0-9aa77c788196" />
+<img width="625" alt="Screenshot 2026-07-19 at 5 52 42 PM" src="https://github.com/user-attachments/assets/aa62afae-50ec-4d30-a9b8-de678fccb6e3" />
+<img height="300" alt="EBA-B_00425_Ibadan_q97912_i1_panel_0_cropped" src="https://github.com/user-attachments/assets/781254ea-64f5-4807-8305-0ae230b585a6" />
+
+This pipeline frames "find and cluster the motifs" as a computer-vision
+problem: segment carved regions out of photographs of varying form and
 quality (aged B&W photographs, pen-and-ink survey drawings, modern colour
 photos), normalize them into a comparable visual space, embed them, and
 cluster the embeddings to surface visual families — then let a human (with
 LLM assistance) name and interpret what's been found.
 
 ## Pipeline architecture
+<img width="1057" height="460" alt="Screenshot 2026-07-19 at 5 52 54 PM" src="https://github.com/user-attachments/assets/13aed61d-f276-476f-aa96-d019ae1fdd55" />
 
 ```
 images/<source>.png                                  (photo or illustration)
@@ -104,6 +116,10 @@ See [`PIPELINE.md`](./PIPELINE.md) for the exact CLI/notebook sequence, file
 naming conventions, and current artifact counts from the last full run.
 
 ### Two generations of tooling
+<img width="1036" height="388" alt="Screenshot 2026-07-19 at 5 53 10 PM" src="https://github.com/user-attachments/assets/922b2092-2dba-47de-a18d-235725309235" />
+<img width="991" height="1812" alt="EBA-Div_00303_Ado_Ekiti_q166559_i1_panel_00" src="https://github.com/user-attachments/assets/5ef7f731-d860-40c3-8733-fc40f085792a" />
+<img width="924" height="969" alt="EBA-Div_00302_q166558_i1_panel_00" src="https://github.com/user-attachments/assets/47496b6c-d26f-4b29-bf1d-538803ddbb72" />
+<img width="442" height="648" alt="EBA-B_00425_Ibadan_q97912_i1_panel_0_cropped" src="https://github.com/user-attachments/assets/4ea5be79-02f7-4bd0-a620-7bbe10dd320a" />
 
 The pipeline evolved from a modular, CLI/notebook-per-phase design into a
 single unified interactive notebook:
