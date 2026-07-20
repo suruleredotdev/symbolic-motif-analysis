@@ -31,8 +31,8 @@ As far as the history of such inqury, the Leo Frobenius-led [German archeaologic
 as welll as museum collections and archival photo libraries of the
 [Frobenius Institut Bildarchiv](http://bildarchiv.frobenius-katalog.de/), provide a rich set of archaic panels with rich symbolic forms, as well as apparent inquiry into specific motifs and their meaning
 
-<img height="300" alt="EBA-Div_00303_Ado_Ekiti_q166559_i1_panel_00" src="https://github.com/user-attachments/assets/405e279f-38fa-4b6d-b3b0-9aa77c788196" />
 <img width="625" alt="Screenshot 2026-07-19 at 5 52 42 PM" src="https://github.com/user-attachments/assets/aa62afae-50ec-4d30-a9b8-de678fccb6e3" />
+<img height="300" alt="EBA-Div_00303_Ado_Ekiti_q166559_i1_panel_00" src="https://github.com/user-attachments/assets/405e279f-38fa-4b6d-b3b0-9aa77c788196" />
 <img height="300" alt="EBA-B_00425_Ibadan_q97912_i1_panel_0_cropped" src="https://github.com/user-attachments/assets/781254ea-64f5-4807-8305-0ae230b585a6" />
 
 This pipeline frames "find and cluster the motifs" as a computer-vision
