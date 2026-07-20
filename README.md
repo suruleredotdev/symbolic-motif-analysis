@@ -117,9 +117,6 @@ naming conventions, and current artifact counts from the last full run.
 
 ### Two generations of tooling
 <img width="1036" height="388" alt="Screenshot 2026-07-19 at 5 53 10 PM" src="https://github.com/user-attachments/assets/922b2092-2dba-47de-a18d-235725309235" />
-<img width="991" height="1812" alt="EBA-Div_00303_Ado_Ekiti_q166559_i1_panel_00" src="https://github.com/user-attachments/assets/5ef7f731-d860-40c3-8733-fc40f085792a" />
-<img width="924" height="969" alt="EBA-Div_00302_q166558_i1_panel_00" src="https://github.com/user-attachments/assets/47496b6c-d26f-4b29-bf1d-538803ddbb72" />
-<img width="442" height="648" alt="EBA-B_00425_Ibadan_q97912_i1_panel_0_cropped" src="https://github.com/user-attachments/assets/4ea5be79-02f7-4bd0-a620-7bbe10dd320a" />
 
 The pipeline evolved from a modular, CLI/notebook-per-phase design into a
 single unified interactive notebook:
