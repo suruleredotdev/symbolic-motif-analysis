@@ -59,3 +59,8 @@ packages = ["panel_art"]
 [tool.uv]
 # Keep existing standalone scripts in place; package lives in panel_art/
 package = true
+
+[dependency-groups]
+dev = [
+    "jupyterlab>=4.6.2",
+]

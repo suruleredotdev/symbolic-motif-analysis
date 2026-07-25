@@ -47,8 +47,8 @@ from PIL import Image
 
 
 # ── Repo-relative defaults ────────────────────────────────────────────────────
-_HERE = Path(__file__).resolve().parent          # src/python/
-_REPO = _HERE.parent.parent                      # repo root
+_HERE = Path(__file__).resolve().parent          # repo root
+_REPO = _HERE
 
 DEFAULT_DETECTIONS   = _REPO / "frobenius_artifacts/analysis/detections.json"
 DEFAULT_PANELS_DIR   = _REPO / "frobenius_artifacts/analysis/panels"
