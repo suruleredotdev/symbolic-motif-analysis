@@ -61,8 +61,8 @@ from PIL import Image
 
 
 # ── Repo-relative defaults ────────────────────────────────────────────────────
-_HERE     = Path(__file__).resolve().parent
-_REPO     = _HERE.parent.parent
+_HERE     = Path(__file__).resolve().parent      # repo root
+_REPO     = _HERE
 _ANALYSIS = _REPO / "frobenius_artifacts/analysis"
 
 DEFAULT_IN_DIR  = _ANALYSIS / "motifs"

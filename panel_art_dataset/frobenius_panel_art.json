@@ -1,0 +1,2780 @@
+{
+  "generated_from": "frobenius_all.json",
+  "filter_description": "Records specifically depicting: door panels (carved wooden doors, wall boards), Ifa divination boards (opon Ifa, oracle boards, iroke), figurines (bronze figures, wooden cult figures, Ogboni edan, ivory carvings), or motif illustrations (non-photographic drawings of carved relief motifs on doors/boards, Skulptur am Bau, Reliefschnitzereien, figures at/on doors).",
+  "total_input_records": 698,
+  "total_output_records": 108,
+  "counts_by_category": {
+    "door_panel": 21,
+    "ifa_board": 39,
+    "figurine": 14,
+    "motif_illustration": 46
+  },
+  "records": [
+    {
+      "result_number": "101",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48628&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48628&ipos=1&erg=A&hst=1&rpos=48628.png",
+      "registration_number": "FoA 04-5578",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Doors from Joruba temple huts . Excavated in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "door"
+      ]
+    },
+    {
+      "result_number": "102",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48629&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48629&ipos=1&erg=A&hst=1&rpos=48629.png",
+      "registration_number": "FoA 04-5579",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' tombs in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "103",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48630&ipos=3&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48630&ipos=3&erg=A&hst=1&rpos=48630.png",
+      "registration_number": "FoA 04-5580",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' tombs in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "104",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48631&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48631&ipos=1&erg=A&hst=1&rpos=48631.png",
+      "registration_number": "FoA 04-5581",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' tombs in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "105",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48632&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48632&ipos=1&erg=A&hst=1&rpos=48632.png",
+      "registration_number": "FoA 04-5582",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' tombs in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "106",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48633&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48633&ipos=1&erg=A&hst=1&rpos=48633.png",
+      "registration_number": "FoA 04-5583",
+      "technique_image_type": "photography",
+      "reference": "KBA 10303",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' tombs in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "107",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48634&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48634&ipos=1&erg=A&hst=1&rpos=48634.png",
+      "registration_number": "FoA 04-5584",
+      "technique_image_type": "photography",
+      "reference": "KBA 10297 EBA-B 00718",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated in Modeke. Depiction of the 16 sky gods as doves.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "108",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48635&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48635&ipos=1&erg=A&hst=1&rpos=48635.png",
+      "registration_number": "FoA 04-5585",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' graves in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "109",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48636&ipos=2&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48636&ipos=2&erg=A&hst=1&rpos=48636.png",
+      "registration_number": "FoA 04-5586",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' graves in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "110",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48637&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48637&ipos=1&erg=A&hst=1&rpos=48637.png",
+      "registration_number": "FoA 04-5587",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' graves in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "111",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48638&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48638&ipos=1&erg=A&hst=1&rpos=48638.png",
+      "registration_number": "FoA 04-5588",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' graves in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "The motif is isolated on the original negative using red chalk.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "112",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48639&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48639&ipos=1&erg=A&hst=1&rpos=48639.png",
+      "registration_number": "FoA 04-5589",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Boards for the Ifa oracle of the Joruba. Excavated from priests' graves in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "113",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48640&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48640&ipos=1&erg=A&hst=1&rpos=48640.png",
+      "registration_number": "FoA 04-5947",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "image_author_copyright_holder": "Frobenius, Leo",
+      "title": "Board for the Ifa oracle of the Joruba, photo: Frobenius. Circumstances of discovery or owner unknown.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "ethnic_group": "Yoruba",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "boards for ifa",
+        "ifa oracle"
+      ]
+    },
+    {
+      "result_number": "118",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48645&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48645&ipos=1&erg=A&hst=1&rpos=48645.png",
+      "registration_number": "FoA 04-5598",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Jorubaland: Ivory beater (iroke) of the Joruba, a tool of the Ifa cult. Excavated in 1910 in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "Older reproduction of a photograph by Leo Frobenius",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa cult",
+        "iroke"
+      ]
+    },
+    {
+      "result_number": "119",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48646&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48646&ipos=1&erg=A&hst=1&rpos=48646.png",
+      "registration_number": "FoA 04-5599",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Jorubaland: Ivory beater (iroke) of the Joruba, a tool of the Ifa cult. Excavated in 1910 in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "Older reproduction of a photograph by Leo Frobenius",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa cult",
+        "iroke"
+      ]
+    },
+    {
+      "result_number": "120th",
+      "inventory": "Photo archive",
+      "thumbnail_url": "zhimg.FAU?sid=66C60647&DM=1&qpos=48647&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=66C60647&DM=1&qpos=48647&ipos=1&erg=A&hst=1&rpos=48647.png",
+      "registration_number": "FoA 04-5597",
+      "technique_image_type": "photography",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "title": "Jorubaland: Ivory carvings, objects of the Ifa cult of the Joruba. In the center is a tumbler (iroke) , surrounded by four heads, which were positioned as spectators at the oracle . Excavated in 1910 in Modeke.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Modakeke (Ife)",
+      "ethnic_group": "Yoruba",
+      "remarks": "Older reproduction of a photograph by Leo Frobenius",
+      "categories": [
+        "figurine",
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa cult",
+        "iroke",
+        "ivory carving"
+      ]
+    },
+    {
+      "result_number": "168",
+      "bestand": "Fotoarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=48755&ipos=3&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=48755&ipos=3&erg=H&hst=1&rpos=48755.png",
+      "register_nr.": "FoA 04-5095",
+      "technik_bildtyp": "Fotografie",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "titel": "Jorubaland: Die heiligen Bronzefiguren in Jebba (Djebba) .",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Jebba",
+      "ethn._gruppe": "Yoruba ; Nupe",
+      "schlagworte": "Guß in verlorener Form ; Portrait-/Gruppenbild ; Priester / Priestertum ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Skulptur",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "bronzefigur",
+        "heilige bronzefiguren"
+      ]
+    },
+    {
+      "result_number": "185",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97896&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97896&ipos=1&erg=H&hst=1&rpos=97896.png",
+      "register_nr.": "EBA-B 00411~b",
+      "verweis": "EBA-B 00411",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "21,5x30",
+      "titel": "Geschnitzte Tür und Wandbretter der Yoruba.",
+      "registertitel": "Geschnitzte Tür und Wandbretter der Yoruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Wandbretter einer in Modeke ausgegrabenen Tempeltür mit Reliefschnitzereien: Spiralen und anthropomorphe Figuren (u. a. Krieger) und Schlangen.",
+      "publikation": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "Taf. 184",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "geschnitzte tür",
+        "wandbrett"
+      ]
+    },
+    {
+      "result_number": "186",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97897&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97897&ipos=1&erg=H&hst=1&rpos=97897.png",
+      "register_nr.": "EBA-B 00411~a",
+      "verweis": "EBA-B 00411",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "21,5x30",
+      "titel": "Geschnitzte Tür und Wandbretter der Yoruba.",
+      "registertitel": "Geschnitzte Tür und Wandbretter der Yoruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Wandbretter einer in Modeke ausgegrabenen Tempeltür mit Reliefschnitzereien: Spiralen und anthropomorphe Figuren.",
+      "publikation": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "Taf. 184",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "geschnitzte tür",
+        "wandbrett"
+      ]
+    },
+    {
+      "result_number": "187",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97898&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97898&ipos=1&erg=H&hst=1&rpos=97898.png",
+      "register_nr.": "EBA-B 00413~a",
+      "verweis": "EBA-B 00413",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "21,5x30",
+      "titel": "Geschnitzte Tür und Wandbretter der Yoruba.",
+      "registertitel": "Geschnitzte Tür und Wandbretter der Yoruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Wandbretter einer in Modeke ausgegrabenen Tempeltür mit Reliefschnitzereien: Flechtmuster, anthropo- und zoomorphe Figuren.",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "geschnitzte tür",
+        "wandbrett"
+      ]
+    },
+    {
+      "result_number": "188",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97899&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97899&ipos=1&erg=H&hst=1&rpos=97899.png",
+      "register_nr.": "EBA-B 00413~b",
+      "verweis": "EBA-B 00413",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "22x23",
+      "titel": "Geschnitzte Tür und Wandbretter der Yoruba.",
+      "registertitel": "Geschnitzte Tür und Wandbretter der Yoruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Wandbretter einer in Modeke ausgegrabenen Tempeltür mit Reliefschnitzereien: Kreis mit Flechtmuster, anthropomorphe Figuren.",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "geschnitzte tür",
+        "wandbrett"
+      ]
+    },
+    {
+      "result_number": "189",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97900&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97900&ipos=1&erg=H&hst=1&rpos=97900.png",
+      "register_nr.": "EBA-B 00414~a",
+      "verweis": "EBA-B 00414",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "21,5x30",
+      "titel": "Geschnitzte Tür und Wandbretter der Yoruba.",
+      "registertitel": "Geschnitzte Tür und Wandbretter der Yoruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Wandbretter einer in Modeke ausgegrabenen Tempeltür mit Reliefschnitzereien: Flechtmuster, anthropomorphe und zoomorphe Figuren (u. a. Schlange) .",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "geschnitzte tür",
+        "wandbrett"
+      ]
+    },
+    {
+      "result_number": "190",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97901&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97901&ipos=1&erg=H&hst=1&rpos=97901.png",
+      "register_nr.": "EBA-B 00414~b",
+      "verweis": "EBA-B 00414",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "21,5x30",
+      "titel": "Geschnitzte Tür und Wandbretter der Yoruba.",
+      "registertitel": "Geschnitzte Tür und Wandbretter der Yoruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Wandbretter einer in Modeke ausgegrabenen Tempeltür mit Reliefschnitzereien: Flechtmuster, anthropomorphe Figuren (u. a. Krieger) .",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "geschnitzte tür",
+        "wandbrett"
+      ]
+    },
+    {
+      "result_number": "198",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97909&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97909&ipos=1&erg=H&hst=1&rpos=97909.png",
+      "register_nr.": "EBA-B 00422",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "29x45",
+      "titel": "Tür des Oni- Palastes in Ife.",
+      "registertitel": "Ife: Tür des Onipalastes",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Ife",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Holztür des Onipalastes mit Reliefschnitzereien (Geflecht, figürliche Darstellungen) .",
+      "literatur": "Frobenius, Und Afrika sprach, Bd. 1, 1912, S. 303",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "reliefschnitzerei"
+      ]
+    },
+    {
+      "result_number": "201",
+      "inventory": "Ethnographic image archive",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97912&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97912&ipos=1&erg=H&hst=1&rpos=97912.png",
+      "registration_number": "EBA-B 00425",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "date_of_origin": "1910",
+      "image_author_copyright_holder": "Arriens, Carl",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "34x49",
+      "title": "Door in Ibadan.",
+      "register_title": "Door in Ibadan",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "location": "Ibadan",
+      "ethnic_group": "Yoruba",
+      "descriptive_editing": "Wooden entrance door of a mud house with relief carvings: various anthropo- and zoomorphic figures (including birds , tortoise, donkey) , braid-like ornamented frame; on the right in the picture a man with trousers, shirt and pot-shaped cap.",
+      "literature": "Frobenius, And Africa Spoke, Vol. 1, 1912, pp. 302ff.",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "door"
+      ]
+    },
+    {
+      "result_number": "211",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97922&ipos=3&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97922&ipos=3&erg=H&hst=1&rpos=97922.png",
+      "register_nr.": "EBA-B 00435",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "26,5x33,5",
+      "titel": "Dachstützen von Tempeln. Ibadan.",
+      "registertitel": "Dachstützen von Tempeln, Ibadan",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Ibadan",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Vier Dachpfeiler mit weiblichen Holzfiguren, z. T. übereinanderstehend, geschnitzte Kleidung, Frisuren, Gesichts- und Brusttataúierungen.",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "dachstützen mit figuren",
+        "holzfigur"
+      ]
+    },
+    {
+      "result_number": "213",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97924&ipos=2&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97924&ipos=2&erg=H&hst=1&rpos=97924.png",
+      "register_nr.": "EBA-B 00436",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "33,5x49",
+      "titel": "Tempelportal, Ibadan.",
+      "registertitel": "Tempelportal, Ibadan",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Ibadan",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Doppeltür eines Tempels mit Reliefschnitzereien in der Mitte (u. a. Kultgegenstände) vor dem Portal drei Holzfiguren (zwei weibliche, davon eine kniend, eine männliche) mit geschnitzter Kleidung und Kopfbedeckungen.",
+      "categories": [
+        "door_panel",
+        "figurine",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzfigur",
+        "portal",
+        "reliefschnitzerei",
+        "tempelportal"
+      ]
+    },
+    {
+      "result_number": "214",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97925&ipos=2&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97925&ipos=2&erg=H&hst=1&rpos=97925.png",
+      "register_nr.": "EBA-B 00438",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Aquarell",
+      "format_(bxhxtxø_in_cm)": "47x31",
+      "titel": "Altar in einem Oranjatempgel, Ibadan.",
+      "registertitel": "Altar eines Oranjatempels, Ibadan",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Ibadan",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Altar mit verschiedenen Kultgegenständen und geschnitzten, anthropo- und zoomorphen Kultfiguren (zwei Hühner, ein Widder( ?)), z. T. bemalt, Opfergaben: mehrere Tongefäße mit Früchten( ?).",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "kultfigur",
+        "kultfiguren altar"
+      ]
+    },
+    {
+      "result_number": "215",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97926&ipos=3&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97926&ipos=3&erg=H&hst=1&rpos=97926.png",
+      "register_nr.": "EBA-B 00439",
+      "verweis": "FoA 04-5010",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Aquarell",
+      "format_(bxhxtxø_in_cm)": "47x31",
+      "titel": "Altar im Schangotempel in Ibadan.",
+      "registertitel": "Altar im Schangotempel, Ibadan",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Ibadan",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Altar mit verschiedenen Kultgegenständen (Kalebassen, Tongefäße, Decken) sowie geschnitzten und bemalten, anthropo- und zoomorphen Kultfiguren (u. a. der Blitz- und Donnergott Schango auf einem Esel reitend, Krieger mit Lanzen) , die als Dachstützen dienen.",
+      "literatur": "Frobenius, Und Afrika sprach, Bd. 1, 1912, S. 29ff.",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "kultfigur",
+        "kultfiguren altar"
+      ]
+    },
+    {
+      "result_number": "216",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97927&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97927&ipos=1&erg=H&hst=1&rpos=97927.png",
+      "register_nr.": "EBA-B 00440~a",
+      "verweis": "EBA-B 00440 FoA 04-5011",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "29x23",
+      "titel": "Schangotempel in Ibadan.",
+      "registertitel": "Schangotempel, Ibadan",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Ibadan",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Mehrere neben- und übereinander gestellte Holzfiguren in einer Fensterwand eines Schangotempels (Lehmbau mit Dach aus Plamblättern? ) in Ibadan; links im Bild Männer in langen Gewändern.",
+      "publikation": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "Taf. 182",
+      "literatur": "Frobenius, Und Afrika sprach, Bd. 1, 1912, S. 44ff.",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "holzfigur",
+        "holzfiguren fenster"
+      ]
+    },
+    {
+      "result_number": "217",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97928&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97928&ipos=1&erg=H&hst=1&rpos=97928.png",
+      "register_nr.": "EBA-B 00440~b",
+      "verweis": "EBA-B 00440",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "23x17",
+      "titel": "Altar des Schangotempels in Ibadan.",
+      "registertitel": "Schangotempel, Ibadan",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Ibadan",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Mehrere nebeneinander gestellte Holzfiguren vor einem Altar mit Opfergaben (verschiedene, gefüllte Tongefäße) und Wandbehängen im Schangotempel (Lehmbau) in Ibadan.",
+      "literatur": "Frobenius, Und Afrika sprach, Bd. 1, 1912, S. 44ff.",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "holzfigur",
+        "holzfiguren fenster"
+      ]
+    },
+    {
+      "result_number": "219",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=7B012952&DM=1&qpos=97930&ipos=2&az=0",
+      "fullsize_url": "zvimg.FAU?sid=7B012952&DM=1&qpos=97930&ipos=2&erg=H&hst=1&rpos=97930.png",
+      "register_nr.": "EBA-B 00442",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "30x44,5",
+      "titel": "Türflügel am Schangotempel in Ibadan.",
+      "registertitel": "Türflügel am Schangotempel, Ibadan",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Ibadan",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Holztürflügel des Schangotempels in Ibadan mit einem Längsstreifen Reliefschnitzereien: Flechtmuster, anthropo- und zoomorphe Figuren, Kultgegenstände.",
+      "literatur": "Frobenius, Und Afrika sprach, Bd. 1, 1912, S. 44f. , 187ff.",
+      "categories": [
+        "door_panel",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "reliefschnitzerei",
+        "türflügel"
+      ]
+    },
+    {
+      "result_number": "266",
+      "inventory": "Ethnographic image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98212&ipos=3&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98212&ipos=3&erg=H&hst=1&rpos=98212.png",
+      "registration_number": "EBA-B 00642",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "image_author_copyright_holder": "Arriens, Carl",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "28.5x30",
+      "title": "Ceremony of initiation into the Ogboni Society.",
+      "register_title": "Ogbonibund in Yoruba",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "region": "Southwest Nigeria",
+      "ethnic_group": "Yoruba",
+      "descriptive_editing": "Aufnahmezeremonie im Inneren eines Hauses in den Ogboni- Bund (eine Art Ältestenrat mit politischen, richterlichen und religiösen Funktionen) : zwei glatzköpfige Männer mit langen Hüftschurzen, einer mit Halskette und Amulett( ?) hat die Hände auf einen knienden Mann mit Hüftschurz und verbundenen Augen gelegt, zwei anthropomorphe, männliche und weibliche Gelb- gußfiguren (sind mit einer Kette verbunden) werden mit dem Blut eines Opferhuhns begossen, daneben zwei Kolanüsse, im Hintergrund drei Trommler neben einem reliefartig verzierten Wandstück aus Lehm, eine Trommel ist als männliche anthropomorphe Figur geschnitzt, im Vordergrund ein Feuer, ein weiteres Opferhuhn mit abgeschlagenem Kopf, Tonschalemit Kolanüssen.",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 65 \"Ogonibund\"",
+      "literatur": "Frobenius, Und Afrika sprach, Bd. 1, 1912, S. 54ff.",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "ogboni figur"
+      ]
+    },
+    {
+      "result_number": "271",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98295&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98295&ipos=1&erg=H&hst=1&rpos=98295.png",
+      "register_nr.": "EBA-B 00713~a",
+      "verweis": "EBA-B 00713",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "29x22,5",
+      "titel": "Ifabretter aus Gräbern.",
+      "registertitel": "Ifabretter aus Gräbern, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Rundes Holzbrett mit reliefartiger figuraler Ornamentik am Außenrand für das Ifa- Orakel der Yoruba, ausgegraben in Priestergräbern in Modeke.",
+      "publikation": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "Taf. 192",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "272",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98296&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98296&ipos=1&erg=H&hst=1&rpos=98296.png",
+      "register_nr.": "EBA-B 00715~a",
+      "verweis": "EBA-B 00715",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "21x23,5",
+      "titel": "Ifabretter aus Gräbern.",
+      "registertitel": "Ifabretter aus Gräbern, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Rundes Holzbrett mit reliefartiger figuraler Ornamentik und linienförmgier am Außenrand für das Ifa- Orakel der Yoruba, ausgegraben in Priestergräbern in Modeke.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "273",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98297&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98297&ipos=1&erg=H&hst=1&rpos=98297.png",
+      "register_nr.": "EBA-B 00713~b",
+      "verweis": "EBA-B 00713 EBA-Div 00302",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "29x22",
+      "titel": "Ifabretter aus Gräbern.",
+      "registertitel": "Ifabretter aus Gräbern, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Rundes Holzbrett mit reliefartiger figuraler Ornamentik (u. a. mythologische Darstellung von vier miteinander verschlungenen Götterpaaren) am Außenrand für das Ifa- Orakel der Yoruba, ausgegraben in Priestergräbern in Modeke.",
+      "publikation": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "Taf. 191",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "274",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98298&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98298&ipos=1&erg=H&hst=1&rpos=98298.png",
+      "register_nr.": "EBA-B 00715~b",
+      "verweis": "EBA-B 00715",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "28,5x20",
+      "titel": "Ifabretter aus Gräbern.",
+      "registertitel": "Ifabretter aus Gräbern, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Halbmondförmiges Holzbrett mit reliefartiger figuraler Ornamentik am Außenrand für das Ifa- Orakel der Yoruba, ausgegraben in Priestergräbern in Modeke.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "275",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98299&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98299&ipos=1&erg=H&hst=1&rpos=98299.png",
+      "register_nr.": "EBA-B 00716~a",
+      "verweis": "EBA-B 00716",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "28x22",
+      "titel": "Ifabretter aus Gräbern.",
+      "registertitel": "Ifabretter aus Gräbern, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Rechteckiges Holzbrett mit reliefartiger figuraler Ornamentik (zu erkennen Schildkröte, Schlange, Krokodil, Widder, Soldat) am Außenrand für das Ifa- Orakel der Yoruba, ausgegraben in Priestergräbern in Modeke.",
+      "publikation": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "Taf. 188",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "276",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98300&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98300&ipos=1&erg=H&hst=1&rpos=98300.png",
+      "register_nr.": "EBA-B 00716~b",
+      "verweis": "EBA-B 00716",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "28x21",
+      "titel": "Ifabretter aus Gräbern.",
+      "registertitel": "Ifabretter aus Gräbern, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Rechteckiges Holzbrett mit reliefartiger figuraler, schlangen- und zopfförmiger Ornamentik (zu erkennen z. B. Schildkröte) am Außenrand für das Ifa- Orakel der Yoruba, ausgegraben in Priestergräbern in Modeke.",
+      "publikation": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "Taf. 187",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "277",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98301&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98301&ipos=1&erg=H&hst=1&rpos=98301.png",
+      "register_nr.": "EBA-B 00717~a",
+      "verweis": "EBA-B 00717",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "28,5x20,5",
+      "titel": "Ifabretter aus Gräbern.",
+      "registertitel": "Ifabretter aus Gräbern, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Rechteckiges Holzbrett mit reliefartiger figuraler Ornamentik am Außenrand für das Ifa- Orakel der Yoruba, ausgegraben in Priestergräbern in Modeke.",
+      "publikation": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "Taf. 186",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "278",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98302&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98302&ipos=1&erg=H&hst=1&rpos=98302.png",
+      "register_nr.": "EBA-B 00717~b",
+      "verweis": "EBA-B 00717 KBA 10299",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Frobenius, Leo",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "28,5x21,5",
+      "titel": "Ifabretter aus Gräbern.",
+      "registertitel": "Ifabretter aus Gräbern, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Rechteckiges Holzbrett mit reliefartiger figuraler Ornamentik am Außenrand für das Ifa- Orakel der Yoruba, ausgegraben in Priestergräbern in Modeke.",
+      "publikation": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "Taf. 185",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "280",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98428&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98428&ipos=1&erg=H&hst=1&rpos=98428.png",
+      "register_nr.": "EBA-B 00807",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche; Aquarell",
+      "format_(bxhxtxø_in_cm)": "38,5x58",
+      "titel": "Die sechzehn Odu.",
+      "registertitel": "Die sechzehn Odu",
+      "histor._bildbeschreibung": "Edju ogbe, Ojaku medji, Ewori medji, Odi medji, Hosso medji, Jionoli medji, Oballa medji, Okanna medji, Oguda medji, Osa medji, Eka medji, Oturuqua medji, Olua medji, Ilette medji, Ose medji, Ofu medji, Hauptweg, West, Nord, Ost, Süd, roth Ogun, schwarz Schango, weiss Obatala, gelb Edju, die 16 Odu und ihre Beziehung zum jorubischen Tempel",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft)",
+      "deskriptive_bearbeitung": "Schnittdarstellung der 16 Yoruba- Odu und ihrer Beziehung zum Tempel, Ifa- Orakel.",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "die 16 odu"
+      ]
+    },
+    {
+      "result_number": "281",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98682&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98682&ipos=1&erg=H&hst=1&rpos=98682.png",
+      "register_nr.": "EBA-B 00699",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Fischer-Derenburg, Friedrich Wilhelm",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "30x41,5",
+      "titel": "Alte Elfenbeinschnitzereien.",
+      "registertitel": "Elfenbeinschnitzereien, Joruba",
+      "histor._bildbeschreibung": "Originalgröße",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Vier mit anthropomorphen, meist knienden Figuren versehene Elfenbeinstoßzähne (als Anhänger getragen? ).",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "elfenbeinschnitz"
+      ]
+    },
+    {
+      "result_number": "282",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=98683&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=98683&ipos=1&erg=H&hst=1&rpos=98683.png",
+      "register_nr.": "EBA-B 00700",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Fischer-Derenburg, Friedrich Wilhelm",
+      "technik_bildtyp": "Aquarell",
+      "format_(bxhxtxø_in_cm)": "30x37",
+      "titel": "Alte Elfenbeinschnitzereien.",
+      "registertitel": "Elfenbeinschnitzereien, Joruba",
+      "histor._bildbeschreibung": "Originalgröße",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Zwei mit anthropomorphen, z. T. übereinanderstehenden Figuren versehene Elfenbeinstoßzähne sowie eine reliefartig geschnitzte, flache Figur (als Anhänger getragen? ).",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "elfenbeinschnitz"
+      ]
+    },
+    {
+      "result_number": "288",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=99965&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=99965&ipos=1&erg=H&hst=1&rpos=99965.png",
+      "register_nr.": "EBA-B 00410",
+      "verweis": "EBA-B 00409 EBA-Div 00303",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "entstehungsdatum": "1910 - 1912",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Tusche; Aquarell",
+      "format_(bxhxtxø_in_cm)": "38,5x47",
+      "titel": "Tür des Köngis von Ado.",
+      "registertitel": "Tür des Königs von Ado",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ethn._gruppe": "Yoruba",
+      "deskriptive_bearbeitung": "Holztür mit Reliefschnitzereien (Figuren aus der Mythologie, u. a. Krieger, Krokodile? ) vom Gehöft eines Yoruba- Fürsten (vgl. Dok. - Nr. 960) .",
+      "publikation": "Stappert, Gisela 1996: Afrika - ethnographisch ; Zeichnungen, Aquarelle und Fotografien aus dem ethnographischen Bildarchiv des Frobenius-Instituts. Frankfurt a.M.: Frobenius-Institut.",
+      "publikationsstelle": "S. 69",
+      "literatur": "Stappert, Afrika- EthnoGraphisch 1996",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "reliefschnitzerei"
+      ]
+    },
+    {
+      "result_number": "294",
+      "bestand": "Ethnographisches Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=100689&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=100689&ipos=1&erg=H&hst=1&rpos=100689.png",
+      "register_nr.": "PBA-B 00084",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Aquarell",
+      "format_(bxhxtxø_in_cm)": "35x31",
+      "titel": "Die Bronzefiguren von Ibba.",
+      "registertitel": "Bronzefiguren, Ibba.",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "region": "Südwestnigeria",
+      "ort": "Jebba",
+      "ethn._gruppe": "Yoruba-Gruppen",
+      "deskriptive_bearbeitung": "Ansicht einer männlichen und einer weiblichen Bronzefigur (Ganzkörperdarstellung im Halbprofil) , die männliche ist bekleidet dargestellt und trägt ein Gewand, Hosen und einen geschmückten Helm, die weibliche Figur ist unbekleidet dargestellt, trägt Schmuck und hält einen Spiegel in der Hand.",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "bronzefigur"
+      ]
+    },
+    {
+      "result_number": "319",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=139371&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=139371&ipos=1&erg=H&hst=1&rpos=139371.png",
+      "register_nr.": "KBA 03088",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "12,7x15,5",
+      "histor._stichworte": "Holzschnitzerei",
+      "histor._lokalisierung": "Yoruba",
+      "histor._bildbeschreibung": "Natürliche Größe. Yoruba. Holzstöpsel v. Flasche m. d. heilig. Wasser eines Gottes.",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Deckel ; Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "320",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=139372&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=139372&ipos=1&erg=H&hst=1&rpos=139372.png",
+      "register_nr.": "KBA 03089",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "12,7x16,7",
+      "histor._stichworte": "Holzschnitzerei",
+      "histor._lokalisierung": "Yoruba",
+      "histor._bildbeschreibung": "Natürliche Größe. Yoruba. Holzstöpsel von einer Flasche, in der das heilige Wasser eines Gottes bewahrt wurde.",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Deckel ; Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "330",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=140586&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=140586&ipos=1&erg=H&hst=1&rpos=140586.png",
+      "register_nr.": "KBA 04877",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "13,4x5,6",
+      "histor._stichworte": "Haushalts- Geräte; Löffel; Holz- Löffel",
+      "histor._lokalisierung": "Oberguinea; Joruba",
+      "ursprüngl._herkunftsverweis": "Museum für Völkerkunde, Hamburg (13.67:127)",
+      "histor._bildbeschreibung": "Yoruba, Holzlöffel ca. 20 cm Lg, 1/ 2 n. Gr.",
+      "kontinent": "Afrika",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "360",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=143881&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=143881&ipos=1&erg=H&hst=1&rpos=143881.png",
+      "register_nr.": "KBA 02342",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "8,5x12,7",
+      "histor._stichworte": "Weberei; Webrolle",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Nord Joruba",
+      "histor._bildbeschreibung": "okerekere Webstuhlflansche, Holz, 19 cm hoch , Nord- Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Skulptur ; Webrolle",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "361",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=143882&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=143882&ipos=1&erg=H&hst=1&rpos=143882.png",
+      "register_nr.": "KBA 02343",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "15,2x12,7",
+      "histor._stichworte": "Weberei; Webrollen",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Webstuhlflansche, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Skulptur ; Tiermotiv ; Webrolle",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "391",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147702&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147702&ipos=1&erg=H&hst=1&rpos=147702.png",
+      "register_nr.": "KBA 10267",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "16,7x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifabrett",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "41 cm breit. Ifabrett. Jorbua 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "abstraktes Motiv ; Divination (Tätigkeit und Gerätschaft) ; Holzschnitzerei ; Ornament ; Tiermotiv ; Vogel",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 187",
+      "publikationsstelle": "S. 275",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "392",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147740&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147740&ipos=1&erg=H&hst=1&rpos=147740.png",
+      "register_nr.": "KBA 10268",
+      "verweis": "KBA 10274",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "16,7x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Deckel eines Gefäßes f. Ifafarben u. Ifakerne",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba (- Nord)",
+      "histor._bildbeschreibung": "Deckel eines Ifagefässes. Nord- Joruba 3) ¶ Ogunfa [?]",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "abstraktes Motiv ; Deckel ; Divination (Tätigkeit und Gerätschaft) ; Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Relief ; Schlange ; Tiermotiv",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 157",
+      "publikationsstelle": "S. 283",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "394",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147757&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147757&ipos=1&erg=H&hst=1&rpos=147757.png",
+      "register_nr.": "KBA 10270",
+      "verweis": "KBA 10270~a KBA 10270~b",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Darstellungen des Gottes Edschu",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Darstellungen des Gottes Edschu als Tanzkeule, Altarschmuck und Schmuckfigur",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Skulptur ; Tanz,rituell",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 169",
+      "publikationsstelle": "S. 257",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "395",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147758&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147758&ipos=1&erg=H&hst=1&rpos=147758.png",
+      "register_nr.": "KBA 10270~a",
+      "verweis": "KBA 10270",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "7,2x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Darstellungen des Gottes Edschu als Tanzkeule",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Edschu aus Holz, 38 cm hoch, Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Ornament ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Skulptur ; Tanz,rituell",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 169",
+      "publikationsstelle": "S. 257",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "396",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147759&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147759&ipos=1&erg=H&hst=1&rpos=147759.png",
+      "register_nr.": "KBA 10270~b",
+      "verweis": "KBA 10270",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "4,3x12,8",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Darstellungen des Gottes Edschu als Tanzkeule",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Edschustab, 46 cm hoch, Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Skulptur ; Tanz,rituell",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 169",
+      "publikationsstelle": "S. 257",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "397",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147760&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147760&ipos=1&erg=H&hst=1&rpos=147760.png",
+      "register_nr.": "KBA 10271",
+      "verweis": "KBA 10271~a KBA 10271~b",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Darstellungen des Gottes Edschu",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Darstellung des Gottes Edschu als Tanzkeule, Altarschmuck und Schmuckfigur",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Ornament ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Skulptur ; Tanz,rituell",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 155",
+      "publikationsstelle": "S. 257",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "398",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147762&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147762&ipos=1&erg=H&hst=1&rpos=147762.png",
+      "register_nr.": "KBA 10271~a",
+      "verweis": "KBA 10271",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "3,9x16,5",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Darstellungen des Gottes Edschu als Tanzkeule",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Edschu- Stab, Holz, Joruba 3) ¶ 57 cm",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Ornament ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Skulptur ; Tanz,rituell",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 155",
+      "publikationsstelle": "S. 257",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "399",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147763&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147763&ipos=1&erg=H&hst=1&rpos=147763.png",
+      "register_nr.": "KBA 10271~b",
+      "verweis": "KBA 10271",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "3,9x16,5",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Darstellungen des Gottes Edschu als Tanzkeule",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Edschu- Stab, Holz, Joruba 3) ¶ 49 cm",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Ornament ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Tanz,rituell",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "Frobenius, Leo 1923: Das unbekannte Afrika. München, Beck.",
+      "publikationsstelle": "S. 257",
+      "literatur": "S. 155",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "400",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147764&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147764&ipos=1&erg=H&hst=1&rpos=147764.png",
+      "register_nr.": "KBA 10272",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "12,7x8,4",
+      "histor._stichworte": "Cult objects / cult items; IFA service; IFA board (half -burned)",
+      "historical_location": "West Africa; East Atlantic Province (SW Nigeria) ; Joruba",
+      "historical_image_description": "Ifa board, half burned, Joruba 3) . 34cm ​",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "ethnic_group": "Yoruba",
+      "keywords": "Divination (activity and equipment) ; wood carving ; ornament ; ritual object / ceremonial object (pictorial motif) ; animal motif",
+      "material": "Wood (unspecified)",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "405",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147769&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147769&ipos=1&erg=H&hst=1&rpos=147769.png",
+      "registration_number": "KBA 10274",
+      "reference": "KBA 10268",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "16.5x12.7",
+      "historical_keywords": "Kultus / Kultgeräte; Ifa- Dienst; Gefäß für Ifakerne u. Ifafarben",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Gefäss für Ifa- Farben, Nord Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Gefäß ; Holzschnitzerei ; Ornament",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 157",
+      "publikationsstelle": "S. 283",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "406",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147770&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147770&ipos=1&erg=H&hst=1&rpos=147770.png",
+      "register_nr.": "KBA 10275",
+      "verweis": "KBA 10275~a KBA 10275~b",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "histor._stichworte": "Kultus / Kultgeräte; Darstellung des Gottes Edschu",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "auf Brettern und Türen jorubischer Tempel",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Relief ; Tür",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 254",
+      "categories": [
+        "door_panel",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "auf brett",
+        "auf brettern und türen",
+        "edschu auf",
+        "holzschnitzerei",
+        "tür"
+      ]
+    },
+    {
+      "result_number": "407",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147771&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147771&ipos=1&erg=H&hst=1&rpos=147771.png",
+      "register_nr.": "KBA 10275~a",
+      "verweis": "KBA 10275",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "4,1x12,6",
+      "histor._stichworte": "Kultus / Kultgeräte; Darstellung des Gottes Edschu",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Figur des Edschu auf Tür ¶ auf Brettern und Türen jorubischer Tempel",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Relief ; Tür",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 254",
+      "categories": [
+        "door_panel",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "auf brett",
+        "auf brettern und türen",
+        "auf tür",
+        "edschu auf",
+        "holzschnitzerei",
+        "tür"
+      ]
+    },
+    {
+      "result_number": "408",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147772&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147772&ipos=1&erg=H&hst=1&rpos=147772.png",
+      "register_nr.": "KBA 10275~b",
+      "verweis": "KBA 10275",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "5,2x12",
+      "histor._stichworte": "Kultus / Kultgeräte; Darstellung des Gottes Edschu",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Figur des Edschu auf Tür ¶ auf Brettern und Türen jorubischer Tempel",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Relief ; Tür",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 254",
+      "categories": [
+        "door_panel",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "auf brett",
+        "auf brettern und türen",
+        "auf tür",
+        "edschu auf",
+        "holzschnitzerei",
+        "tür"
+      ]
+    },
+    {
+      "result_number": "409",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147773&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147773&ipos=1&erg=H&hst=1&rpos=147773.png",
+      "register_nr.": "KBA 10276",
+      "verweis": "KBA 10276~a KBA 10276~b",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "histor._stichworte": "Kultus / Kultgeräte; Darstellungen des Gottes Edschu",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "auf Brettern und Türen jorubischer Tempel",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Relief ; Tür",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 254",
+      "categories": [
+        "door_panel",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "auf brett",
+        "auf brettern und türen",
+        "edschu auf",
+        "holzschnitzerei",
+        "tür"
+      ]
+    },
+    {
+      "result_number": "410",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147774&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147774&ipos=1&erg=H&hst=1&rpos=147774.png",
+      "register_nr.": "KBA 10276~a",
+      "verweis": "KBA 10276",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "7,2x12,1",
+      "histor._stichworte": "Kultus / Kultgeräte; Darstellungen des Gottes Edschu",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Figur des Edschu auf Tür. Joruba 3) ¶ auf Brettern und Türen jorubischer Tempel",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Relief ; Tür",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 254",
+      "categories": [
+        "door_panel",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "auf brett",
+        "auf brettern und türen",
+        "auf tür",
+        "edschu auf",
+        "holzschnitzerei",
+        "tür"
+      ]
+    },
+    {
+      "result_number": "411",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147775&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147775&ipos=1&erg=H&hst=1&rpos=147775.png",
+      "register_nr.": "KBA 10276~b",
+      "verweis": "KBA 10276",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "7,1x12,4",
+      "histor._stichworte": "Kultus / Kultgeräte; Darstellungen des Gottes Edschu",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Figur des Edschu auf Tür. Darstellung auf geschnitzer Tür. Joruba 3) ¶ auf Brettern und Türen jorubischer Tempel",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Lokalreligion,Afrika ; Relief ; Tür",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 254",
+      "categories": [
+        "door_panel",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "auf brett",
+        "auf brettern und türen",
+        "auf tür",
+        "edschu auf",
+        "holzschnitzerei",
+        "tür"
+      ]
+    },
+    {
+      "result_number": "417",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147781&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147781&ipos=1&erg=H&hst=1&rpos=147781.png",
+      "register_nr.": "KBA 10281~a",
+      "verweis": "KBA 10281",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "3x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifaklopfer aus Holz u. Elfenbein",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Ifaklopfer. Holz. 38 cm. Joruba. 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Holzschnitzerei ; Ornament ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 277",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "420",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147784&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147784&ipos=1&erg=H&hst=1&rpos=147784.png",
+      "register_nr.": "KBA 10281~d",
+      "verweis": "KBA 10281",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "3x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifaklopfer aus Holz u. Elfenbein",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Ifaklopfer. Holz. 30 cm ¶ Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Holzschnitzerei ; Ornament",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 277",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "421",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147785&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147785&ipos=1&erg=H&hst=1&rpos=147785.png",
+      "register_nr.": "KBA 10281~e",
+      "verweis": "KBA 10281",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "3x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifaklopfer aus Holz u. Elfenbein",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Ifaklopfer. Holz. 33 cm ¶ Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Holzschnitzerei ; Ornament ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 277",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "424",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147788&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147788&ipos=1&erg=H&hst=1&rpos=147788.png",
+      "register_nr.": "KBA 10282~b",
+      "verweis": "KBA 10282",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "2,3x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifaklopfer aus Holz u. Elfenbein",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Ifaklopfer. Holz. 30, 5 cm. Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Holzschnitzerei ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 277",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "425",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147789&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147789&ipos=1&erg=H&hst=1&rpos=147789.png",
+      "register_nr.": "KBA 10282~c",
+      "verweis": "KBA 10282",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "4,5x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifaklopfer aus Holz u. Elfenbein",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Ifaklopfer. Holz. 34 cm. Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Glocke ; Holzschnitzerei ; Kopf (Bildmotiv) ; Ornament",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 277",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "428",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147792&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147792&ipos=1&erg=H&hst=1&rpos=147792.png",
+      "register_nr.": "KBA 10283~a",
+      "verweis": "KBA 10283",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "2,3x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifaklopfer aus Holz u. Elfenbein",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Ifaklopfer. Holz. 28 cm. Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Gesichtsskarifizierung /-tatauierung ; Holzschnitzerei ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 277",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "431",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147795&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147795&ipos=1&erg=H&hst=1&rpos=147795.png",
+      "register_nr.": "KBA 10283~d",
+      "verweis": "KBA 10283",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "2,5x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifaklopfer aus Holz u. Elfenbein",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Ifaklopfer. Holz. 28, 5 cm. Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Holzschnitzerei ; Ornament ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "publikationsstelle": "S. 277",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "439",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=147803&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=147803&ipos=1&erg=H&hst=1&rpos=147803.png",
+      "register_nr.": "KBA 10290",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Fotografie",
+      "format_(bxhxtxø_in_cm)": "10,8x16,4",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifabretter",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "ursprüngl._herkunftsverweis": "a.) 1367:254 ¶ b.) 1367: 258",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Ornament ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Tiermotiv",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "447",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148403&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148403&ipos=1&erg=H&hst=1&rpos=148403.png",
+      "registration_number": "KBA 10298",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "12.8x12.7",
+      "historical_keywords": "Cult / Cult equipment; IFA service; IFA board",
+      "historical_location": "West Africa; East Atlantic Province (SW Nigeria) ; Joruba",
+      "historical_image_description": "Ifabrett. Joruba 3) 29 cm. Diam",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "ethnic_group": "Yoruba",
+      "keywords": "Divination (activity and implement) ; ornament ; ritual object / ceremonial object (pictorial motif) ; snake ; animal motif",
+      "material": "Wood (unspecified)",
+      "publication": "Frobenius, Leo 1926: The Atlantic Gods. Atlantis Vol. 10. Jena: Diederichs.",
+      "publication_office": "p. 183",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "448",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148421&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148421&ipos=1&erg=H&hst=1&rpos=148421.png",
+      "registration_number": "KBA 10299",
+      "reference": "EBA-B 00717~b",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "14.9x12.7",
+      "historical_keywords": "Cult / Cult equipment; IFA service; IFA board",
+      "historical_location": "West Africa; East Atlantic Province (SW Nigeria) ; Joruba",
+      "historical_image_description": "Ifabrett. Joruba 3) Maximum length 54 cm",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "ethnic_group": "Yoruba",
+      "keywords": "Divination (activity and equipment) ; human figure (pictorial motif) ; ornament ; ritual object / ceremonial object (pictorial motif)",
+      "material": "Wood (unspecified)",
+      "publication": "Frobenius, Leo 1926: The Atlantic Gods. Atlantis Vol. 10. Jena: Diederichs.",
+      "publication_office": "p. 193",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "449",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148483&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148483&ipos=1&erg=H&hst=1&rpos=148483.png",
+      "registration_number": "KBA 10300",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "12.6x8.3",
+      "historical_keywords": "Cult / Cult equipment; IFA service; IFA board",
+      "historical_location": "West Africa; East Atlantic Province (SW Nigeria) ; Joruba",
+      "historical_image_description": "Ifabrett. 35x41cm . Joruba 3) .",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "ethnic_group": "Yoruba",
+      "keywords": "Divination (activity and implement) ; ornament ; ritual object / ceremonial object (pictorial motif) ; animal motif",
+      "material": "Wood (unspecified)",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "450",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148484&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148484&ipos=1&erg=H&hst=1&rpos=148484.png",
+      "registration_number": "KBA 10301",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "13.2 x 12.7",
+      "historical_keywords": "Cult / Cult equipment; IFA service; IFA board",
+      "historical_location": "West Africa; East Atlantic Province (SW Nigeria) ; Joruba",
+      "historical_image_description": "Ifabrett. Joruba 3) , 41 cm. Dm.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "ethnic_group": "Yoruba",
+      "keywords": "Divination (activity and equipment) ; human figure (pictorial motif) ; ornament ; ritual object / ceremonial object (pictorial motif)",
+      "material": "Wood (unspecified)",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "452",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148486&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148486&ipos=1&erg=H&hst=1&rpos=148486.png",
+      "registration_number": "KBA 10303",
+      "reference": "FoA 04-5583",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "16.7x12.7",
+      "historical_keywords": "Cult / Cult equipment; IFA service; IFA boards",
+      "historical_location": "West Africa; East Atlantic Province (SW Nigeria) ; Joruba",
+      "historical_image_description": "Ifabretter. Joruba 3) , 35 cm diameter , 36 cm diameter.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "ethnic_group": "Yoruba",
+      "keywords": "Divination (activity and implement) ; ornament ; ritual object / ceremonial object (pictorial motif) ; animal motif",
+      "material": "Wood (unspecified)",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "454",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148488&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148488&ipos=1&erg=H&hst=1&rpos=148488.png",
+      "registration_number": "KBA 10305",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "9.4x12.7",
+      "historical_keywords": "Cult / Cult equipment; IFA service; IFA board",
+      "historical_location": "West Africa; East Atlantic Province (SW Nigeria) ; Joruba",
+      "historical_image_description": "Ifabrett. Joruba 3) ¶ 24 cm",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "ethnic_group": "Yoruba",
+      "keywords": "Divination (activity and equipment) ; human figure (pictorial motif) ; ornament ; ritual object / ceremonial object (pictorial motif) ; animal motif",
+      "material": "Wood (unspecified)",
+      "publication": "Frobenius, Leo 1926: The Atlantic Gods. Atlantis Vol. 10. Jena: Diederichs.",
+      "publication_office": "p. 183",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "458",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148492&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148492&ipos=1&erg=H&hst=1&rpos=148492.png",
+      "register_nr.": "KBA 10309",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "16,4x12,6",
+      "histor._stichworte": "Kultus / Kultgeräte; Ifa- Dienst; Ifabretter",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Ifabretter. 34, 5 cm Durchm. Joruba. 3) ¶ 33, 5 cm Durchm.",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Divination (Tätigkeit und Gerätschaft) ; Ornament ; Ritualobjekt / Zeremonialobjekt (Bildmotiv)",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifabrett"
+      ]
+    },
+    {
+      "result_number": "477",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148551&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148551&ipos=1&erg=H&hst=1&rpos=148551.png",
+      "register_nr.": "KBA 10330",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "12,7x16,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Götterdienst; Löffel aus dem Obatalla- Dienst; Obatalla = Himmelsgott",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Löffel aus dem \" Obatalla\" - dienst. Joruba 3) . ¶ 44 cm ¶ 23 cm ¶ 22 cm",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Löffel ; Lokalreligion,Afrika ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 147, 1-3",
+      "publikationsstelle": "S. 211, 5-7",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "479",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148796&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148796&ipos=1&erg=H&hst=1&rpos=148796.png",
+      "register_nr.": "KBA 10332",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "10,3x9,8",
+      "histor._stichworte": "Kultus / Kultgeräte; Götterdienst; hölzerner Sockel f. Gefäße im Schango- Tempel",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Hölzerner Sockel für Gefässe etc. aus Schangotempel. Joruba. 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Lokalreligion,Afrika ; Ritualobjekt / Zeremonialobjekt (Bildmotiv)",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 171",
+      "publikationsstelle": "S. 241",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "505",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148879&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148879&ipos=1&erg=H&hst=1&rpos=148879.png",
+      "register_nr.": "KBA 10349",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "16,6x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Götterdienst; Schemel des Gottes Schankpanna (= Pockengott)",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "39 cm ¶ 47 cm ¶ 39 cm ¶ Schemel des Gottes Schankpana. rot u. weiss bemalt. Joruba 3) .",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Hocker ; Holzschnitzerei ; Lokalreligion,Afrika ; Ornament ; Ritualobjekt / Zeremonialobjekt (Bildmotiv)",
+      "material": "Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1912: Und Afrika sprach ... Bd 1: Auf den Trümmern des klassischen Atlantis. Berlin: Vita.",
+      "": "S. 146",
+      "publikationsstelle": "S. 211",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "511",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148917&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148917&ipos=1&erg=H&hst=1&rpos=148917.png",
+      "register_nr.": "KBA 10354",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "5,5x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Holzfigur (an Haustüren)",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Holzfiguren an Haustür. 36 cm. Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Skulptur am Bau",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "figurine",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "an haustür",
+        "holzfigur",
+        "skulptur am bau"
+      ]
+    },
+    {
+      "result_number": "512",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148923&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148923&ipos=1&erg=H&hst=1&rpos=148923.png",
+      "register_nr.": "KBA 10355",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "5,9x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Figuren (an Haustüren)",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Awurang. Ada sunscha. 33 cm. Figur an Haustür. Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Skulptur am Bau",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "an haustür",
+        "skulptur am bau"
+      ]
+    },
+    {
+      "result_number": "513",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148925&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148925&ipos=1&erg=H&hst=1&rpos=148925.png",
+      "register_nr.": "KBA 10356",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "6,9x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Figuren (vor Haustüren)",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Figur vor Haustür. Joruba 3) . 28 cm",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Skulptur am Bau",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "skulptur am bau",
+        "vor haustür"
+      ]
+    },
+    {
+      "result_number": "514",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148929&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148929&ipos=1&erg=H&hst=1&rpos=148929.png",
+      "register_nr.": "KBA 10357",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "12,7x16,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Holzfigur",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Bunu. Holzfigur. 47 cm hoch. Nordjoruba 3) . 14. 27 ¶ Rückseite",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Echse ; Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Körperskarifizierung/ -tatauierung ; Ornament ; Skulptur ; Tiermotiv",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "518",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148949&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148949&ipos=1&erg=H&hst=1&rpos=148949.png",
+      "register_nr.": "KBA 10359",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Bleistift",
+      "format_(bxhxtxø_in_cm)": "12,7x16,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Götterdienst; Tempeltrommeln",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Tempeltrommeln in Gbaga. Joruba 3) 1. 29 ¶ rot gefleckt ¶ schwarz am [?]",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Holzschnitzerei ; Ornament ; Röhrentrommel ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "520",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148953&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148953&ipos=1&erg=H&hst=1&rpos=148953.png",
+      "register_nr.": "KBA 10361",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "5,7x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz, SW- Nigeria; Joruba",
+      "histor._bildbeschreibung": "Edschu. 25 cm. Joruba 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Figur, menschlich (Bildmotiv) ; Gefäß ; Holzschnitzerei ; Lokalreligion,Afrika ; Ritualobjekt / Zeremonialobjekt (Bildmotiv) ; Skulptur",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "521",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148955&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148955&ipos=1&erg=H&hst=1&rpos=148955.png",
+      "register_nr.": "KBA 10362",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "7,4x12,7",
+      "histor._stichworte": "Kultus / Kultgeräte; geschnitzter Gefäßdeckel",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "geschnitzter Gefässdeckel, längst. Durchm 42 cm. Joruba. 3)",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Deckel ; Holzschnitzerei ; Ornament ; Ritualobjekt / Zeremonialobjekt (Bildmotiv)",
+      "material": "Holz (unspezifiziert)",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei",
+        "ornament schnitzerei"
+      ]
+    },
+    {
+      "result_number": "525",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=148972&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=148972&ipos=1&erg=H&hst=1&rpos=148972.png",
+      "register_nr.": "KBA 10366",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "bildautor_urheber": "Arriens, Carl",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "12,7x16,7",
+      "histor._stichworte": "Kultus / Kultgeräte; Götterdienst; Gegenstände von einem Hausaltar",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz (SW- Nigeria) ; Joruba",
+      "histor._bildbeschreibung": "Holz 19 cm lang ¶ Kette von Stein ab 40 cm lang ¶ Holz 20 cm lang ¶ 27 cm lang ¶ Stein 26, 5 cm lang, 18 cm breit, Rot bemalt. Kultusgegenstände von einem Hausaltar. Joruba 3) .",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Holzschnitzerei ; Kette (unspezifiziert) ; Ritualobjekt / Zeremonialobjekt (Bildmotiv)",
+      "material": "Gestein ; Holz (unspezifiziert)",
+      "publikation": "Frobenius, Leo 1926: Die atlantische Götterlehre. Atlantis Bd. 10. Jena: Diederichs.",
+      "publikationsstelle": "S. 127",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "holzschnitzerei"
+      ]
+    },
+    {
+      "result_number": "593",
+      "bestand": "Kartei Bildarchiv",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=155090&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=155090&ipos=1&erg=H&hst=1&rpos=155090.png",
+      "register_nr.": "KBA 03286",
+      "expedition": "004 Nigeria, Kamerun (1910-1912)",
+      "technik_bildtyp": "Tusche",
+      "format_(bxhxtxø_in_cm)": "12,7x17",
+      "histor._stichworte": "Metallhandwerk; Ogboni- Stäbe",
+      "histor._lokalisierung": "West- Afrika; Ostatlantische Provinz; Joruba",
+      "histor._bildbeschreibung": "Ogboni - Ibinschi. Weibliche Figur ohne Eisenspitzfuss [?] 19 ctm, mit Eisenspitz [?] 27 ctm. Blut. Männchen [?] ohne Eisenfuss 21 ctm lg, mit Eisenfuss 29 ctm. Blut. \" ogboni- Ibanschi\" , Ogboni- Stäbe, Joruba",
+      "kontinent": "Afrika",
+      "staat_land": "Nigeria",
+      "ethn._gruppe": "Yoruba",
+      "schlagworte": "Barthaar ; Figur, menschlich (Bildmotiv) ; Geheimbund ; Gesichtsskarifizierung /-tatauierung ; Kette (unspezifiziert) ; Lokalreligion,Afrika ; Plastik ; Ritualobjekt / Zeremonialobjekt (Bildmotiv)",
+      "material": "Eisen ; Kupferlegierung",
+      "bemerkungen": "Edan Ogboni",
+      "categories": [
+        "figurine"
+      ],
+      "matched_terms": [
+        "edan"
+      ]
+    },
+    {
+      "result_number": "649",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=158954&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=158954&ipos=1&erg=H&hst=1&rpos=158954.png",
+      "registration_number": "KBA 15356",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "ink",
+      "dimensions_(w_x_h_x_d_x_ø_in_cm)": "10.8x8.2",
+      "historical_image_description": "Ifa board, 26.5 x 33 cm , Joruba",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "ethnic_group": "Yoruba",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "678",
+      "inventory": "Ethnographic image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=166558&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=166558&ipos=1&erg=H&hst=1&rpos=166558.png",
+      "registration_number": "EBA-Div 00302",
+      "reference": "EBA-B 00713~b",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "image_author_copyright_holder": "Frobenius, Leo",
+      "technique_image_type": "photography",
+      "register_title": "Ifa oracle board of the Joruba",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "ethnic_group": "Yoruba",
+      "keywords": "Divination (activity and equipment) ; human figure (pictorial motif) ; ornament ; animal motif ; bird",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa oracle",
+        "oracle board"
+      ]
+    },
+    {
+      "result_number": "679",
+      "inventory": "Ethnographic image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=166559&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=166559&ipos=1&erg=H&hst=1&rpos=166559.png",
+      "registration_number": "EBA-Div 00303",
+      "reference": "EBA-B 00409 EBA-B 00410",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "image_author_copyright_holder": "Frobenius, Leo",
+      "technique_image_type": "photography",
+      "title": "Palace door of the Prince of Ado. Photo: Frobenius",
+      "register_title": "Palace door of the Prince of Ado",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "location": "Ado Ekiti",
+      "ethnic_group": "Yoruba",
+      "keywords": "Human figure (pictorial motif) ; ornament ; relief ; animal motif ; door",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "door",
+        "palace door"
+      ]
+    },
+    {
+      "result_number": "680",
+      "inventory": "Ethnographic image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=166566&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=166566&ipos=1&erg=H&hst=1&rpos=166566.png",
+      "registration_number": "EBA-Div 00311",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "photography",
+      "title": "Carvings from temple doors from Ife, Joruba",
+      "register_title": "Carvings Temple Door Ife",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "location": "Ife",
+      "ethnic_group": "Yoruba",
+      "keywords": "Human figure (pictorial motif) ; ornament ; relief ; ritual site / ceremonial site / sacred building / memorial ; sculpture ; animal motif ; door",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "carvings from temple doors",
+        "door"
+      ]
+    },
+    {
+      "result_number": "681",
+      "inventory": "Ethnographic image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=166567&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=166567&ipos=1&erg=H&hst=1&rpos=166567.png",
+      "registration_number": "EBA-Div 00312",
+      "expedition": "004 Nigeria, Cameroon (1910-1912)",
+      "technique_image_type": "photography",
+      "title": "Carvings from temple doors from Ife, Joruba",
+      "register_title": "Carvings Temple Door Ife",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "location": "Ife",
+      "ethnic_group": "Yoruba",
+      "keywords": "Human figure (pictorial motif) ; ornament ; relief ; ritual site / ceremonial site / sacred building / memorial ; sculpture ; door",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "carvings from temple doors",
+        "door"
+      ]
+    },
+    {
+      "result_number": "690",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=220055&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=220055&ipos=1&erg=H&hst=1&rpos=220055.png",
+      "registration_number": "KBA 17553",
+      "historical_keywords": "Best motive",
+      "historical_location": "Yoruba",
+      "original_source_reference": "Repetition [...] from the small image archive",
+      "historical_image_description": "[...] from an IFA board",
+      "continent": "Africa",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "691",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=220057&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=220057&ipos=1&erg=H&hst=1&rpos=220057.png",
+      "registration_number": "KBA 17554",
+      "historical_keywords": "Best motive",
+      "historical_location": "Yoruba",
+      "historical_image_description": "Ifa board, 33 in diameter",
+      "continent": "Africa",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "692",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=220058&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=220058&ipos=1&erg=H&hst=1&rpos=220058.png",
+      "registration_number": "KBA 17555",
+      "historical_keywords": "Best motive",
+      "historical_location": "Yoruba",
+      "historical_image_description": "Ifa board, 25cm diameter",
+      "continent": "Africa",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "693",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=220060&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=220060&ipos=1&erg=H&hst=1&rpos=220060.png",
+      "registration_number": "KBA 17556",
+      "historical_keywords": "Best motive",
+      "historical_location": "Yoruba",
+      "historical_image_description": "Ifa board, 48cm",
+      "continent": "Africa",
+      "categories": [
+        "ifa_board"
+      ],
+      "matched_terms": [
+        "ifa board"
+      ]
+    },
+    {
+      "result_number": "694",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=220061&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=220061&ipos=1&erg=H&hst=1&rpos=220061.png",
+      "registration_number": "KBA 17557",
+      "historical_keywords": "Best motive",
+      "historical_location": "Yoruba",
+      "historical_image_description": "Edchu depiction on carved door",
+      "continent": "Africa",
+      "categories": [
+        "door_panel"
+      ],
+      "matched_terms": [
+        "carved door",
+        "door"
+      ]
+    },
+    {
+      "result_number": "695",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=221664&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=221664&ipos=1&erg=H&hst=1&rpos=221664.png",
+      "registration_number": "KBA 19153",
+      "historical_keywords": "Melusine motif I",
+      "historical_location": "Africa",
+      "historical_image_description": "Ancient West African wood carving. Detail from a carved temple board.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "location": "Yoruba",
+      "publication": "Frobenius, Leo 1923: The Unknown Africa. Munich, Beck.",
+      "publication_office": "Plate 184.",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "carved temple board"
+      ]
+    },
+    {
+      "result_number": "696",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=221665&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=221665&ipos=1&erg=H&hst=1&rpos=221665.png",
+      "registration_number": "KBA 19154",
+      "historical_keywords": "Melusine motif I",
+      "historical_location": "Africa",
+      "historical_image_description": "Old West African wood carving. Partial drawing of a carved temple panel.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "location": "Yoruba",
+      "publication": "Frobenius, Leo 1923: The Unknown Africa. Munich, Beck.",
+      "publication_office": "from Plate 184.",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "carved temple board"
+      ]
+    },
+    {
+      "result_number": "697",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=221666&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=221666&ipos=1&erg=H&hst=1&rpos=221666.png",
+      "registration_number": "KBA 19155",
+      "historical_keywords": "Melusine motif I",
+      "historical_location": "Africa",
+      "historical_image_description": "Old West African wood carving. Partial drawing of a carved temple panel.",
+      "continent": "Africa",
+      "state_country": "Nigeria",
+      "location": "Yoruba",
+      "publication": "Frobenius, Leo 1923: The Unknown Africa. Munich, Beck.",
+      "publication_office": "Plate 184.",
+      "categories": [
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "carved temple board"
+      ]
+    },
+    {
+      "result_number": "698",
+      "inventory": "Card index image archive",
+      "thumbnail_url": "zhimg.FAU?sid=8150CD41&DM=1&qpos=221668&ipos=1&az=0",
+      "fullsize_url": "zvimg.FAU?sid=8150CD41&DM=1&qpos=221668&ipos=1&erg=H&hst=1&rpos=221668.png",
+      "registration_number": "KBA 19157",
+      "historical_keywords": "Melusine motif I",
+      "historical_location": "Africa",
+      "historical_image_description": "West African wood carving. Door by a Yoruba [...] with depictions from mythology . Figurative sculpture in a surface fill.",
+      "continent": "Africa",
+      "publication": "Frobenius, Leo 1923: The Unknown Africa. Munich, Beck.",
+      "publication_office": "Plate 183.",
+      "categories": [
+        "door_panel",
+        "motif_illustration"
+      ],
+      "matched_terms": [
+        "door",
+        "door with depictions",
+        "figurative sculpture"
+      ]
+    }
+  ]
+}

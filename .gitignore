@@ -1,6 +1,7 @@
 # Generated analysis outputs — large, regenerable, not committed
+# (no trailing slash: frobenius_artifacts may be a symlink into african-artifacts)
 analysis/
-frobenius_artifacts/
+frobenius_artifacts
 
 # Source images (gitignored — fetch/download separately)
 images/
