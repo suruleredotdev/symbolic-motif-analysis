@@ -19,6 +19,13 @@ __pycache__/
 *.pt
 sam2*.yaml
 
+# Collaborator share bundles built by make_subset.sh (contain restricted images)
+subset_share/
+subset_share*.tar.gz
+
+# Per-labeller output from motif_labeling.ipynb (MOTIF_LABELER=<name>)
+motif_labels.*.json
+
 # OS / editor cruft
 .DS_Store
 *.swp

@@ -293,6 +293,53 @@ Tracked in more detail in `HITL_PLAN.md`, `LABELING_PLAN.md`, and `todos/`:
 - Moving containment filtering (currently a post-hoc pass in
   `extract_crops.py`) upstream into Phase 3 segmentation.
 
+## Sharing data with collaborators
+
+The image corpus is gitignored and large (~900 MB), most of it source
+photographs that carry the tightest licensing restrictions. `make_subset.sh`
+stages a small, shareable slice instead — the panels listed in
+[`subset_panels.txt`](./subset_panels.txt) plus everything derived from them:
+
+```bash
+./make_subset.sh --tar
+```
+
+The default shortlist of 10 panels produces ~24 MB (204 files) and resolves to
+just **5 source photographs**, since several panels are cut from the same plate.
+Edit `subset_panels.txt` to change the selection, or pass `--list`. Use
+`--no-source` to ship derived crops only, with no archive photographs at all.
+
+Each bundle gets a `MANIFEST.md` recording its panels and source catalogue
+numbers. See [`TERMS.md`](./TERMS.md) before sharing one onward.
+
+Upload the staging directory to the shared Drive folder:
+
+```bash
+rclone sync subset_share gdrive:motif-subset --progress
+```
+
+### Running the labeling notebook in Colab
+
+`motif_labeling.ipynb` locates its data automatically, trying Drive first, then
+a local bundle, then a full checkout. In Colab:
+
+```python
+!git clone https://github.com/suruleredotdev/symbolic-motif-analysis.git
+%cd symbolic-motif-analysis
+!pip install -q ipywidgets scikit-learn pillow numpy
+```
+
+Then run the notebook — it mounts Drive and reads from
+`MyDrive/motif-subset/`. Two things to tell collaborators:
+
+- A folder shared with them will **not** appear under `MyDrive` until they add a
+  shortcut to it (right-click the folder → *Organize* → *Add shortcut to
+  Drive*). Set `MOTIF_DRIVE_FOLDER` if it is named something else.
+- Set `MOTIF_LABELER` to their name before labeling. The notebook rewrites the
+  whole label JSON on save, so a shared path means whoever saves last erases
+  everyone else's work; with `MOTIF_LABELER=ade` they write
+  `motif_labels.ade.json` instead, and the files are merged afterwards.
+
 ## Provenance
 
 Extracted from
