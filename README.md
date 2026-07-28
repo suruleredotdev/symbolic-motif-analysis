@@ -318,27 +318,48 @@ Upload the staging directory to the shared Drive folder:
 rclone sync subset_share gdrive:motif-subset --progress
 ```
 
-### Running the labeling notebook in Colab
+### Running `motif_pipeline.ipynb` in Colab
 
-`motif_labeling.ipynb` locates its data automatically, trying Drive first, then
-a local bundle, then a full checkout. In Colab:
+Stage 0 locates its data automatically, trying mounted Drive first, then a local
+bundle, then a full checkout, and raises with every path it tried if none match.
+Open the notebook from the GitHub tab in Colab, then run this as the first cell:
 
 ```python
 !git clone https://github.com/suruleredotdev/symbolic-motif-analysis.git
 %cd symbolic-motif-analysis
-!pip install -q ipywidgets scikit-learn pillow numpy
+from google.colab import drive; drive.mount('/content/drive')
+!ls /content/drive/MyDrive/motif-subset
 ```
 
-Then run the notebook — it mounts Drive and reads from
-`MyDrive/motif-subset/`. Two things to tell collaborators:
+The clone matters — `panel_art/` and the notebook's sibling data files are
+imported from the checkout, so without the `%cd` Stage 0 fails on
+`import panel_art`. The `ls` should print `MANIFEST.md  analysis  images`; if it
+prints `subset_share`, the upload is nested one level too deep.
+
+Two things to tell collaborators:
 
 - A folder shared with them will **not** appear under `MyDrive` until they add a
   shortcut to it (right-click the folder → *Organize* → *Add shortcut to
   Drive*). Set `MOTIF_DRIVE_FOLDER` if it is named something else.
-- Set `MOTIF_LABELER` to their name before labeling. The notebook rewrites the
-  whole label JSON on save, so a shared path means whoever saves last erases
-  everyone else's work; with `MOTIF_LABELER=ade` they write
-  `motif_labels.ade.json` instead, and the files are merged afterwards.
+- Set `MOTIF_LABELER` to their name before labeling. Stage 6 rewrites the whole
+  label JSON on save, so a shared path means whoever saves last erases everyone
+  else's work; with `MOTIF_LABELER=ade` they write `motif_labels.ade.json`
+  instead, and the files are merged afterwards.
+
+**What works in Colab, and what doesn't.** Not every stage survives the move:
+
+| Stage | Colab |
+|---|---|
+| 0 — load state | works |
+| 1 — Segment / manual draw | **degraded** — needs the `ipympl` widget backend for drag-to-draw; falls back to inline, so panels render but boxes can't be drawn |
+| 2 — Embeddings / clustering | needs `torch` + `open_clip` (~2 GB of installs) |
+| 3 — Gallery | works; degrades gracefully with no embeddings |
+| 4 — Label | works — this is the informant-facing surface |
+| 5 — Interpret | works; LLM suggestions need `ANTHROPIC_API_KEY` |
+| 6 — Export | works, but writes into the data dir, so the Drive folder must be shared read-write |
+
+Stage 4 references gallery state built in Stage 3, so informants run 0 → 3 → 4
+and skip 1 and 2. Colab preinstalls everything those stages need.
 
 ## Provenance
 
