@@ -320,9 +320,31 @@ rclone sync subset_share gdrive:motif-subset --progress
 
 ### Running `motif_pipeline.ipynb` in Colab
 
-Stage 0 locates its data automatically, trying mounted Drive first, then a local
-bundle, then a full checkout, and raises with every path it tried if none match.
-Open the notebook from the GitHub tab in Colab, then run this as the first cell:
+Stage 0 locates its data automatically: local paths first, then an
+already-mounted Drive, and only mounting Drive if nothing local matched. It
+raises with every path it tried when none do.
+
+**Preferred — download the bundle, no Drive mount.** `drive.mount()` cannot be
+scoped to one folder; it exposes the collaborator's entire Drive to the
+notebook. At 23 MB the bundle doesn't need a mount at all. Share
+`subset_share.tar.gz` and pull it by file id:
+
+```python
+!git clone https://github.com/suruleredotdev/symbolic-motif-analysis.git
+%cd symbolic-motif-analysis
+!gdown <file-id> -O /content/bundle.tar.gz
+!mkdir -p /content/subset_share && tar xf /content/bundle.tar.gz -C /content/subset_share --strip-components=1
+```
+
+Stage 0 finds `/content/subset_share` and never touches Drive. Set
+`MOTIF_NO_DRIVE=1` to make that guarantee explicit — Stage 0 will then refuse to
+mount and fail loudly instead. The trade-off: `gdown` needs the file to be
+link-shared, which is weaker than named-account sharing. Rotate the link after
+each labeling round, and keep it pointed at the derived-crops bundle
+(`--no-source`) so a leaked link doesn't expose archive photographs.
+
+**Alternative — mount Drive.** Stronger access control (named accounts,
+revocable), at the cost of a full-Drive mount:
 
 ```python
 !git clone https://github.com/suruleredotdev/symbolic-motif-analysis.git
@@ -331,8 +353,8 @@ from google.colab import drive; drive.mount('/content/drive')
 !ls /content/drive/MyDrive/motif-subset
 ```
 
-The clone matters — `panel_art/` and the notebook's sibling data files are
-imported from the checkout, so without the `%cd` Stage 0 fails on
+Either way the clone matters — `panel_art/` and the notebook's sibling data
+files are imported from the checkout, so without the `%cd` Stage 0 fails on
 `import panel_art`. The `ls` should print `MANIFEST.md  analysis  images`; if it
 prints `subset_share`, the upload is nested one level too deep.
 
