@@ -22,3 +22,6 @@ sam2*.yaml
 # OS / editor cruft
 .DS_Store
 *.swp
+
+# pytest
+.pytest_cache/

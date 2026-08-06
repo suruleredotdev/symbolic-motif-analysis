@@ -63,8 +63,13 @@ potrace bitmap → SVG, normalised to a 100×100 viewBox, stroke-only
     ▼  Phase 5 — Similarity & clustering   panel_art/similarity.py
 Hu moments + CLIP/DINO embeddings → HDBSCAN clustering (no preset cluster count)
     │
+    ▼  Phase 6 — Interpretation            panel_art/layout.py + interpret.py
+register/symmetry recovery + cluster statistics → Claude: cluster briefs →
+panel readings → corpus synthesis
+    │
     ▼
-clusters.json, similarity_graph.json, annotated images, SVG motif library
+clusters.json, similarity_graph.json, annotated images, SVG motif library,
+interpretation/ (cluster briefs, per-panel readings, corpus essay)
 ```
 
 **Phase-by-phase rationale:**
@@ -111,6 +116,16 @@ clusters.json, similarity_graph.json, annotated images, SVG motif library
   the original SVG/Hu-moment clustering (`panel_art/similarity.py`) as the
   primary similarity method** — it's more robust to the inconsistent line
   quality across photographs vs. illustrations.
+- **Interpretation.** Clustering answers "which motifs recur"; it does not
+  answer what a panel says. Phase 6 joins the three things a reading needs —
+  the per-motif descriptions, the embedding clusters (evidence about recurrence
+  that no single crop carries), and relative position — through three widening
+  Claude passes: a brief per motif family across the whole corpus, then a
+  register-by-register reading of each panel that uses those briefs, then a
+  synthesis over everything. The spatial half is deterministic
+  (`panel_art/layout.py` recovers registers, bilateral pairs, nesting, and
+  reading order from bounding boxes alone), so it can be inspected before any
+  API call. See [`INTERPRETATION.md`](./INTERPRETATION.md).
 
 See [`PIPELINE.md`](./PIPELINE.md) for the exact CLI/notebook sequence, file
 naming conventions, and current artifact counts from the last full run.
@@ -133,13 +148,15 @@ single unified interactive notebook:
 - **v2 — unified pipeline (`motif_pipeline.ipynb`).** Consolidates the whole
   human-in-the-loop loop — Setup → Segment (review/manual-draw/SAM-Refine
   all in one UI) → Cluster → Gallery → Label (with LLM suggestions) →
-  Interpret → Export — into one notebook with shared, cell-independent state.
+  Interpret (Layout / Cluster Brief / Panel Reading / Corpus Synthesis) →
+  Export — into one notebook with shared, cell-independent state.
   Every bbox, label, and cluster assignment records its own provenance
   (`manual` / `sam_prompted` / `llm` / `human`) and timestamp. This is the
   current recommended entry point for day-to-day use;
-  see [`HITL_PLAN.md`](./HITL_PLAN.md) and [`LABELING_PLAN.md`](./LABELING_PLAN.md)
-  for the design rationale behind the human-review extensions layered onto
-  the original automated pipeline.
+  see [`HITL_PLAN.md`](./HITL_PLAN.md), [`LABELING_PLAN.md`](./LABELING_PLAN.md),
+  and [`INTERPRETATION.md`](./INTERPRETATION.md)
+  for the design rationale behind the human-review and interpretation
+  extensions layered onto the original automated pipeline.
 
 ## Repository layout
 
@@ -150,6 +167,8 @@ panel_art/                  Core package — the 5-phase pipeline
   motif_segment.py              Phase 3: SAM auto-mask generation + NMS
   vectorize.py                  Phase 4: bbox → normalised SVG
   similarity.py                 Phase 5: Hu moments/embeddings + HDBSCAN
+  layout.py                     Phase 6: registers, symmetry, nesting from bboxes
+  interpret.py                  Phase 6: cluster briefs → panel readings → synthesis
   pipeline.py                   CLI orchestration of Phases 1-5
   pipeline_state.py              Run tracking / staleness checks (HITL Phase 2)
 
@@ -159,7 +178,13 @@ scripts/                    Standalone data-prep & pipeline utility scripts
   extract_motif_patches.py       SAM 2 automatic mask generation → patch crops
   embed_motif_patches.py         CLIP (ViT-L/14) + DINOv2 (ViT-L/14) embeddings
   describe_motif_patches.py      Claude-generated structured visual descriptions
+  interpret_motifs.py            Phase 6 driver (cluster/panel/corpus stages)
   dino_perceptual_hash_demo.py   DINO-based perceptual hashing experiment
+
+tests/                      pytest suite for the deterministic layers
+  test_layout.py                 Register/symmetry/containment geometry
+  test_interpret.py              Corpus loading, cluster stats, prompt assembly
+  test_interpret_cli.py          CLI stages, resume, failure handling
 
 extract_crops.py            PNG crop extraction from SAM detections (geometric
                              containment filtering to drop sub-crop artefacts)
@@ -184,6 +209,7 @@ motif_params_edges.json     Parameters used to produce the above
 PIPELINE.md                 End-to-end CLI/notebook reference, current run stats
 HITL_PLAN.md                 Human-in-the-loop pipeline extension design
 LABELING_PLAN.md             motif_labeling.ipynb design spec
+INTERPRETATION.md            Phase 6 design: the three-pass interpretation join
 
 panel_art_dataset/           Sample curated metadata + example queries
   README.md                    Dataset sources, categories, directory layout
@@ -221,7 +247,9 @@ External dependencies not installable via pip:
   ```
 - **`ANTHROPIC_API_KEY`** (optional): enables LLM-generated motif label/
   description suggestions in `motif_labeling.ipynb` and
-  `scripts/describe_motif_patches.py`. Both degrade gracefully without it.
+  `scripts/describe_motif_patches.py`, and the Phase 6 interpretation passes.
+  All degrade gracefully without it — Phase 6's spatial analysis and cluster
+  statistics run offline (`--dry-run`).
 
 ## Usage
 
@@ -273,6 +301,36 @@ Run Setup once, then use the Segment / Cluster / Gallery / Label / Interpret
 others. See [`HITL_PLAN.md`](./HITL_PLAN.md) for the review-workflow design
 (candidate pools, manual bbox drawing, dirty-state autosave, run versioning).
 
+**Phase 6 — interpretation.** The final join runs either from the notebook's
+Stage 5 or headless. Both write to the same `analysis/interpretation/`
+directory and read each other's output, so a run can start in one and finish
+in the other:
+
+```bash
+# Inspect the recovered registers, symmetry, and prompts — no API calls
+uv run python scripts/interpret_motifs.py \
+  --analysis-dir analysis/ --stage all --dry-run
+
+# Cluster briefs → panel readings → corpus synthesis
+uv run python scripts/interpret_motifs.py \
+  --analysis-dir analysis/ \
+  --embeddings   motif_embeddings_edges.npy \
+  --paths        motif_paths_edges.txt \
+  --stage all --resume
+```
+
+Output: `interpretation/clusters.{json,md}`, `interpretation/panels/<stem>.{json,md}`,
+`interpretation/layouts/<stem>.json`, and `interpretation/corpus.md`.
+See [`INTERPRETATION.md`](./INTERPRETATION.md) for the design.
+
+**Tests.** The deterministic layers (geometry, corpus loading, cluster
+statistics, prompt assembly, CLI staging) are covered by a pytest suite that
+needs no API key:
+
+```bash
+uv run pytest
+```
+
 **Static export.** Convert an executed notebook to a self-contained,
 shareable HTML file (widgets render as their last saved state):
 
@@ -292,6 +350,10 @@ Tracked in more detail in `HITL_PLAN.md`, `LABELING_PLAN.md`, and `todos/`:
   (SAM-2 LoRA or similar) — deferred, not yet started.
 - Moving containment filtering (currently a post-hoc pass in
   `extract_crops.py`) upstream into Phase 3 segmentation.
+- Vertical-column detection in `panel_art/layout.py` — registers are currently
+  horizontal-only, so a column-organised panel collapses into one band.
+- Near-duplicate detection across panels (the same carving photographed twice),
+  so Phase 6 can relate motifs directly and not only through their cluster.
 
 ## Provenance
 

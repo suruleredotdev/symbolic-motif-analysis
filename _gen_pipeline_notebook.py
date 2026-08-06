@@ -59,7 +59,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import ipywidgets as widgets
-from IPython.display import display, clear_output, HTML
+from IPython.display import display, clear_output, HTML, Markdown
 from PIL import Image
 
 warnings.filterwarnings("ignore")
@@ -1555,7 +1555,7 @@ def _lbl_llm_suggest(_=None):
         })
 
         resp = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-opus-5",
             max_tokens=400,
             messages=[{"role": "user", "content": content}],
         )
@@ -1606,168 +1606,271 @@ _lbl_load_fields()\
 """))
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Cell 6: Interpret — LLM Context Analysis
+# Cell 6: Interpret — join clusters, descriptions, and positions
 # ══════════════════════════════════════════════════════════════════════════════
 cells.append(code("mp-6", """\
 ## ── Stage 5: Interpret ──────────────────────────────────────────────────────
 #
-# LLM-powered interpretation of motifs individually and in panel context.
+# The join: motif descriptions + embedding-derived cluster families + relative
+# positions, run through Claude in three widening passes.
+#
+#   Layout          — deterministic geometry only, no API call. Run it first to
+#                     check the registers and symmetry the model will be told about.
+#   Cluster Brief   — what the selected motif's family is, across every panel.
+#   Panel Reading   — this panel read register by register, using the briefs.
+#   Corpus Synthesis— all briefs + all readings joined into one essay.
+#
+# Each pass feeds the next, so run them in order. Results persist to
+# analysis/interpretation/ and reload on re-run.
 
 import os as _os7
-import base64 as _b647
 
-try:
-    import anthropic as _ant7
-    _ANT7_OK = True
-except ImportError:
-    _ANT7_OK = False
+from IPython.display import Markdown
+from panel_art.interpret import (
+    Corpus, InterpretationStore, Interpreter,
+    build_cluster_prompt, build_panel_prompt,
+    cluster_context_lines, compute_cluster_stats, corpus_scale,
+    render_clusters_markdown, render_panel_markdown,
+)
+from panel_art.layout import render_layout_text
 
-btn_interp_motif = widgets.Button(description="Interpret Motif", button_style="info",
-    layout=widgets.Layout(width="160px"))
-btn_interp_panel = widgets.Button(description="Interpret Panel", button_style="",
-    layout=widgets.Layout(width="160px"))
-out_interp = widgets.Output()
+INTERPRET_DIR = _ANA / "interpretation"
+_store = InterpretationStore(INTERPRET_DIR)
+_store.ensure_dirs()
+
+_interp_state = {
+    "corpus": None,
+    "stats": {},
+    "briefs": _store.load_clusters(),
+    "readings": _store.load_panels(),
+}
 
 
-def _img_b64(pil_img, max_d=512):
-    img = pil_img.copy()
-    img.thumbnail((max_d, max_d), Image.LANCZOS)
-    buf = _gio.BytesIO(); img.save(buf, "PNG")
-    return _b647.standard_b64encode(buf.getvalue()).decode()
+def _interp_corpus(rebuild=False):
+    \"\"\"Build a Corpus over the approved motifs, reusing Stage 2's embeddings.\"\"\"
+    if _interp_state["corpus"] is None or rebuild:
+        embeddings = _cl_state.get("embeddings") if "_cl_state" in globals() else None
+        keys = _cl_state.get("motif_keys") if "_cl_state" in globals() else None
+        corpus = Corpus.from_pipeline_state(PS, embeddings, keys)
+        _interp_state["corpus"] = corpus
+        _interp_state["stats"] = compute_cluster_stats(corpus)
+    return _interp_state["corpus"]
 
 
-def _interp_motif(_=None):
+def _interp_client():
+    if not _os7.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("ANTHROPIC_API_KEY not set — Layout still works without it")
+    return Interpreter(model=w_interp_model.value, effort=w_interp_effort.value)
+
+
+def _selected_motif(corpus):
     included = PS.included_motifs()
     idx = _gal_state.get("cursor", 0)
-    if idx >= len(included): return
-    m = included[idx]
-    key = _os7.environ.get("ANTHROPIC_API_KEY")
-    if not key or not _ANT7_OK:
-        with out_interp: print("ANTHROPIC_API_KEY not set"); return
-
-    btn_interp_motif.description = "Thinking..."
-    btn_interp_motif.disabled = True
-    out_interp.clear_output()
-
-    try:
-        client = _ant7.Anthropic(api_key=key)
-        content = []
-
-        # Crop
-        crop_b64 = _img_b64(PS.crop(m))
-        content.append({"type": "text", "text": "Motif crop:"})
-        content.append({"type": "image",
-            "source": {"type": "base64", "media_type": "image/png", "data": crop_b64}})
-
-        # Panel context
-        panel_img = PS.panel_image(m.panel_stem)
-        from PIL import ImageDraw
-        pdraw = panel_img.copy()
-        drw = ImageDraw.Draw(pdraw)
-        b = m.bbox
-        drw.rectangle([b["x"], b["y"], b["x"]+b["w"], b["y"]+b["h"]],
-                      outline=(0, 255, 64), width=4)
-        panel_b64 = _img_b64(pdraw, max_d=800)
-        content.append({"type": "text", "text": "Full panel (motif highlighted in green):"})
-        content.append({"type": "image",
-            "source": {"type": "base64", "media_type": "image/png", "data": panel_b64}})
-
-        label_ctx = f" Currently labeled: {m.label}." if m.label else ""
-        content.append({"type": "text", "text":
-            f"This is a carved motif from a Yoruba door panel (Frobenius archive). "
-            f"Panel: {m.panel_stem}. Scale: {m.scale}. Cluster: {m.cluster}.{label_ctx}\\n\\n"
-            "Provide a detailed interpretation of this motif:\\n"
-            "1. What does it depict visually?\\n"
-            "2. What is its likely cultural/iconographic significance in Yoruba art?\\n"
-            "3. How does it relate to the surrounding panel composition?"
-        })
-
-        resp = client.messages.create(
-            model="claude-sonnet-4-20250514", max_tokens=800,
-            messages=[{"role": "user", "content": content}])
-        out_interp.clear_output()
-        with out_interp:
-            print(resp.content[0].text)
-    except Exception:
-        out_interp.clear_output()
-        with out_interp: import traceback; traceback.print_exc()
-    finally:
-        btn_interp_motif.description = "Interpret Motif"
-        btn_interp_motif.disabled = False
+    if not included or idx >= len(included):
+        return None
+    return corpus.by_key(included[idx].motif_key)
 
 
-def _interp_panel(_=None):
+def _current_stem(corpus):
     stem = _seg_state.get("stem")
-    if not stem:
-        with out_interp: print("Select a panel in Stage 1 first"); return
-    key = _os7.environ.get("ANTHROPIC_API_KEY")
-    if not key or not _ANT7_OK:
-        with out_interp: print("ANTHROPIC_API_KEY not set"); return
+    if stem:
+        return stem
+    motif = _selected_motif(corpus)
+    return motif.panel_stem if motif else None
 
-    btn_interp_panel.description = "Thinking..."
-    btn_interp_panel.disabled = True
+
+# ── Widgets ───────────────────────────────────────────────────────────────────
+w_interp_model = widgets.Dropdown(
+    options=["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5"],
+    value="claude-opus-5", description="Model:",
+    layout=widgets.Layout(width="260px"))
+w_interp_effort = widgets.Dropdown(
+    options=["low", "medium", "high", "xhigh", "max"], value="high",
+    description="Effort:", layout=widgets.Layout(width="200px"))
+
+btn_interp_layout = widgets.Button(description="Layout", button_style="",
+    layout=widgets.Layout(width="130px"),
+    tooltip="Registers, symmetry, nesting — computed, no API call")
+btn_interp_cluster = widgets.Button(description="Cluster Brief", button_style="info",
+    layout=widgets.Layout(width="150px"),
+    tooltip="Characterise the selected motif's family across the whole corpus")
+btn_interp_panel = widgets.Button(description="Panel Reading", button_style="info",
+    layout=widgets.Layout(width="150px"),
+    tooltip="Read the current panel register by register, using the cluster briefs")
+btn_interp_corpus = widgets.Button(description="Corpus Synthesis", button_style="success",
+    layout=widgets.Layout(width="170px"),
+    tooltip="Join every brief and reading into a single interpretation")
+
+out_interp = widgets.Output()
+out_interp_status = widgets.Output()
+
+
+def _interp_status():
+    out_interp_status.clear_output()
+    with out_interp_status:
+        scale = corpus_scale(_interp_corpus())
+        print(f"{scale['panels']} panels | {scale['motifs']} motifs | "
+              f"{scale['clusters']} families | {scale['labelled']} labelled")
+        print(f"Briefs: {len(_interp_state['briefs'])}/{scale['clusters']}  |  "
+              f"Readings: {len(_interp_state['readings'])}/{scale['panels']}  |  "
+              f"Corpus essay: {'yes' if _store.corpus_path.exists() else 'no'}")
+        print(f"Saved under {INTERPRET_DIR}")
+
+
+def _interp_busy(button, label):
+    button._label = button.description
+    button.description = label
+    button.disabled = True
+
+
+def _interp_done(button):
+    button.description = getattr(button, "_label", button.description)
+    button.disabled = False
+
+
+# ── Layout (no API) ───────────────────────────────────────────────────────────
+def _on_layout(_=None):
     out_interp.clear_output()
+    corpus = _interp_corpus(rebuild=True)
+    stem = _current_stem(corpus)
+    with out_interp:
+        if not stem:
+            print("Select a panel in Stage 1, or a motif in the gallery, first")
+            return
+        layout = corpus.layout_for(stem)
+        _store.save_layout(stem, layout)
+        print(render_layout_text(layout))
+        print(f"\\nSaved to {_store.layouts_dir / (stem + '.json')}")
+    _interp_status()
 
+
+# ── Pass 1: cluster brief ─────────────────────────────────────────────────────
+def _on_cluster(_=None):
+    out_interp.clear_output()
+    corpus = _interp_corpus(rebuild=True)
+    motif = _selected_motif(corpus)
+    if motif is None or motif.cluster < 0:
+        with out_interp:
+            print("Select a clustered motif in the gallery first "
+                  "(unclustered motifs have no family to brief)")
+        return
+
+    stats = _interp_state["stats"].get(motif.cluster)
+    _interp_busy(btn_interp_cluster, "Thinking...")
     try:
-        client = _ant7.Anthropic(api_key=key)
-        content = []
+        with out_interp:
+            print(f"Briefing cluster {motif.cluster} ({stats.size} motifs across "
+                  f"{stats.panel_spread} panel(s))...")
+        brief = _interp_client().cluster_brief(corpus, stats)
+        _interp_state["briefs"][str(motif.cluster)] = brief
+        _store.save_clusters(_interp_state["briefs"])
+        (INTERPRET_DIR / "clusters.md").write_text(
+            render_clusters_markdown(_interp_state["briefs"]), encoding="utf-8")
 
-        # Panel image with all bboxes drawn
-        panel_img = PS.panel_image(stem)
-        from PIL import ImageDraw
-        pdraw = panel_img.copy()
-        drw = ImageDraw.Draw(pdraw)
-        motifs = [m for m in PS.motifs_for_panel(stem) if m.included]
-        motif_desc = []
-        for m in motifs:
-            b = m.bbox
-            drw.rectangle([b["x"], b["y"], b["x"]+b["w"], b["y"]+b["h"]],
-                          outline=(0, 255, 64), width=3)
-            drw.text((b["x"]+4, b["y"]+4), str(m.index), fill=(0, 255, 64))
-            desc = f"#{m.index} ({m.scale})"
-            if m.label: desc += f" - {m.label}"
-            motif_desc.append(desc)
-
-        panel_b64 = _img_b64(pdraw, max_d=1000)
-        content.append({"type": "text", "text": "Panel with all detected motifs highlighted:"})
-        content.append({"type": "image",
-            "source": {"type": "base64", "media_type": "image/png", "data": panel_b64}})
-
-        motif_list = "\\n".join(motif_desc)
-        content.append({"type": "text", "text":
-            f"This is a Yoruba carved door panel: {stem}\\n"
-            f"Detected motifs:\\n{motif_list}\\n\\n"
-            "Interpret the panel as a whole:\\n"
-            "1. What narrative or scene does it depict?\\n"
-            "2. How do the individual motifs relate to each other compositionally?\\n"
-            "3. What cultural/ceremonial context might this panel represent?"
-        })
-
-        resp = client.messages.create(
-            model="claude-sonnet-4-20250514", max_tokens=1000,
-            messages=[{"role": "user", "content": content}])
         out_interp.clear_output()
         with out_interp:
-            print(resp.content[0].text)
+            display(HTML(f"<h4>Cluster {motif.cluster}: {brief.get('name', '?')}</h4>"))
+            for key in ("visual_definition", "variation", "distribution_note",
+                        "iconographic_reading", "relation_to_neighbours"):
+                if brief.get(key):
+                    display(HTML(f"<b>{key.replace('_', ' ').title()}.</b> {brief[key]}"))
+            display(HTML(f"<i>Confidence: {brief.get('confidence', '?')}</i>"))
+            for q in brief.get("open_questions", []):
+                print(f"  ? {q}")
     except Exception:
         out_interp.clear_output()
-        with out_interp: import traceback; traceback.print_exc()
+        with out_interp:
+            import traceback; traceback.print_exc()
     finally:
-        btn_interp_panel.description = "Interpret Panel"
-        btn_interp_panel.disabled = False
+        _interp_done(btn_interp_cluster)
+        _interp_status()
 
 
-btn_interp_motif.on_click(_interp_motif)
-btn_interp_panel.on_click(_interp_panel)
+# ── Pass 2: panel reading ─────────────────────────────────────────────────────
+def _on_panel(_=None):
+    out_interp.clear_output()
+    corpus = _interp_corpus(rebuild=True)
+    stem = _current_stem(corpus)
+    if not stem:
+        with out_interp:
+            print("Select a panel in Stage 1 first")
+        return
+
+    _interp_busy(btn_interp_panel, "Thinking...")
+    try:
+        with out_interp:
+            n_briefs = len(_interp_state["briefs"])
+            print(f"Reading {stem} with {n_briefs} cluster brief(s) as context...")
+            if not n_briefs:
+                print("  (no briefs yet — run Cluster Brief first for corpus-aware readings)")
+        reading = _interp_client().panel_reading(
+            corpus, stem, _interp_state["briefs"], _interp_state["stats"])
+        _interp_state["readings"][stem] = reading
+        _store.save_panel(stem, reading)
+
+        out_interp.clear_output()
+        with out_interp:
+            display(Markdown(render_panel_markdown(reading)))
+    except Exception:
+        out_interp.clear_output()
+        with out_interp:
+            import traceback; traceback.print_exc()
+    finally:
+        _interp_done(btn_interp_panel)
+        _interp_status()
+
+
+# ── Pass 3: corpus synthesis ──────────────────────────────────────────────────
+def _on_corpus(_=None):
+    out_interp.clear_output()
+    corpus = _interp_corpus(rebuild=True)
+    briefs, readings = _interp_state["briefs"], _interp_state["readings"]
+    if not briefs and not readings:
+        with out_interp:
+            print("Nothing to synthesise yet — run Cluster Brief and Panel Reading first")
+        return
+
+    _interp_busy(btn_interp_corpus, "Thinking...")
+    try:
+        with out_interp:
+            print(f"Synthesising {len(briefs)} families and {len(readings)} panel "
+                  "readings into one interpretation... (this is the slowest pass)")
+        markdown = _interp_client().corpus_synthesis(
+            briefs, readings, corpus_scale(corpus))
+        _store.save_corpus(markdown)
+
+        out_interp.clear_output()
+        with out_interp:
+            display(Markdown(markdown))
+    except Exception:
+        out_interp.clear_output()
+        with out_interp:
+            import traceback; traceback.print_exc()
+    finally:
+        _interp_done(btn_interp_corpus)
+        _interp_status()
+
+
+btn_interp_layout.on_click(_on_layout)
+btn_interp_cluster.on_click(_on_cluster)
+btn_interp_panel.on_click(_on_panel)
+btn_interp_corpus.on_click(_on_corpus)
 
 display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 5: Interpret</h3>"),
     widgets.HTML("<div style='font-size:12px;color:#999;margin-bottom:6px'>"
-        "Interpret Motif: the selected motif in its panel context. "
-        "Interpret Panel: all motifs on the current panel as a composition.</div>"),
-    widgets.HBox([btn_interp_motif, btn_interp_panel]),
-    out_interp,
-)\
+        "Three widening passes, each feeding the next: "
+        "<b>Cluster Brief</b> characterises the selected motif's family across every "
+        "panel; <b>Panel Reading</b> reads the current panel register by register "
+        "using those briefs; <b>Corpus Synthesis</b> joins everything into one "
+        "interpretation. <b>Layout</b> shows the geometry the model is given — "
+        "no API call.</div>"),
+    widgets.HBox([w_interp_model, w_interp_effort]),
+    widgets.HBox([btn_interp_layout, btn_interp_cluster,
+                  btn_interp_panel, btn_interp_corpus]),
+    out_interp_status, out_interp,
+)
+_interp_status()\
 """))
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1882,5 +1985,37 @@ nb = {
 }
 
 out = Path(__file__).parent / "motif_pipeline.ipynb"
+
+
+def carry_over_outputs(cells: list[dict], existing_path: Path) -> int:
+    """Keep saved outputs from an executed notebook for cells whose source is unchanged.
+
+    The checked-in notebook doubles as the shareable record of a run (see
+    export_html.sh), so regenerating must not silently discard it.  A cell whose
+    source changed gets its outputs dropped — stale output under new code is
+    worse than none.
+    """
+    if not existing_path.exists():
+        return 0
+    try:
+        previous = json.loads(existing_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return 0
+
+    by_id = {c.get("id"): c for c in previous.get("cells", [])}
+    kept = 0
+    for cell in cells:
+        old = by_id.get(cell.get("id"))
+        if not old or old.get("source") != cell["source"]:
+            continue
+        if old.get("outputs"):
+            cell["outputs"] = old["outputs"]
+            cell["execution_count"] = old.get("execution_count")
+            kept += 1
+    return kept
+
+
+kept = carry_over_outputs(cells, out)
 out.write_text(json.dumps(nb, indent=1, ensure_ascii=False))
-print(f"Written: {out}  ({out.stat().st_size // 1024} KB)")
+print(f"Written: {out}  ({out.stat().st_size // 1024} KB)"
+      + (f" — kept saved outputs for {kept} unchanged cell(s)" if kept else ""))

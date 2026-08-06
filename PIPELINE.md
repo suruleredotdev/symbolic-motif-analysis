@@ -24,6 +24,14 @@ frobenius_artifacts/
       <panel_stem>/
         <NNN>_<scale>_iou<X.XXX>.png
     clusters/                Phase 5: cluster JSON output (SVG-based workflow)
+    motif_labels.json        labels written by motif_labeling.ipynb / Stage 4
+    interpretation/          Phase 6: written by scripts/interpret_motifs.py
+      clusters.json            per-cluster brief + the statistics behind it
+      clusters.md              the same, as a reference sheet
+      layouts/<stem>.json      recovered geometry (registers, symmetry, nesting)
+      panels/<stem>.json       structured panel reading
+      panels/<stem>.md         the same reading, rendered
+      corpus.md                the synthesis essay
   site/                      nbconvert HTML exports for static hosting
   PIPELINE.md                ← this file
 src/
@@ -40,6 +48,10 @@ src/
       motif_segment.py Phase 3: SAM segmentation → detections JSON
       vectorize.py     Phase 4: detection bbox → SVG contour trace
       similarity.py    Phase 5: feature matrix + HDBSCAN clustering (SVG-based)
+      layout.py        Phase 6: registers/symmetry/nesting from bounding boxes
+      interpret.py     Phase 6: cluster briefs → panel readings → corpus synthesis
+    scripts/
+      interpret_motifs.py       Step 10: Phase 6 driver
     motif_tuning.ipynb          SAM parameter tuning sandbox (run before Phase 3)
     bbox_review.ipynb           Review UI: include/exclude detections per panel
     extract_crops.py            PNG crop extraction (preferred over SVG for CLIP)
@@ -297,6 +309,47 @@ of defence after geometric containment filtering in extract_crops.py.
 
 ---
 
+### Step 10 — Interpretation (Phase 6)  *(after labelling and clustering)*
+
+**Script:** `scripts/interpret_motifs.py` — or `motif_pipeline.ipynb` Stage 5.
+
+Joins the three inputs a reading needs — per-motif descriptions, the embedding
+clusters, and relative position — into one interpretation, through three
+widening Claude passes. Design rationale: [`INTERPRETATION.md`](./INTERPRETATION.md).
+
+```bash
+# Inspect what would be sent — recovered registers, symmetry, and prompts.
+# No API key, no calls; still writes interpretation/layouts/.
+python3 scripts/interpret_motifs.py \
+  --analysis-dir frobenius_artifacts/analysis \
+  --stage all --dry-run
+
+# Full run. --embeddings/--paths enable cluster cohesion, centroid exemplars,
+# and family adjacency; without them the passes fall back to labels and counts.
+python3 scripts/interpret_motifs.py \
+  --analysis-dir frobenius_artifacts/analysis \
+  --embeddings   motif_embeddings_edges.npy \
+  --paths        motif_paths_edges.txt \
+  --stage all --resume
+```
+
+| Stage | What it produces | Reads |
+| --- | --- | --- |
+| `clusters` | `interpretation/clusters.json` — one brief per motif family | crops, embeddings, labels |
+| `panels` | `interpretation/panels/<stem>.{json,md}` | cluster briefs, layout, panel image |
+| `corpus` | `interpretation/corpus.md` | all briefs + all panel readings |
+
+`--stage all` runs them in order in one invocation; the stages are ordered
+because each consumes the one before it. Cluster briefs are checkpointed after
+every call, so `--resume` picks up an interrupted run rather than restarting.
+Use `--panels <stem> …` to limit the panel stage, and `--model` / `--effort` to
+trade cost against depth (`--effort high` is the default; `low` is noticeably
+cheaper on large corpora).
+
+Requires `ANTHROPIC_API_KEY` unless `--dry-run`.
+
+---
+
 ## Current artifact counts (as of last pipeline run)
 
 
@@ -352,6 +405,15 @@ motif_embeddings_*.npy + motif_paths_*.txt
     │
     ▼  (motif_labeling.ipynb)
 motif_labels.json
+    │
+    ▼  (scripts/interpret_motifs.py --stage all, or motif_pipeline.ipynb Stage 5)
+interpretation/clusters.json      ← one brief per motif family, corpus-wide
+    │
+    ▼
+interpretation/panels/<panel>.md  ← register-by-register reading, using the briefs
+    │
+    ▼
+interpretation/corpus.md          ← the synthesis over everything
 ```
 
 ### Quick re-run after bbox_review curation
