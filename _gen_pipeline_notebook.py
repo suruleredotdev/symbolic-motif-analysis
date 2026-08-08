@@ -2064,7 +2064,11 @@ def merge_with_existing(nb: dict, existing_path: Path) -> dict:
     # Generated cells the previous notebook did not have (a newly added stage).
     merged.extend(c for c in generated if c["id"] not in placed)
 
-    metadata = {**nb["metadata"], **previous.get("metadata", {})}
+    # Preserve the existing key order; only add what is missing. Reordering
+    # metadata that Colab wrote produces a diff carrying no content change.
+    metadata = dict(previous.get("metadata", {}))
+    for key, value in nb["metadata"].items():
+        metadata.setdefault(key, value)
     nb = {**nb, "cells": merged, "metadata": metadata}
 
     print(f"  merged with existing: kept {foreign} hand-authored cell(s), "
@@ -2079,5 +2083,5 @@ def merge_with_existing(nb: dict, existing_path: Path) -> dict:
 
 
 nb = merge_with_existing(nb, out)
-out.write_text(json.dumps(nb, indent=1, ensure_ascii=False))
+out.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n")
 print(f"Written: {out}  ({out.stat().st_size // 1024} KB, {len(nb['cells'])} cells)")
