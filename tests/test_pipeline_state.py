@@ -169,3 +169,16 @@ def test_a_stale_cache_is_rejected_rather_than_guessed(state: PipelineState, tmp
 def test_loading_an_absent_cache_is_a_no_op(tmp_path: Path):
     fresh = PipelineState()
     assert fresh.load_embeddings(tmp_path / "nope.npy", tmp_path / "nope.txt") == []
+
+
+def test_save_embeddings_accepts_an_explicit_matrix(state: PipelineState, tmp_path: Path):
+    """The notebook holds its working copy in cell state, not on PipelineState."""
+    keys = [m.motif_key for m in state.included_motifs()]
+    working = np.ones((len(keys), 3))
+    assert state.embeddings is None                  # nothing mirrored onto the state
+
+    state.save_embeddings(tmp_path / "e.npy", tmp_path / "e.txt", keys,
+                          embeddings=working)
+    fresh = PipelineState()
+    assert fresh.load_embeddings(tmp_path / "e.npy", tmp_path / "e.txt") == keys
+    assert np.array_equal(fresh.embeddings, working)

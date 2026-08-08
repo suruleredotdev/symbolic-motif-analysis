@@ -304,22 +304,29 @@ class PipelineState:
     # ── Embedding cache ───────────────────────────────────────────────────
 
     def save_embeddings(self, npy_path: Path, keys_path: Path,
-                        keys: list[str] | None = None) -> Path:
+                        keys: list[str] | None = None,
+                        embeddings: "np.ndarray | None" = None) -> Path:
         """Cache the embedding matrix and its row keys.
 
         Recomputing CLIP over every crop costs minutes each session; the
         vectors only change when the crops or the preprocessing mode do.
+
+        Pass `embeddings` explicitly to save a matrix the caller is holding —
+        the notebook keeps its working copy in cell state, and relying on that
+        having been mirrored onto `self.embeddings` is a coupling worth not
+        depending on.  Defaults to `self.embeddings`.
         """
-        if self.embeddings is None:
+        matrix = embeddings if embeddings is not None else self.embeddings
+        if matrix is None:
             raise ValueError("no embeddings to save — compute them first")
         keys = keys or [m.motif_key for m in self.included_motifs()]
-        if len(keys) != len(self.embeddings):
+        if len(keys) != len(matrix):
             raise ValueError(
-                f"{len(keys)} keys but {len(self.embeddings)} embedding rows")
+                f"{len(keys)} keys but {len(matrix)} embedding rows")
 
         npy_path, keys_path = Path(npy_path), Path(keys_path)
         npy_path.parent.mkdir(parents=True, exist_ok=True)
-        np.save(npy_path, self.embeddings)
+        np.save(npy_path, matrix)
         keys_path.write_text("\n".join(keys))
         return npy_path
 

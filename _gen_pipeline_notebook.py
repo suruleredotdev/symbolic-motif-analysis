@@ -869,7 +869,8 @@ def _save_clusters(_=None):
         PS.save_clusters(CLUSTERS_PATH, params=_cluster_params())
         print(f"Saved {n} cluster assignments -> {CLUSTERS_PATH.name}")
         if _cl_state["embeddings"] is not None:
-            PS.save_embeddings(EMBED_CACHE, EMBED_KEYS, _cl_state["motif_keys"])
+            PS.save_embeddings(EMBED_CACHE, EMBED_KEYS, _cl_state["motif_keys"],
+                              embeddings=_cl_state["embeddings"])
             print(f"Cached {len(_cl_state['motif_keys'])} embeddings "
                   f"-> {EMBED_CACHE.name} (skip recompute next session)")
 
