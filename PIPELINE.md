@@ -318,11 +318,15 @@ clusters, and relative position — into one interpretation, through three
 widening Claude passes. Design rationale: [`INTERPRETATION.md`](./INTERPRETATION.md).
 
 ```bash
-# Inspect what would be sent — recovered registers, symmetry, and prompts.
-# No API key, no calls; still writes interpretation/layouts/.
+# Inspect what would be sent. No API key, no calls.
+python3 scripts/interpret_motifs.py \
+  --analysis-dir frobenius_artifacts/analysis --dry-run
+
+# The default: one call joining the whole analysis.
 python3 scripts/interpret_motifs.py \
   --analysis-dir frobenius_artifacts/analysis \
-  --stage all --dry-run
+  --embeddings   motif_embeddings_edges.npy \
+  --paths        motif_paths_edges.txt
 
 # Full run. --embeddings/--paths enable cluster cohesion, centroid exemplars,
 # and family adjacency; without them the passes fall back to labels and counts.
@@ -333,11 +337,18 @@ python3 scripts/interpret_motifs.py \
   --stage all --resume
 ```
 
-| Stage | What it produces | Reads |
-| --- | --- | --- |
-| `clusters` | `interpretation/clusters.json` — one brief per motif family | crops, embeddings, labels |
-| `panels` | `interpretation/panels/<stem>.{json,md}` | cluster briefs, layout, panel image |
-| `corpus` | `interpretation/corpus.md` | all briefs + all panel readings |
+| Stage | Calls | What it produces | Reads |
+| --- | --- | --- | --- |
+| `direct` *(default)* | **1** | `interpretation/corpus.md` | everything already on disk, as text |
+| `clusters` | 1 per cluster | `interpretation/clusters.json` | crops, embeddings, labels |
+| `panels` | 1 per panel | `interpretation/panels/<stem>.{json,md}` | cluster briefs, layout, panel image |
+| `corpus` | 1 | `interpretation/corpus.md` | all briefs + all panel readings |
+
+**Start with `direct`.** The whole join is tens of thousands of tokens at this
+pipeline's corpus sizes, so one call covers it. The three-pass flow costs a
+call per cluster plus one per panel, and what it buys is that the model *sees*
+the crops and annotated panels rather than working from the pipeline's
+description of them.
 
 `--stage all` runs them in order in one invocation; the stages are ordered
 because each consumes the one before it. Cluster briefs are checkpointed after

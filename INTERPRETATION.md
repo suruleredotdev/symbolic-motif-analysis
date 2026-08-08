@@ -30,6 +30,34 @@ Phase 6 is the join.
 
 ---
 
+## Two paths: start cheap
+
+There are two ways to run the join, and **the cheap one is the default**.
+
+| | `--stage direct` (default) | `--stage all` |
+|---|---|---|
+| API calls | **1** | 1 per cluster + 1 per panel + 1 |
+| Sees the images | no | yes |
+| Input | the analysis already on disk | same, plus crops and annotated panels |
+| Good for | the whole-collection interpretation | depth on a panel that deserves it |
+
+At the corpus sizes this pipeline produces, the entire join — every motif
+label and description, every cluster's statistics, every panel's recovered
+layout — is only tens of thousands of tokens. That fits in one request with
+room to spare, so **one call is the right default** and the three-pass flow
+has to earn its cost.
+
+What the extra calls buy is images. A per-panel call can attach the annotated
+panel so the model actually looks at the carving; a per-cluster call can
+attach exemplar crops. Everything else the three passes produce, the single
+call can produce too — from the pipeline's *description* of the images rather
+than the images themselves, which the direct prompt says explicitly so the
+model can qualify readings that depend on it.
+
+Recommended order: run `--stage direct` first, read it, and escalate to
+`--stage panels --panels <stem>` for the specific panels where the description
+clearly isn't enough.
+
 ## Three widening passes
 
 Each pass consumes the one before it. That ordering is what makes the output
@@ -163,11 +191,17 @@ briefs are checkpointed after each call, so an interrupted run resumes with
 ## Usage
 
 ```bash
-# Inspect the geometry and prompts — no API key, no calls
+# Inspect the joined prompt — no API key, no calls
 python3 scripts/interpret_motifs.py \
-  --analysis-dir frobenius_artifacts/analysis --stage all --dry-run
+  --analysis-dir frobenius_artifacts/analysis --dry-run
 
-# Full run, with embeddings for cohesion and centroid exemplars
+# The default: ONE call over the whole corpus
+python3 scripts/interpret_motifs.py \
+  --analysis-dir frobenius_artifacts/analysis \
+  --embeddings   motif_embeddings_edges.npy \
+  --paths        motif_paths_edges.txt
+
+# The three-pass flow, when a panel deserves the model's eyes on it
 python3 scripts/interpret_motifs.py \
   --analysis-dir frobenius_artifacts/analysis \
   --embeddings   motif_embeddings_edges.npy \

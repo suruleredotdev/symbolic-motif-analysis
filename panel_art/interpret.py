@@ -19,6 +19,15 @@ Each pass consumes the pass before it, which is what makes the output cohere:
 a panel reading can say "the interlace family that also frames seven other
 panels", because the cluster brief established that family first.
 
+There is also a **single-call path** (`direct_synthesis`, `--stage direct`)
+that joins the analysis already on disk — motif labels and descriptions,
+cluster membership and statistics, recovered layout — and asks for the
+interpretation in one request.  Prefer it by default: at the corpus sizes this
+pipeline produces, the whole join is tens of thousands of tokens, so the three
+passes above buy depth per panel and a look at the actual images, at roughly
+one call per cluster plus one per panel.  Start direct; escalate when a
+specific panel deserves it.
+
 The deterministic inputs — cluster statistics from the embeddings, spatial
 structure from `panel_art/layout.py` — are computed here without the model, so
 that what Claude receives is evidence rather than raw pixels alone, and so the
@@ -758,6 +767,100 @@ def build_corpus_prompt(
     return "\n".join(lines)
 
 
+def build_direct_prompt(
+    corpus: "Corpus",
+    stats: dict[int, "ClusterStats"],
+    max_panels: int | None = None,
+) -> str:
+    """Join everything already on disk into one prompt for a single call.
+
+    The cheap path. Where the three-pass flow spends a call per cluster and per
+    panel to *generate* intermediate text — and to put images in front of the
+    model — this assembles the analysis that already exists (motif labels and
+    descriptions, cluster membership and statistics, recovered layout) and asks
+    for the interpretation in one go.
+
+    At the corpus sizes this pipeline produces, the whole join is tens of
+    thousands of tokens, so it fits comfortably in one request. What it gives
+    up is depth per panel and any actual look at the carvings: the model works
+    from the pipeline's description of the images, never the images.
+    """
+    lines: list[str] = []
+    scale = corpus_scale(corpus)
+
+    lines.append(
+        "Below is a complete motif-level analysis of a collection of carved West "
+        "African panels: the recurring motif families found across the collection, "
+        "then every panel with its motifs and the spatial structure recovered from "
+        "the detection geometry. Interpret the collection."
+    )
+    lines.append("")
+    lines.append(
+        f"CORPUS: {scale['panels']} panels, {scale['motifs']} approved motif "
+        f"detections, {scale['clusters']} motif families "
+        f"({scale['unclustered']} unclustered), {scale['labelled']} labelled."
+    )
+
+    lines.append("")
+    lines.append("═══ MOTIF FAMILIES (visual clusters, discovered from CLIP embeddings) ═══")
+    grouped = corpus.clusters()
+    for cid in sorted(grouped):
+        st = stats.get(cid)
+        members = grouped[cid]
+        lines.append("")
+        header = f"— Cluster {cid}: {len(members)} motifs"
+        if st:
+            header += f" across {st.panel_spread} panel(s)"
+            if st.cohesion is not None:
+                header += f", cohesion {st.cohesion:.3f}"
+        lines.append(header)
+        if st and st.label_counts:
+            lines.append(f"  Labels: {_fmt_counts(st.label_counts, limit=8)}")
+        if st and st.neighbour_clusters:
+            kin = ", ".join(f"cluster {c} (cos {s:.3f})" for c, s in st.neighbour_clusters)
+            lines.append(f"  Nearest other families: {kin}")
+        for m in members:
+            if m.has_text:
+                lines.append(f"  {m.panel_stem} {m.summary_line()}")
+
+    lines.append("")
+    lines.append("═══ PANELS ═══")
+    stems = corpus.panel_stems()
+    if max_panels is not None:
+        stems = stems[:max_panels]
+    for stem in stems:
+        motifs = corpus.motifs_for_panel(stem)
+        if not motifs:
+            continue
+        lines.append("")
+        lines.append(f"── {stem} ──")
+        lines.append(render_layout_text(corpus.layout_for(stem), max_relations=12))
+        lines.append("Motifs:")
+        for m in motifs:
+            cluster = f"cluster {m.cluster}" if m.cluster >= 0 else "unclustered"
+            lines.append(f"  {m.summary_line()} [{cluster}]")
+
+    lines.append("")
+    lines.append(
+        "Write the interpretation as a Markdown essay. Cover: what visual "
+        "vocabulary this collection shares and how it is deployed; which families "
+        "are structural (borders, framing, ground) versus which carry subject "
+        "matter; the compositional grammar the panels have in common (register "
+        "structure, symmetry, centring, scale hierarchy); what the cross-panel "
+        "recurrences suggest about workshops, regions, or a shared repertoire; "
+        "and read the most legible individual panels in enough detail to show the "
+        "grammar working.\n\n"
+        "Be specific — cite cluster numbers and panel identifiers where they carry "
+        "the argument. Keep the evidential distinction visible throughout: what the "
+        "pipeline observed, what the clustering implies, what you are inferring "
+        "from cultural knowledge. Note that you are working from the pipeline's "
+        "descriptions and geometry, not from the images themselves, and say where "
+        "that limits a reading. End with the weakest points in the analysis and "
+        "what evidence would settle them."
+    )
+    return "\n".join(lines)
+
+
 def _fmt_counts(counts: dict[Any, int], limit: int = 6) -> str:
     if not counts:
         return "(none)"
@@ -977,6 +1080,22 @@ class Interpreter:
         reading["generated_at"] = _now()
         reading["model"] = self.model
         return reading
+
+    # ── Single-call alternative to passes 1-3 ─────────────────────────────
+
+    def direct_synthesis(
+        self,
+        corpus: Corpus,
+        stats: dict[int, ClusterStats],
+        max_tokens: int = 32000,
+        max_panels: int | None = None,
+    ) -> str:
+        """One call: join the existing analysis and return the interpretation."""
+        prompt = build_direct_prompt(corpus, stats, max_panels=max_panels)
+        message = self._message([{"type": "text", "text": prompt}], max_tokens)
+        if getattr(message, "stop_reason", None) == "refusal":
+            raise RuntimeError("Claude declined the synthesis request")
+        return self._text_of(message)
 
     # ── Pass 3: corpus synthesis ──────────────────────────────────────────
 

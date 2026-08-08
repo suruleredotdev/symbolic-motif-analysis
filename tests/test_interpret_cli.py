@@ -154,3 +154,30 @@ def test_missing_credentials_are_reported_clearly(analysis_dir: Path, monkeypatc
     assert out.count("ERROR:") == 1
     # Either the SDK is absent or the key is — both name the fix.
     assert "ANTHROPIC_API_KEY" in out or "pip install anthropic" in out
+
+
+def test_direct_stage_is_the_default_and_makes_one_call(analysis_dir: Path, stub_interpreter):
+    class Direct(FakeInterpreter):
+        def direct_synthesis(self, corpus, stats, **kwargs):
+            FakeInterpreter.calls["direct"] = FakeInterpreter.calls.get("direct", 0) + 1
+            return f"# Interpretation\n\n{len(corpus.panels)} panels."
+
+    import pytest as _pytest
+    _pytest.MonkeyPatch().setattr(cli, "Interpreter", Direct)
+    assert cli.main(["--analysis-dir", str(analysis_dir)]) == 0   # no --stage given
+
+    corpus_md = (analysis_dir / "interpretation" / "corpus.md").read_text()
+    assert "2 panels" in corpus_md
+    assert FakeInterpreter.calls["direct"] == 1
+    # The per-cluster and per-panel passes never ran.
+    assert FakeInterpreter.calls["cluster"] == 0
+    assert FakeInterpreter.calls["panel"] == 0
+
+
+def test_direct_stage_dry_run_prints_the_joined_prompt(analysis_dir: Path, capsys):
+    assert cli.main(["--analysis-dir", str(analysis_dir), "--dry-run"]) == 0
+
+    out = capsys.readouterr().out
+    assert "Direct synthesis — one call over the whole corpus" in out
+    assert "MOTIF FAMILIES" in out and "── panel_a ──" in out
+    assert "no API calls made" in out

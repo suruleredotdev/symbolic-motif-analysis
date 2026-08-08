@@ -307,11 +307,17 @@ directory and read each other's output, so a run can start in one and finish
 in the other:
 
 ```bash
-# Inspect the recovered registers, symmetry, and prompts — no API calls
-uv run python scripts/interpret_motifs.py \
-  --analysis-dir analysis/ --stage all --dry-run
+# Inspect the joined prompt and recovered geometry — no API calls
+uv run python scripts/interpret_motifs.py --analysis-dir analysis/ --dry-run
 
-# Cluster briefs → panel readings → corpus synthesis
+# The default: ONE call joining the whole analysis into an interpretation
+uv run python scripts/interpret_motifs.py \
+  --analysis-dir analysis/ \
+  --embeddings   motif_embeddings_edges.npy \
+  --paths        motif_paths_edges.txt
+
+# The three-pass flow — a call per cluster and per panel, so the model sees
+# the actual crops and annotated panels. Use it where the depth is worth it.
 uv run python scripts/interpret_motifs.py \
   --analysis-dir analysis/ \
   --embeddings   motif_embeddings_edges.npy \

@@ -6,7 +6,15 @@ Runs the three passes in `panel_art/interpret.py` over an analysis directory
 produced by the pipeline, and writes the results to `<analysis>/interpretation/`.
 
 Usage:
-  # Everything, resuming any passes already on disk
+  # ONE call joining everything already on disk — the default, start here
+  python3 scripts/interpret_motifs.py \\
+      --analysis-dir frobenius_artifacts/analysis \\
+      --embeddings motif_embeddings_edges.npy \\
+      --paths      motif_paths_edges.txt
+
+  # The three-pass flow: adds a call per cluster and per panel so the model
+  # sees the actual images. Much slower and costlier — use it once the direct
+  # synthesis shows the analysis is worth the depth.
   python3 scripts/interpret_motifs.py \\
       --analysis-dir frobenius_artifacts/analysis \\
       --embeddings motif_embeddings_edges.npy \\
@@ -51,6 +59,7 @@ from panel_art.interpret import (  # noqa: E402
     Interpreter,
     build_cluster_prompt,
     build_corpus_prompt,
+    build_direct_prompt,
     build_panel_prompt,
     cluster_context_lines,
     compute_cluster_stats,
@@ -199,8 +208,36 @@ def run_corpus(
     return markdown
 
 
+def run_direct(
+    corpus: Corpus,
+    stats: dict,
+    store: InterpretationStore,
+    interpreter: Interpreter | None,
+    dry_run: bool,
+) -> str | None:
+    """One call: join the analysis already on disk and ask for the interpretation."""
+    prompt = build_direct_prompt(corpus, stats)
+
+    print(f"\n{'═' * 68}")
+    print("Direct synthesis — one call over the whole corpus")
+    print(f"  Prompt: {len(prompt):,} characters (~{len(prompt) // 4:,} tokens)")
+
+    if dry_run:
+        print(_boxed(prompt))
+        return None
+
+    assert interpreter is not None
+    markdown = interpreter.direct_synthesis(corpus, stats)
+    path = store.save_corpus(markdown)
+    print(f"\n  Wrote {path} ({len(markdown):,} characters)")
+    return markdown
+
+
 def _planned_calls(args, stats: dict, corpus: Corpus, store: InterpretationStore) -> int:
     """How many API calls this invocation will make, accounting for --resume."""
+    if args.stage == "direct":
+        return 1
+
     stages = ["clusters", "panels", "corpus"] if args.stage == "all" else [args.stage]
     done_clusters = store.load_clusters() if args.resume else {}
     done_panels = store.load_panels() if args.resume else {}
@@ -242,8 +279,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Optional JSON overriding cluster assignments "
                         "(motif key or crop path → cluster id)")
 
-    p.add_argument("--stage", choices=["clusters", "panels", "corpus", "all"], default="all",
-                   help="Which pass(es) to run")
+    p.add_argument("--stage",
+                   choices=["direct", "clusters", "panels", "corpus", "all"],
+                   default="direct",
+                   help="direct: ONE call joining everything already on disk (start here). "
+                        "clusters/panels/corpus: the three-pass flow, which adds a call per "
+                        "cluster and per panel to look at the actual images. all: run all three")
     p.add_argument("--panels", nargs="*", metavar="STEM", default=None,
                    help="Limit the panels stage to these panel stems")
 
@@ -337,6 +378,13 @@ def main(argv: list[str] | None = None) -> int:
               "model thinks before it writes, so early silence is normal.")
         print("  Every brief and reading is written as soon as it lands — Ctrl-C "
               "is safe, and --resume picks up where it stopped.")
+
+    if args.stage == "direct":
+        run_direct(corpus, stats, store, interpreter, args.dry_run)
+        print(f"\n{'═' * 68}")
+        print("Dry run complete — no API calls made." if args.dry_run
+              else f"Interpretation written to {out_dir}")
+        return 0
 
     stages = ["clusters", "panels", "corpus"] if args.stage == "all" else [args.stage]
 

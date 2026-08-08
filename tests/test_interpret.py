@@ -21,6 +21,7 @@ from panel_art.interpret import (
     MotifView,
     build_cluster_prompt,
     build_corpus_prompt,
+    build_direct_prompt,
     build_panel_prompt,
     cluster_context_lines,
     compute_cluster_stats,
@@ -269,6 +270,49 @@ def test_cluster_context_accepts_int_or_str_brief_keys(analysis_dir: Path):
     for briefs in ({"0": {"name": "int_or_str"}}, {0: {"name": "int_or_str"}}):
         lines = cluster_context_lines(motifs, briefs, stats)
         assert any("int_or_str" in line for line in lines)
+
+
+def test_direct_prompt_joins_the_whole_analysis_in_one(analysis_dir: Path, embeddings):
+    npy, txt = embeddings
+    corpus = load_corpus(analysis_dir, embeddings_path=npy, paths_path=txt)
+    stats = compute_cluster_stats(corpus)
+    prompt = build_direct_prompt(corpus, stats)
+
+    # Every cluster, with its statistics and its members' existing notes.
+    assert "MOTIF FAMILIES" in prompt
+    assert "Cluster 0: 4 motifs across 2 panel(s), cohesion" in prompt
+    assert "Upright figure with raised arms" in prompt
+    assert "Nearest other families" in prompt
+
+    # Every panel, with its recovered spatial structure.
+    assert "── panel_a ──" in prompt and "── panel_b ──" in prompt
+    assert "REGISTERS" in prompt and "BILATERAL PAIRS" in prompt
+
+    # And it is honest about working from descriptions rather than images.
+    assert "not from the images themselves" in prompt
+
+
+def test_direct_prompt_can_be_capped_to_a_panel_subset(analysis_dir: Path):
+    corpus = load_corpus(analysis_dir)
+    stats = compute_cluster_stats(corpus)
+    prompt = build_direct_prompt(corpus, stats, max_panels=1)
+
+    assert "── panel_a ──" in prompt
+    assert "── panel_b ──" not in prompt
+
+
+def test_direct_synthesis_is_a_single_text_only_call(analysis_dir: Path):
+    corpus = load_corpus(analysis_dir)
+    stats = compute_cluster_stats(corpus)
+    client = StubClient(["# Interpretation\n\nThe collection…"])
+
+    markdown = Interpreter(client=client).direct_synthesis(corpus, stats)
+
+    assert markdown.startswith("# Interpretation")
+    assert len(client.messages.requests) == 1              # one call, not per-panel
+    content = client.messages.requests[0]["messages"][0]["content"]
+    assert all(block["type"] == "text" for block in content)
+    assert "format" not in client.messages.requests[0]["output_config"]
 
 
 def test_corpus_prompt_joins_both_earlier_passes():
