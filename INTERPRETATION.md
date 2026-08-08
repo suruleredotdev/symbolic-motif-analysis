@@ -216,6 +216,31 @@ start in one and finish in the other.
 
 ---
 
+## The site
+
+`scripts/export_interpretation_site.py` is the shippable end of the pipeline: it
+reads the analysis directory and whatever `interpretation/` contains, and writes
+a single self-contained HTML file.
+
+The page is built as **a plate and its apparatus**, borrowing the archive's own
+idiom — a numbered figure with letterpress notes beside it — rather than a
+dashboard. Two things it draws are things the pipeline *discovered* and that are
+invisible in the JSON:
+
+- **Registers as bands.** The structure `layout.py` recovered from bounding
+  boxes alone, laid over the image where it can be checked against the carving.
+- **Boxes tinted by family.** The same tint recurring across different plates is
+  the corpus-level argument, made visible in one glance.
+
+Everything is embedded as a data URI, so the file works from disk, over email,
+or on any static host. It needs no API key. It also degrades: a panel with no
+reading still renders with its motifs and geometry, and a family with no brief
+still shows its members and statistics — a partial interpretation gives a
+partial but honest page rather than an error.
+
+`panel_art/site_template.py` holds the page (HTML, CSS, JS) so the exporter
+stays readable as data assembly; the exporter passes it one JSON payload.
+
 ## Known limits
 
 - **Registers are horizontal only.** A panel organised into vertical columns

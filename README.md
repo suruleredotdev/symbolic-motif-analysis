@@ -329,6 +329,27 @@ Output: `interpretation/clusters.{json,md}`, `interpretation/panels/<stem>.{json
 `interpretation/layouts/<stem>.json`, and `interpretation/corpus.md`.
 See [`INTERPRETATION.md`](./INTERPRETATION.md) for the design.
 
+**The shippable artifact.** `export_interpretation_site.py` turns the
+interpretation into one self-contained HTML page — every panel image and motif
+crop embedded, no server and no asset directory. Each panel is presented as an
+annotated plate: numbered detection boxes tinted by motif family, the recovered
+registers drawn as bands, and an apparatus column carrying the panel's reading
+and, when a box is selected, that motif's annotation and its family.
+
+```bash
+uv run python scripts/export_interpretation_site.py \
+  --analysis-dir analysis/ \
+  --embeddings   motif_embeddings_edges.npy \
+  --paths        motif_paths_edges.txt
+# → analysis/interpretation/site.html
+```
+
+It needs no API key and degrades on partial data: panels without a reading
+still render with their motifs and geometry, families without a brief still
+show their members and statistics. Arrow keys walk a plate in the reading order
+the layout pass computed. Use `--max-dim` / `--quality` to trade file size
+against image detail.
+
 **Tests.** The deterministic layers (geometry, corpus loading, cluster
 statistics, prompt assembly, CLI staging) are covered by a pytest suite that
 needs no API key:
