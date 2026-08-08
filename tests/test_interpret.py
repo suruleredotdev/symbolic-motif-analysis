@@ -618,3 +618,102 @@ def test_interpreter_reads_past_a_leading_thinking_block(analysis_dir: Path):
     client.messages = ThinkingFirst([json.dumps({"name": "interlace"})])
     brief = Interpreter(client=client).cluster_brief(corpus, stats[0])
     assert brief["name"] == "interlace"
+
+
+def test_load_corpus_picks_up_the_notebooks_clusters_json(analysis_dir: Path):
+    """Save Clusters writes analysis/clusters.json; interpretation must read it."""
+    for key, entry in json.loads((analysis_dir / "motif_labels.json").read_text()).items():
+        pass
+    # Wipe every label so cluster ids exist ONLY in clusters.json.
+    (analysis_dir / "motif_labels.json").write_text("{}")
+    (analysis_dir / "clusters.json").write_text(json.dumps({
+        "params": {"min_cluster_size": 3},
+        "assignments": {"panel_a/1": 4, "panel_a/2": 4, "panel_b/0": 9},
+    }))
+
+    corpus = load_corpus(analysis_dir)
+    assert corpus.by_key("panel_a/1").cluster == 4
+    assert corpus.by_key("panel_b/0").cluster == 9
+    assert sorted(corpus.clusters()) == [4, 9]
+    assert all(not m.label for m in corpus.motifs)      # no labels needed
+
+
+def test_explicit_clusters_override_beats_the_default_file(analysis_dir: Path, tmp_path: Path):
+    (analysis_dir / "clusters.json").write_text(
+        json.dumps({"assignments": {"panel_a/1": 4}}))
+    override = tmp_path / "override.json"
+    override.write_text(json.dumps({"panel_a/1": 99}))
+
+    corpus = load_corpus(analysis_dir, clusters_path=override)
+    assert corpus.by_key("panel_a/1").cluster == 99
+
+
+def test_cluster_stats_work_with_no_labels_at_all(analysis_dir: Path):
+    """Cluster briefs must be possible before any labelling has happened."""
+    (analysis_dir / "motif_labels.json").write_text("{}")
+    (analysis_dir / "clusters.json").write_text(json.dumps({
+        "assignments": {"panel_a/1": 0, "panel_a/2": 0, "panel_b/0": 0}}))
+
+    stats = compute_cluster_stats(load_corpus(analysis_dir))
+    assert stats[0].size == 3
+    assert stats[0].panel_spread == 2
+    assert stats[0].label_counts == {}                  # nothing labelled yet
+
+
+# ── Label provenance and brief staleness ─────────────────────────────────────
+
+def test_human_and_generated_labels_are_distinguished():
+    from panel_art.interpret import MotifView
+    def m(source):
+        return MotifView(key="p/0", panel_stem="p", index=0, bbox={},
+                         label="x", label_source=source)
+    assert m("human").is_human_labelled is True
+    assert m(None).is_human_labelled is True          # older records: assume human
+    assert m("llm").is_human_labelled is False
+    assert m("cluster-brief").is_human_labelled is False
+    assert MotifView(key="p/0", panel_stem="p", index=0, bbox={}).is_human_labelled is False
+
+
+def test_cluster_prompt_ranks_human_annotation_above_placeholders(analysis_dir: Path):
+    corpus = load_corpus(analysis_dir)
+    for motif in corpus.clusters()[0]:
+        motif.label_source = "human" if motif.index == 1 else "cluster-brief"
+    stats = compute_cluster_stats(corpus)
+    prompt = build_cluster_prompt(stats[0], corpus.clusters()[0], exemplar_count=2)
+
+    human_at = prompt.index("ANNOTATED BY A PERSON")
+    generated_at = prompt.index("MODEL-GENERATED PLACEHOLDERS")
+    assert human_at < generated_at                     # people first
+    assert "strongest evidence" in prompt
+    assert "safe to contradict" in prompt
+
+
+def test_label_fingerprint_changes_only_when_labels_do(analysis_dir: Path):
+    from panel_art.interpret import label_fingerprint
+    corpus = load_corpus(analysis_dir)
+    members = corpus.clusters()[0]
+
+    before = label_fingerprint(members)
+    assert label_fingerprint(list(reversed(members))) == before   # order-independent
+
+    members[0].label = "something_else"
+    assert label_fingerprint(members) != before
+
+
+def test_stale_briefs_names_only_the_affected_families(analysis_dir: Path):
+    from panel_art.interpret import stale_briefs
+    corpus = load_corpus(analysis_dir)
+    stats = compute_cluster_stats(corpus)
+    briefs = {str(cid): {"name": f"f{cid}", "stats": st.as_dict()}
+              for cid, st in stats.items()}
+    assert stale_briefs(briefs, stats) == []           # nothing has moved
+
+    corpus.clusters()[1][0].label = "relabelled_by_hand"
+    assert stale_briefs(briefs, compute_cluster_stats(corpus)) == [1]
+
+
+def test_a_brief_without_a_fingerprint_is_not_reported_stale(analysis_dir: Path):
+    """Briefs written before fingerprinting existed shouldn't all light up."""
+    from panel_art.interpret import stale_briefs
+    stats = compute_cluster_stats(load_corpus(analysis_dir))
+    assert stale_briefs({"0": {"name": "old", "stats": {}}}, stats) == []

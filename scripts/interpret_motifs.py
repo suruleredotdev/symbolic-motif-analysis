@@ -65,6 +65,7 @@ from panel_art.interpret import (  # noqa: E402
     compute_cluster_stats,
     corpus_scale,
     load_corpus,
+    stale_briefs,
     render_clusters_markdown,
 )
 from panel_art.layout import render_layout_text  # noqa: E402
@@ -357,6 +358,20 @@ def main(argv: list[str] | None = None) -> int:
                   "to arbitrary exemplars and report no cohesion.")
 
     stats = compute_cluster_stats(corpus, exemplars=args.exemplars)
+
+    human = sum(1 for m in corpus.motifs if m.is_human_labelled)
+    if human:
+        print(f"  {human} motifs annotated by a person "
+              "(weighted above model-generated labels in the prompts)")
+
+    # Annotation work invalidates the briefs written before it. Naming the
+    # affected families turns "re-run everything" into "re-run these three".
+    outdated = stale_briefs(store.load_clusters(), stats)
+    if outdated:
+        print(f"  {len(outdated)} cluster brief(s) predate the current labels: "
+              + ", ".join(str(c) for c in outdated))
+        print("    Refresh just those:  --stage clusters --resume  after deleting them,"
+              "\n    or re-run --stage clusters without --resume to redo all.")
 
     interpreter = None
     if not args.dry_run:

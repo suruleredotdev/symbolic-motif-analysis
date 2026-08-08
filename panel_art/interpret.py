@@ -41,6 +41,7 @@ layout passes work without it.
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import os
 import re
@@ -100,9 +101,18 @@ class MotifView:
     notes: str | None = None
     label_source: str | None = None
 
+    # Sources a model wrote. Anything else — including a missing source on an
+    # older record — is treated as a person's assertion, which is the safe way
+    # round: it protects human work from being overwritten or discounted.
+    GENERATED_SOURCES = frozenset({"llm", "cluster-brief", "llm-edited"})
+
     @property
     def has_text(self) -> bool:
         return bool(self.label or self.description or self.iconography)
+
+    @property
+    def is_human_labelled(self) -> bool:
+        return bool(self.label) and self.label_source not in self.GENERATED_SOURCES
 
     def summary_line(self) -> str:
         """One line of text describing this motif for a prompt."""
@@ -274,6 +284,35 @@ def parse_motif_key(path_like: str) -> str | None:
     return f"{match.group(1)}/{int(match.group(2))}"
 
 
+def label_fingerprint(motifs: Sequence["MotifView"]) -> str:
+    """A short digest of the labels a cluster brief was written from.
+
+    Stored on the brief so a later run can tell which briefs your annotation
+    work has invalidated: relabel a few motifs and only the affected families
+    need regenerating, instead of re-running the whole corpus or — worse —
+    leaving a brief that quietly contradicts the labels beneath it.
+    """
+    payload = "|".join(
+        f"{m.key}:{m.label or ''}:{m.iconography or ''}:{m.label_source or ''}"
+        for m in sorted(motifs, key=lambda m: m.key)
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def stale_briefs(briefs: dict[str, dict],
+                 stats: dict[int, "ClusterStats"]) -> list[int]:
+    """Cluster ids whose brief was written against different labels than today's."""
+    stale = []
+    for cid, st in stats.items():
+        brief = briefs.get(str(cid))
+        if not brief:
+            continue
+        recorded = (brief.get("stats") or {}).get("label_fingerprint")
+        if recorded and recorded != st.label_fingerprint:
+            stale.append(cid)
+    return sorted(stale)
+
+
 def text_of(message: Any) -> str:
     """Concatenate the text blocks of a Claude response.
 
@@ -319,15 +358,21 @@ def load_corpus(
 
     analysis_dir = Path(analysis_dir)
     state = PipelineState()
+    # clusters.json is the notebook's Save Clusters output and the authoritative
+    # record of the assignments — cluster ids inside label records only cover
+    # motifs that happen to have been labelled, which is a small minority.
+    default_clusters = analysis_dir / "clusters.json"
     state.load_from_disk(
         annotated_dir=analysis_dir / "annotated",
         panels_dir=analysis_dir / "panels",
         labels_path=analysis_dir / "motif_labels.json",
+        clusters_path=default_clusters if default_clusters.exists() else None,
     )
 
     embeddings, embedding_keys = _load_embeddings(embeddings_path, paths_path)
     corpus = Corpus.from_pipeline_state(state, embeddings, embedding_keys)
 
+    # An explicit --clusters file overrides whatever was just loaded.
     if clusters_path:
         _apply_cluster_overrides(corpus, Path(clusters_path))
 
@@ -388,6 +433,8 @@ class ClusterStats:
     cohesion: float | None = None                  # mean pairwise cosine similarity
     exemplar_keys: list[str] = field(default_factory=list)
     neighbour_clusters: list[tuple[int, float]] = field(default_factory=list)
+    human_labelled: int = 0
+    label_fingerprint: str = ""                    # see label_fingerprint()
 
     @property
     def panel_spread(self) -> int:
@@ -403,6 +450,8 @@ class ClusterStats:
             "label_counts": self.label_counts,
             "described": self.described,
             "cohesion": round(self.cohesion, 4) if self.cohesion is not None else None,
+            "human_labelled": self.human_labelled,
+            "label_fingerprint": self.label_fingerprint,
             "exemplar_keys": self.exemplar_keys,
             "neighbour_clusters": [[c, round(s, 4)] for c, s in self.neighbour_clusters],
         }
@@ -436,6 +485,8 @@ def compute_cluster_stats(
             scale_counts=dict(Counter(m.scale for m in members).most_common()),
             label_counts=dict(Counter(m.label for m in members if m.label).most_common()),
             described=sum(1 for m in members if m.has_text),
+            human_labelled=sum(1 for m in members if m.is_human_labelled),
+            label_fingerprint=label_fingerprint(members),
         )
 
         vectors, keys = _cluster_vectors(corpus, members)
@@ -659,15 +710,32 @@ def build_cluster_prompt(stats: ClusterStats, members: Sequence[MotifView],
     lines.append(f"The {exemplar_count} images attached are the members closest to the "
                  "cluster centroid — the most typical examples of this family.")
 
+    # Human annotations first and marked as such: they are the accumulating
+    # signal this pipeline is meant to sharpen against, and a model-generated
+    # placeholder should never be weighed the same as a person's assertion.
     described = [m for m in members if m.has_text]
-    if described:
+    human = [m for m in described if m.is_human_labelled]
+    generated = [m for m in described if not m.is_human_labelled]
+
+    if human:
         lines.append("")
-        lines.append("EXISTING PER-MOTIF NOTES (human and model-generated, may be wrong):")
-        for m in described[:20]:
+        lines.append("ANNOTATED BY A PERSON — treat these as the strongest evidence "
+                     "available, and prefer their vocabulary:")
+        for m in human[:20]:
             lines.append(f"  {m.panel_stem} {m.summary_line()}")
-        if len(described) > 20:
-            lines.append(f"  … and {len(described) - 20} more")
-    else:
+        if len(human) > 20:
+            lines.append(f"  … and {len(human) - 20} more")
+
+    if generated:
+        lines.append("")
+        lines.append("MODEL-GENERATED PLACEHOLDERS — provisional, may be wrong, and "
+                     "safe to contradict if the images say otherwise:")
+        for m in generated[:12]:
+            lines.append(f"  {m.panel_stem} {m.summary_line()}")
+        if len(generated) > 12:
+            lines.append(f"  … and {len(generated) - 12} more")
+
+    if not described:
         lines.append("")
         lines.append("No per-motif notes exist for this family yet — work from the images.")
 

@@ -241,6 +241,46 @@ partial but honest page rather than an error.
 `panel_art/site_template.py` holds the page (HTML, CSS, JS) so the exporter
 stays readable as data assembly; the exporter passes it one JSON payload.
 
+## The annotation loop
+
+Labels sharpen the interpretation, and the interpretation bootstraps the
+labels. The mechanics that make that a loop rather than a one-way trip:
+
+**Clusters do not require labels.** `analysis/clusters.json` is the
+authoritative record of assignments, written by the notebook's *Save Clusters*
+and read by `load_corpus()`. Cluster briefs work on a corpus with zero labels —
+they are written from centroid exemplars and the embedding statistics.
+
+**Bootstrap the corpus for free.** `scripts/label_motifs.py --from-briefs`
+propagates each brief's name and visual definition onto its unlabelled members.
+No API calls, and the labels agree with one another by construction because
+they come from the same characterisation. `--per-motif` spends one call each
+where a family label is genuinely too coarse.
+
+**Provenance decides authority.** Every label records its source —
+`cluster-brief`, `llm`, `llm-edited`, or `human`. A missing source counts as
+human, which is the safe default: it protects existing annotation. Generated
+labels are freely replaced by later passes; a human label is never overwritten
+without `--overwrite`. In the prompts, human annotation is presented first and
+explicitly as *"the strongest evidence available"*, while generated labels are
+marked *"provisional, may be wrong, and safe to contradict"*.
+
+**Briefs know when they are out of date.** Each brief stores a fingerprint of
+the member labels it was written from (`label_fingerprint`). After annotation
+work, `interpret_motifs.py` names the families whose labels have moved:
+
+```
+  3 motifs annotated by a person (weighted above model-generated labels)
+  1 cluster brief(s) predate the current labels: 7
+```
+
+So a correction costs one brief to regenerate, not the whole corpus.
+
+The intended cycle: cluster → brief → `--from-briefs` → read the interpretation
+→ correct the labels that are wrong → regenerate the briefs flagged stale →
+re-synthesise. Each turn, more of the corpus rests on human judgement and less
+on the model's first guess, and the prompts know which is which.
+
 ## Known limits
 
 - **Registers are horizontal only.** A panel organised into vertical columns

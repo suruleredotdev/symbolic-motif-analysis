@@ -350,6 +350,25 @@ show their members and statistics. Arrow keys walk a plate in the reading order
 the layout pass computed. Use `--max-dim` / `--quality` to trade file size
 against image detail.
 
+**Bootstrapping labels.** Cluster briefs work on a corpus with zero labels,
+so the fastest route to a complete v1 is to let them seed the labels:
+
+```bash
+# Briefs first (they need no labels), then propagate them — no API calls
+uv run python scripts/interpret_motifs.py --analysis-dir analysis/ --stage clusters
+uv run python scripts/label_motifs.py     --analysis-dir analysis/ --from-briefs
+
+# Refine only where the family label is too coarse (one call per motif)
+uv run python scripts/label_motifs.py --analysis-dir analysis/ --per-motif --clusters 3
+```
+
+Every label records its provenance, human annotation is never overwritten
+without `--overwrite`, and the interpretation prompts present human labels as
+the strongest evidence while marking generated ones as provisional. Briefs
+store a fingerprint of the labels they were written from, so after correcting
+annotations the CLI names just the families that need regenerating. See
+[`INTERPRETATION.md`](./INTERPRETATION.md) → The annotation loop.
+
 **Tests.** The deterministic layers (geometry, corpus loading, cluster
 statistics, prompt assembly, CLI staging) are covered by a pytest suite that
 needs no API key:
