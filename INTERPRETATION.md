@@ -265,6 +265,24 @@ without `--overwrite`. In the prompts, human annotation is presented first and
 explicitly as *"the strongest evidence available"*, while generated labels are
 marked *"provisional, may be wrong, and safe to contradict"*.
 
+**Two writers, one file.** `motif_labels.json` is written by both the
+notebook and `label_motifs.py`, often with a notebook kernel holding a stale
+copy while the script runs. Three rules keep them from fighting:
+
+- *One motif, one key.* Both writers use `motif_label_key()`. They previously
+  did not — the notebook baked the motif's IoU into the key and the script
+  hardcoded `1.000` — so the same motif got two entries and whichever sorted
+  later silently won on load. Legacy duplicates are collapsed on write.
+- *The script only fills gaps.* It never edits an existing label. Replacing
+  generated ones is `--refresh-generated`; replacing human ones is
+  `--overwrite`.
+- *The notebook writes only what you edited.* Save All State merges the
+  session's edits (`MotifRecord.dirty`) into whatever is on disk, leaving
+  everything else alone. Note the flag, not the label source, is what marks a
+  change: a motif loaded from disk already carries `source="human"` without
+  anyone having touched it this session, so source alone would rewrite the
+  whole file and regress anything improved on disk meanwhile.
+
 **Briefs know when they are out of date.** Each brief stores a fingerprint of
 the member labels it was written from (`label_fingerprint`). After annotation
 work, `interpret_motifs.py` names the families whose labels have moved:

@@ -56,6 +56,10 @@ from panel_art.interpret import (  # noqa: E402
     load_corpus,
 )
 from panel_art.layout import render_layout_text  # noqa: E402
+from panel_art.pipeline_state import (  # noqa: E402
+    key_to_motif,
+    motif_label_key,
+)
 
 GENERATED_SOURCES = {"llm", "cluster-brief", "llm-edited"}
 
@@ -82,13 +86,22 @@ def load_labels(path: Path) -> dict:
 
 
 def label_key(motif) -> str:
-    """The crop-path key motif_labels.json uses, matching PipelineState."""
-    return (f"../../frobenius_artifacts/analysis/motifs_norm/"
-            f"{motif.panel_stem}/{motif.index:03d}_motif_iou1.000.png")
+    """The crop-path key motif_labels.json uses.
+
+    Delegates to PipelineState so both writers agree. They previously did not:
+    the notebook baked the motif's IoU into the key and this script hardcoded
+    1.000, so the same motif ended up with two entries and whichever sorted
+    later silently won on load.
+    """
+    return motif_label_key(motif.panel_stem, motif.index)
 
 
 def write_label(labels: dict, motif, label: str, description: str,
                 iconography: str, source: str, notes: str = "") -> None:
+    # Older files may hold this motif under an IoU-bearing key; drop those so
+    # one motif keeps exactly one entry.
+    for stale in [k for k in labels if key_to_motif(k) == motif.key]:
+        del labels[stale]
     labels[label_key(motif)] = {
         "label": label,
         "description": description,
@@ -100,24 +113,28 @@ def write_label(labels: dict, motif, label: str, description: str,
     }
 
 
-def should_write(motif, overwrite: bool) -> bool:
-    """Never clobber a human label unless asked; generated labels are fair game.
+def should_write(motif, overwrite: bool, refresh_generated: bool = False) -> bool:
+    """By default this script only fills gaps — it never edits an existing label.
 
-    A generated label is a placeholder — refreshing it from a newer brief, or
-    upgrading a family-inherited one to a per-motif reading, is the point. A
-    human label is an assertion, so it stands until --overwrite says otherwise.
+    That keeps it safe to re-run alongside notebook work: a label somebody
+    improved by hand, or a placeholder they have already reviewed, is left
+    exactly as it is. Replacing generated labels is opt-in
+    (--refresh-generated), and replacing human ones needs --overwrite.
     """
     if not motif.label:
         return True
     if overwrite:
         return True
-    return (motif.label_source or "human") in GENERATED_SOURCES
+    if refresh_generated:
+        return (motif.label_source or "human") in GENERATED_SOURCES
+    return False
 
 
 # ── Mode 1: propagate cluster briefs (no API) ────────────────────────────────
 
 def run_from_briefs(corpus: Corpus, store: InterpretationStore, labels: dict,
-                    targets: list, overwrite: bool, dry_run: bool) -> int:
+                    targets: list, overwrite: bool, dry_run: bool,
+                    refresh_generated: bool = False) -> int:
     briefs = store.load_clusters()
     if not briefs:
         print("  No cluster briefs found. Run:\n"
@@ -143,7 +160,7 @@ def run_from_briefs(corpus: Corpus, store: InterpretationStore, labels: dict,
         print(f"  cluster {cid} -> {name}  ({len(members)} motifs)")
 
         for motif in members:
-            if not should_write(motif, overwrite):
+            if not should_write(motif, overwrite, refresh_generated):
                 continue
             if not dry_run:
                 # `source: cluster-brief` already marks this as inherited and
@@ -192,12 +209,13 @@ def build_motif_prompt(corpus: Corpus, motif, brief: dict | None) -> str:
 def run_per_motif(corpus: Corpus, store: InterpretationStore, labels: dict,
                   labels_path: Path, targets: list,
                   interpreter: Interpreter | None,
-                  overwrite: bool, dry_run: bool, delay: float) -> int:
+                  overwrite: bool, dry_run: bool, delay: float,
+                  refresh_generated: bool = False) -> int:
     briefs = store.load_clusters()
-    todo = [m for m in targets if should_write(m, overwrite)]
+    todo = [m for m in targets if should_write(m, overwrite, refresh_generated)]
     kept = len(targets) - len(todo)
     print(f"  {len(todo)} motifs to label"
-          + (f" ({kept} kept — labelled by a person)" if kept else ""))
+          + (f" ({kept} already labelled, left untouched)" if kept else ""))
 
     written = 0
     for n, motif in enumerate(todo, start=1):
@@ -268,8 +286,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--panels", nargs="*", metavar="STEM", default=None)
     p.add_argument("--clusters", nargs="*", type=int, metavar="ID", default=None,
                    help="Limit to these cluster ids")
+    p.add_argument("--refresh-generated", action="store_true",
+                   help="Also replace labels a model wrote (cluster-brief / llm). "
+                        "Human labels still protected. Default is to fill gaps only.")
     p.add_argument("--overwrite", action="store_true",
-                   help="Replace existing labels, including human ones")
+                   help="Replace every existing label, including human ones")
     p.add_argument("--model", default=DEFAULT_MODEL)
     p.add_argument("--effort", default="low",
                    choices=["low", "medium", "high", "xhigh", "max"],
@@ -310,7 +331,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.from_briefs:
         print("Seeding labels from cluster briefs (no API calls)")
         written = run_from_briefs(corpus, store, labels, targets,
-                                  args.overwrite, args.dry_run)
+                                  args.overwrite, args.dry_run,
+                                  args.refresh_generated)
     else:
         interpreter = None
         if not args.dry_run:
@@ -323,7 +345,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Labelling per motif (model={args.model}, effort={args.effort})")
         written = run_per_motif(corpus, store, labels, labels_path, targets,
                                 interpreter, args.overwrite, args.dry_run,
-                                args.delay)
+                                args.delay, args.refresh_generated)
 
     print(f"\n{'═' * 68}")
     if args.dry_run:

@@ -40,8 +40,9 @@ def test_clusters_of_unlabelled_motifs_survive_a_save(state: PipelineState, tmp_
     assert len(assignments) == len(state.motifs)
     assert set(assignments.values()) == {5}
 
-    # And the old path would have dropped every one of them.
-    labels_path = state.save_all_labels(tmp_path / "motif_labels.json")
+    # And labels remain empty — a cluster is not a label.
+    labels_path, written = state.save_all_labels(tmp_path / "motif_labels.json")
+    assert written == 0
     assert json.loads(labels_path.read_text()) == {}
 
 
@@ -182,3 +183,92 @@ def test_save_embeddings_accepts_an_explicit_matrix(state: PipelineState, tmp_pa
     fresh = PipelineState()
     assert fresh.load_embeddings(tmp_path / "e.npy", tmp_path / "e.txt") == keys
     assert np.array_equal(fresh.embeddings, working)
+
+
+# ── Label file: two writers, one file ────────────────────────────────────────
+
+def test_one_motif_gets_exactly_one_key(state: PipelineState, tmp_path: Path):
+    """The notebook and the script must not each write their own entry."""
+    from panel_art.pipeline_state import key_to_motif, motif_label_key
+    motif = state.motif_by_key("panel_a/1")
+
+    notebook_key = motif_label_key(motif.panel_stem, motif.index)
+    legacy_key = (f"../../frobenius_artifacts/analysis/motifs_norm/"
+                  f"{motif.panel_stem}/{motif.index:03d}_motif_iou0.942.png")
+    assert key_to_motif(notebook_key) == key_to_motif(legacy_key) == "panel_a/1"
+
+
+def test_saving_replaces_a_legacy_duplicate_rather_than_adding_one(
+        state: PipelineState, tmp_path: Path):
+    from panel_art.pipeline_state import key_to_motif
+    path = tmp_path / "motif_labels.json"
+    path.write_text(json.dumps({
+        "../../frobenius_artifacts/analysis/motifs_norm/panel_a/001_motif_iou0.942.png":
+            {"label": "old_form", "cluster": 0, "source": "llm"},
+    }))
+
+    state.save_label(state.motif_by_key("panel_a/1"), "new_form", source="human")
+    state.save_all_labels(path, only_changed=True)
+
+    saved = json.loads(path.read_text())
+    for_motif = [k for k in saved if key_to_motif(k) == "panel_a/1"]
+    assert len(for_motif) == 1                       # not two
+    assert saved[for_motif[0]]["label"] == "new_form"
+
+
+def test_saving_preserves_entries_this_session_never_loaded(
+        state: PipelineState, tmp_path: Path):
+    """label_motifs.py may have written entries after the kernel started."""
+    path = tmp_path / "motif_labels.json"
+    path.write_text(json.dumps({
+        "../../frobenius_artifacts/analysis/motifs_norm/other_panel/000_motif.png":
+            {"label": "written_by_the_script", "cluster": 3, "source": "cluster-brief"},
+    }))
+
+    state.save_label(state.motif_by_key("panel_a/1"), "edited_here", source="human")
+    state.save_all_labels(path, only_changed=True)
+
+    saved = json.loads(path.read_text())
+    assert any(v["label"] == "written_by_the_script" for v in saved.values())
+    assert any(v["label"] == "edited_here" for v in saved.values())
+
+
+def test_only_changed_writes_just_this_sessions_edits(state: PipelineState, tmp_path: Path):
+    path = tmp_path / "motif_labels.json"
+    assert all(not m.dirty for m in state.motifs)     # loading marks nothing dirty
+
+    state.save_label(state.motif_by_key("panel_a/1"), "touched", source="human")
+    _, written = state.save_all_labels(path, only_changed=True)
+    assert written == 1
+
+    # And the flag clears, so a second save is a no-op rather than a rewrite.
+    _, again = state.save_all_labels(path, only_changed=True)
+    assert again == 0
+
+
+def test_a_stale_in_memory_label_cannot_clobber_a_newer_one_on_disk(
+        state: PipelineState, tmp_path: Path):
+    """The real hazard: the kernel holds an old copy while the script improves it."""
+    from panel_art.pipeline_state import motif_label_key
+    path = tmp_path / "motif_labels.json"
+    key = motif_label_key("panel_a", 2)
+    path.write_text(json.dumps({key: {"label": "improved_on_disk",
+                                      "cluster": 0, "source": "human"}}))
+
+    # This session edited a *different* motif and never touched panel_a/2.
+    state.save_label(state.motif_by_key("panel_a/1"), "edited_here", source="human")
+    state.save_all_labels(path, only_changed=True)
+
+    assert json.loads(path.read_text())[key]["label"] == "improved_on_disk"
+
+
+def test_save_all_labels_without_only_changed_still_merges(state: PipelineState, tmp_path: Path):
+    path = tmp_path / "motif_labels.json"
+    path.write_text(json.dumps({
+        "../../frobenius_artifacts/analysis/motifs_norm/elsewhere/000_motif.png":
+            {"label": "keep_me", "cluster": 1, "source": "human"}}))
+
+    _, written = state.save_all_labels(path)
+    saved = json.loads(path.read_text())
+    assert written == 7                              # every labelled motif in memory
+    assert any(v["label"] == "keep_me" for v in saved.values())

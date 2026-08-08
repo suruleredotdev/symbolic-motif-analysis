@@ -1964,11 +1964,15 @@ def _on_save_state(_=None):
             if any(m.included for m in motifs):
                 PS.save_approved(stem)
                 saved_panels += 1
-        path = PS.save_all_labels(LABELS_PATH)
-        n_lbl = sum(1 for m in PS.motifs if m.label)
+        # Only what was edited in this session, merged into whatever is on
+        # disk. The label file is shared with scripts/label_motifs.py and with
+        # other labellers, so writing every in-memory label would regress
+        # anything improved on disk while this kernel held a stale copy.
+        path, n_lbl = PS.save_all_labels(LABELS_PATH, only_changed=True)
         print(f"Saved: {saved_panels} panel _approved.json files "
               f"(bboxes + source + timestamps)")
-        print(f"Saved: {n_lbl} labels to {path.name}")
+        print(f"Saved: {n_lbl} label(s) edited this session, merged into {path.name}"
+              if n_lbl else f"Labels: nothing edited this session ({path.name} untouched)")
 
         # Clusters go to their own file. Previously they rode along inside
         # label records, so every unlabelled motif lost its assignment here.

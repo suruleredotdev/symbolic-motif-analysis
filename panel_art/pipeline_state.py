@@ -12,6 +12,7 @@ files.  export_crops() writes PNGs as an explicit action.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
@@ -22,6 +23,27 @@ from PIL import Image
 
 
 # ── Data records ─────────────────────────────────────────────────────────────
+
+# Label-file keys are crop paths for backward compatibility with the standalone
+# notebooks.  The canonical form deliberately omits the IoU: it used to be
+# baked in, which meant two writers holding slightly different values for the
+# same motif produced two entries for it, and whichever landed later in the
+# file silently won on load.  Readers parse only the stem and index, so
+# dropping the IoU is compatible in both directions.
+_LEGACY_KEY_RE = re.compile(r"motifs(?:_norm)?/([^/]+)/(\d+)_")
+
+
+def motif_label_key(panel_stem: str, index: int) -> str:
+    """The one key under which a motif's label is stored.  Use this everywhere."""
+    return (f"../../frobenius_artifacts/analysis/motifs_norm/"
+            f"{panel_stem}/{index:03d}_motif.png")
+
+
+def key_to_motif(key: str) -> str | None:
+    """``<panel_stem>/<index>`` for a label key, old form or new.  None if unparseable."""
+    match = _LEGACY_KEY_RE.search(key)
+    return f"{match.group(1)}/{int(match.group(2))}" if match else None
+
 
 @dataclass
 class MotifRecord:
@@ -49,6 +71,12 @@ class MotifRecord:
     notes: str | None = None
     label_source: str | None = None     # "human" | "llm" | "llm-edited"
     label_timestamp: str | None = None
+
+    # Set by save_label(); cleared on load and after a successful write. This is
+    # what "changed in this session" means — the label *source* cannot answer
+    # that, since a motif loaded from disk already carries source="human"
+    # without anyone having touched it this time round.
+    dirty: bool = False
 
     def to_approved_dict(self) -> dict:
         """Serialize to the _approved.json schema (backward compatible)."""
@@ -229,6 +257,7 @@ class PipelineState:
                 mr.cluster = lbl.get("cluster", -1)
                 mr.label_source = lbl.get("source")
                 mr.label_timestamp = lbl.get("timestamp")
+                mr.dirty = False                 # freshly loaded == unmodified
                 matched += 1
 
         if matched:
@@ -342,28 +371,53 @@ class PipelineState:
         self.embeddings = embeddings
         return keys
 
-    def save_all_labels(self, path: Path | None = None) -> Path:
-        """Write motif_labels.json for all labeled motifs.
+    def save_all_labels(self, path: Path | None = None,
+                        only_changed: bool = False) -> tuple[Path, int]:
+        """Merge this session's labels into motif_labels.json.
 
-        Note this is labels only — cluster assignments for unlabelled motifs
-        live in clusters.json (`save_clusters`), so that clustering survives
-        without requiring every motif to be labelled first.
+        Merges rather than replaces. The file is shared with
+        `scripts/label_motifs.py` and with other labellers, so entries this
+        session knows nothing about — a panel that was not loaded, a label
+        written after this kernel started — are preserved untouched. Rewriting
+        the whole file from memory silently deleted them.
+
+        `only_changed` writes just the motifs edited in this session (see
+        `MotifRecord.dirty`), which is the safe default for a long-running
+        notebook: it cannot regress a label somebody else improved on disk
+        while this kernel held a stale copy of it.
+
+        Returns ``(path, number of entries written)``.
         """
         path = path or self._labels_path
         assert path is not None
-        out: dict[str, Any] = {}
-        for m in self.motifs:
-            if not m.label:
-                continue
-            # Use a path-like key for backward compat
-            key = (f"../../frobenius_artifacts/analysis/motifs_norm/"
-                   f"{m.panel_stem}/{m.index:03d}_motif_iou"
-                   f"{m.predicted_iou:.3f}.png")
+
+        existing: dict[str, Any] = {}
+        if path.exists():
+            try:
+                existing = json.loads(path.read_text())
+            except json.JSONDecodeError:
+                existing = {}                    # corrupt file: start clean
+
+        candidates = [m for m in self.motifs if m.label
+                      and (m.dirty or not only_changed)]
+
+        written = 0
+        for m in candidates:
             lbl = m.to_label_dict()
-            if lbl:
-                out[key] = lbl
-        path.write_text(json.dumps(out, indent=2))
-        return path
+            if not lbl:
+                continue
+            # Drop any other key that refers to this same motif — older writers
+            # embedded the IoU, so one motif could hold several entries.
+            for stale in [k for k in existing
+                          if key_to_motif(k) == m.motif_key]:
+                del existing[stale]
+            existing[motif_label_key(m.panel_stem, m.index)] = lbl
+            written += 1
+
+        path.write_text(json.dumps(dict(sorted(existing.items())), indent=2))
+        for m in candidates:
+            m.dirty = False
+        return path, written
 
     # ── Panel image access ────────────────────────────────────────────────
 
@@ -459,6 +513,7 @@ class PipelineState:
         motif.notes = notes
         motif.label_source = source
         motif.label_timestamp = datetime.now().isoformat()
+        motif.dirty = True
 
     # ── SAM draft-bbox workflow ───────────────────────────────────────────
 
