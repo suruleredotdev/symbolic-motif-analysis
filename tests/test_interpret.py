@@ -350,14 +350,20 @@ def test_render_clusters_markdown():
 # ── Interpreter, against a stub client ───────────────────────────────────────
 
 class _StubStream:
-    def __init__(self, message):
+    def __init__(self, message, events=()):
         self._message = message
+        self._events = list(events)
+        self.iterated = False
 
     def __enter__(self):
         return self
 
     def __exit__(self, *exc):
         return False
+
+    def __iter__(self):
+        self.iterated = True
+        return iter(self._events)
 
     def get_final_message(self):
         return self._message
@@ -440,6 +446,56 @@ def test_effort_is_passed_through():
     client = StubClient(["ok"])
     Interpreter(client=client, effort="max").corpus_synthesis({}, {}, {})
     assert client.messages.requests[0]["output_config"]["effort"] == "max"
+
+
+def test_heartbeat_reports_liveness_during_a_long_call():
+    """A silent socket during adaptive thinking must still show progress."""
+    events = [
+        SimpleNamespace(type="content_block_start",
+                        content_block=SimpleNamespace(type="thinking")),
+        SimpleNamespace(type="content_block_delta"),
+        SimpleNamespace(type="content_block_start",
+                        content_block=SimpleNamespace(type="text")),
+    ]
+
+    class EventfulMessages(StubMessages):
+        def stream(self, **kwargs):
+            self.requests.append(kwargs)
+            message = SimpleNamespace(
+                content=[SimpleNamespace(type="text", text=self.responses.pop(0))],
+                stop_reason="end_turn", stop_details=None)
+            self.last_stream = _StubStream(message, events)
+            return self.last_stream
+
+    client = StubClient([])
+    client.messages = EventfulMessages(["# Synthesis"])
+
+    ticks: list[str] = []
+    # heartbeat=0 makes every event due, so the tick path runs deterministically.
+    interpreter = Interpreter(client=client, heartbeat=0.0, on_progress=ticks.append)
+    assert interpreter.corpus_synthesis({}, {}, {}) == "# Synthesis"
+
+    assert client.messages.last_stream.iterated is True
+    assert len(ticks) == len(events)
+    assert "thinking…" in ticks[0]
+    assert "writing text…" in ticks[-1]
+
+
+def test_stream_is_not_iterated_without_a_progress_callback():
+    client = StubClient([])
+
+    class EventfulMessages(StubMessages):
+        def stream(self, **kwargs):
+            self.requests.append(kwargs)
+            message = SimpleNamespace(
+                content=[SimpleNamespace(type="text", text=self.responses.pop(0))],
+                stop_reason="end_turn", stop_details=None)
+            self.last_stream = _StubStream(message, [SimpleNamespace(type="x")])
+            return self.last_stream
+
+    client.messages = EventfulMessages(["ok"])
+    Interpreter(client=client).corpus_synthesis({}, {}, {})
+    assert client.messages.last_stream.iterated is False
 
 
 def test_unparseable_structured_response_raises(analysis_dir: Path):

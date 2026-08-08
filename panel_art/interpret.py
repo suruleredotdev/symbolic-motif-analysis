@@ -35,6 +35,7 @@ import base64
 import json
 import os
 import re
+import time
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -833,6 +834,8 @@ class Interpreter:
         model: str = DEFAULT_MODEL,
         effort: str = DEFAULT_EFFORT,
         api_key: str | None = None,
+        heartbeat: float = 15.0,
+        on_progress: Any = None,
     ) -> None:
         if client is None:
             if not ANTHROPIC_AVAILABLE:
@@ -847,6 +850,8 @@ class Interpreter:
         self.client = client
         self.model = model
         self.effort = effort
+        self.heartbeat = heartbeat
+        self.on_progress = on_progress
 
     # ── Low-level call ────────────────────────────────────────────────────
 
@@ -868,7 +873,33 @@ class Interpreter:
             output_config=output_config,
             messages=[{"role": "user", "content": content}],
         ) as stream:
+            if self.on_progress:
+                self._drain_with_heartbeat(stream)
             return stream.get_final_message()
+
+    def _drain_with_heartbeat(self, stream: Any) -> None:
+        """Consume the event stream, reporting liveness while the model works.
+
+        Adaptive thinking at high effort can run for minutes before the first
+        text arrives, and `thinking.display` defaults to "omitted" on current
+        models — so thinking blocks stream with empty text and the connection
+        looks dead to anyone watching. Ticking on raw event counts proves the
+        socket is alive without depending on the shape of any event.
+        """
+        started = last = time.monotonic()
+        events = 0
+        phase = "starting"
+        for event in stream:
+            events += 1
+            kind = getattr(event, "type", "")
+            if kind == "content_block_start":
+                block_type = getattr(getattr(event, "content_block", None), "type", "")
+                if block_type:
+                    phase = "thinking" if block_type == "thinking" else f"writing {block_type}"
+            now = time.monotonic()
+            if now - last >= self.heartbeat:
+                self.on_progress(f"{phase}… {now - started:.0f}s, {events} events")
+                last = now
 
     @staticmethod
     def _text_of(message: Any) -> str:

@@ -92,15 +92,17 @@ def run_clusters(
             continue
 
         assert interpreter is not None
+        started = time.monotonic()
         try:
             brief = interpreter.cluster_brief(corpus, st, max_dim=512)
         except Exception as exc:                       # keep going; one bad cluster
-            print(f"    FAILED: {exc}")                # shouldn't sink the run
-            continue
+            print(f"    FAILED after {time.monotonic() - started:.0f}s: {exc}")
+            continue                                   # shouldn't sink the run
 
         briefs[str(cid)] = brief
         store.save_clusters(briefs)                    # checkpoint after each call
-        print(f"    → {brief.get('name', '?')} [{brief.get('confidence', '?')}]")
+        print(f"    → {brief.get('name', '?')} [{brief.get('confidence', '?')}] "
+              f"({time.monotonic() - started:.0f}s)")
         if delay and n < len(todo):
             time.sleep(delay)
 
@@ -151,15 +153,17 @@ def run_panels(
             continue
 
         assert interpreter is not None
+        started = time.monotonic()
         try:
             reading = interpreter.panel_reading(corpus, stem, briefs, stats)
         except Exception as exc:
-            print(f"    FAILED: {exc}")
+            print(f"    FAILED after {time.monotonic() - started:.0f}s: {exc}")
             continue
 
         readings[stem] = reading
         store.save_panel(stem, reading)
-        print(f"    → {reading.get('title', '?')} [{reading.get('confidence', '?')}]")
+        print(f"    → {reading.get('title', '?')} [{reading.get('confidence', '?')}] "
+              f"({time.monotonic() - started:.0f}s)")
         if delay and n < len(todo):
             time.sleep(delay)
 
@@ -193,6 +197,24 @@ def run_corpus(
     path = store.save_corpus(markdown)
     print(f"\n  Wrote {path} ({len(markdown):,} characters)")
     return markdown
+
+
+def _planned_calls(args, stats: dict, corpus: Corpus, store: InterpretationStore) -> int:
+    """How many API calls this invocation will make, accounting for --resume."""
+    stages = ["clusters", "panels", "corpus"] if args.stage == "all" else [args.stage]
+    done_clusters = store.load_clusters() if args.resume else {}
+    done_panels = store.load_panels() if args.resume else {}
+
+    total = 0
+    if "clusters" in stages:
+        total += sum(1 for cid in stats if str(cid) not in done_clusters)
+    if "panels" in stages:
+        stems = args.panels or corpus.panel_stems()
+        total += sum(1 for s in stems
+                     if corpus.motifs_for_panel(s) and s not in done_panels)
+    if "corpus" in stages:
+        total += 1
+    return total
 
 
 def _boxed(text: str, width: int = 68) -> str:
@@ -238,11 +260,21 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Print the layouts and prompts that would be sent; make no API calls")
     p.add_argument("--delay", type=float, default=0.0,
                    help="Seconds to wait between API calls")
+    p.add_argument("--heartbeat", type=float, default=15.0,
+                   help="Seconds between liveness ticks during a call; 0 disables")
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+
+    # A full run is dozens of minutes of API calls, and people redirect it to a
+    # log. Python block-buffers stdout when it is not a TTY, which would hold
+    # every progress line in an 8KB buffer and make a working run look hung.
+    try:
+        sys.stdout.reconfigure(line_buffering=True)
+    except (AttributeError, ValueError):        # non-standard stream; not fatal
+        pass
 
     analysis_dir = args.analysis_dir
     if not analysis_dir.exists():
@@ -288,10 +320,23 @@ def main(argv: list[str] | None = None) -> int:
     interpreter = None
     if not args.dry_run:
         try:
-            interpreter = Interpreter(model=args.model, effort=args.effort)
+            interpreter = Interpreter(
+                model=args.model, effort=args.effort,
+                heartbeat=args.heartbeat,
+                on_progress=(lambda msg: print(f"      … {msg}"))
+                if args.heartbeat > 0 else None,
+            )
         except RuntimeError as exc:
             print(f"ERROR: {exc}")
             return 1
+
+        planned = _planned_calls(args, stats, corpus, store)
+        print(f"\nPlanned API calls: {planned} "
+              f"(model={args.model}, effort={args.effort})")
+        print("  A panel reading at high effort commonly takes 1-3 minutes; the "
+              "model thinks before it writes, so early silence is normal.")
+        print("  Every brief and reading is written as soon as it lands — Ctrl-C "
+              "is safe, and --resume picks up where it stopped.")
 
     stages = ["clusters", "panels", "corpus"] if args.stage == "all" else [args.stage]
 

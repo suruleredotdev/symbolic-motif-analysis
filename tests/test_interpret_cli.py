@@ -135,7 +135,7 @@ def test_a_failing_cluster_does_not_sink_the_run(analysis_dir: Path, monkeypatch
     monkeypatch.setattr(cli, "Interpreter", Flaky)
     assert cli.main(_args(analysis_dir, "--stage", "clusters")) == 0
 
-    assert "FAILED: boom" in capsys.readouterr().out
+    assert "FAILED after 0s: boom" in capsys.readouterr().out
     briefs = json.loads((analysis_dir / "interpretation" / "clusters.json").read_text())
     assert set(briefs) == {"0", "2"}          # the other two still landed
 
