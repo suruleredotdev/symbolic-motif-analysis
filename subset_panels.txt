@@ -1,0 +1,21 @@
+# Panel shortlist for the collaborator share bundle.
+#
+# One panel stem per line (no extension, no _cropped suffix). Blank lines and
+# lines starting with # are ignored. make_subset.sh resolves each stem to its
+# panel crop, motif crops, normalised crops, vectorised SVGs, annotation
+# sidecars, and the source photograph it was cut from.
+#
+# Source photographs are deduplicated: several panel stems usually share one
+# original (the three 00311 panels below all come from a single plate), so ten
+# stems here resolve to five source images.
+
+EBA-Div_00302_q166558_i1_panel_00
+EBA-Div_00303_Ado_Ekiti_q166559_i1_panel_00
+EBA-Div_00311_Ife_q166566_i1_panel_00
+EBA-Div_00311_Ife_q166566_i1_panel_01
+EBA-Div_00311_Ife_q166566_i1_panel_02
+EBA-Div_00312_Ife_q166567_i1_panel_00
+EBA-Div_00312_Ife_q166567_i1_panel_01
+FoA_04-5578_Modakeke_(Ife)_q48628_i1_panel_00
+FoA_04-5578_Modakeke_(Ife)_q48628_i1_panel_01
+FoA_04-5578_Modakeke_(Ife)_q48628_i1_panel_02

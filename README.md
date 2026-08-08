@@ -293,6 +293,96 @@ Tracked in more detail in `HITL_PLAN.md`, `LABELING_PLAN.md`, and `todos/`:
 - Moving containment filtering (currently a post-hoc pass in
   `extract_crops.py`) upstream into Phase 3 segmentation.
 
+## Sharing data with collaborators
+
+The image corpus is gitignored and large (~900 MB), most of it source
+photographs that carry the tightest licensing restrictions. `make_subset.sh`
+stages a small, shareable slice instead — the panels listed in
+[`subset_panels.txt`](./subset_panels.txt) plus everything derived from them:
+
+```bash
+./make_subset.sh --tar
+```
+
+The default shortlist of 10 panels produces ~24 MB (204 files) and resolves to
+just **5 source photographs**, since several panels are cut from the same plate.
+Edit `subset_panels.txt` to change the selection, or pass `--list`. Use
+`--no-source` to ship derived crops only, with no archive photographs at all.
+
+Each bundle gets a `MANIFEST.md` recording its panels and source catalogue
+numbers. See [`TERMS.md`](./TERMS.md) before sharing one onward.
+
+Upload the staging directory to the shared Drive folder:
+
+```bash
+rclone sync subset_share gdrive:motif-subset --progress
+```
+
+### Running `motif_pipeline.ipynb` in Colab
+
+Stage 0 locates its data automatically: local paths first, then an
+already-mounted Drive, and only mounting Drive if nothing local matched. It
+raises with every path it tried when none do.
+
+**Preferred — download the bundle, no Drive mount.** `drive.mount()` cannot be
+scoped to one folder; it exposes the collaborator's entire Drive to the
+notebook. At 23 MB the bundle doesn't need a mount at all. Share
+`subset_share.tar.gz` and pull it by file id:
+
+```python
+!git clone https://github.com/suruleredotdev/symbolic-motif-analysis.git
+%cd symbolic-motif-analysis
+!gdown <file-id> -O /content/bundle.tar.gz
+!mkdir -p /content/subset_share && tar xf /content/bundle.tar.gz -C /content/subset_share --strip-components=1
+```
+
+Stage 0 finds `/content/subset_share` and never touches Drive. Set
+`MOTIF_NO_DRIVE=1` to make that guarantee explicit — Stage 0 will then refuse to
+mount and fail loudly instead. The trade-off: `gdown` needs the file to be
+link-shared, which is weaker than named-account sharing. Rotate the link after
+each labeling round, and keep it pointed at the derived-crops bundle
+(`--no-source`) so a leaked link doesn't expose archive photographs.
+
+**Alternative — mount Drive.** Stronger access control (named accounts,
+revocable), at the cost of a full-Drive mount:
+
+```python
+!git clone https://github.com/suruleredotdev/symbolic-motif-analysis.git
+%cd symbolic-motif-analysis
+from google.colab import drive; drive.mount('/content/drive')
+!ls /content/drive/MyDrive/motif-subset
+```
+
+Either way the clone matters — `panel_art/` and the notebook's sibling data
+files are imported from the checkout, so without the `%cd` Stage 0 fails on
+`import panel_art`. The `ls` should print `MANIFEST.md  analysis  images`; if it
+prints `subset_share`, the upload is nested one level too deep.
+
+Two things to tell collaborators:
+
+- A folder shared with them will **not** appear under `MyDrive` until they add a
+  shortcut to it (right-click the folder → *Organize* → *Add shortcut to
+  Drive*). Set `MOTIF_DRIVE_FOLDER` if it is named something else.
+- Set `MOTIF_LABELER` to their name before labeling. Stage 6 rewrites the whole
+  label JSON on save, so a shared path means whoever saves last erases everyone
+  else's work; with `MOTIF_LABELER=ade` they write `motif_labels.ade.json`
+  instead, and the files are merged afterwards.
+
+**What works in Colab, and what doesn't.** Not every stage survives the move:
+
+| Stage | Colab |
+|---|---|
+| 0 — load state | works |
+| 1 — Segment / manual draw | **degraded** — needs the `ipympl` widget backend for drag-to-draw; falls back to inline, so panels render but boxes can't be drawn |
+| 2 — Embeddings / clustering | needs `torch` + `open_clip` (~2 GB of installs) |
+| 3 — Gallery | works; degrades gracefully with no embeddings |
+| 4 — Label | works — this is the informant-facing surface |
+| 5 — Interpret | works; LLM suggestions need `ANTHROPIC_API_KEY` |
+| 6 — Export | works, but writes into the data dir, so the Drive folder must be shared read-write |
+
+Stage 4 references gallery state built in Stage 3, so informants run 0 → 3 → 4
+and skip 1 and 2. Colab preinstalls everything those stages need.
+
 ## Provenance
 
 Extracted from
