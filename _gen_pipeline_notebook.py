@@ -1987,35 +1987,47 @@ nb = {
 out = Path(__file__).parent / "motif_pipeline.ipynb"
 
 
-def carry_over_outputs(cells: list[dict], existing_path: Path) -> int:
-    """Keep saved outputs from an executed notebook for cells whose source is unchanged.
+def carry_over_state(cells: list[dict], existing_path: Path) -> tuple[int, int]:
+    """Preserve an executed notebook's saved state across regeneration.
 
     The checked-in notebook doubles as the shareable record of a run (see
-    export_html.sh), so regenerating must not silently discard it.  A cell whose
-    source changed gets its outputs dropped — stale output under new code is
-    worse than none.
+    export_html.sh) and carries the collapse state its author set in
+    JupyterLab, so regenerating must not silently discard either.  The two
+    kinds of state have different rules:
+
+    - **Cell metadata** (``jupyter.source_hidden`` and friends) is a display
+      preference about the cell, not about the code in it, so it survives an
+      edit to the source.
+    - **Outputs** are only carried over when the source is unchanged.  Stale
+      output shown under new code is worse than no output.
+
+    Returns ``(cells with outputs kept, cells with metadata kept)``.
     """
     if not existing_path.exists():
-        return 0
+        return 0, 0
     try:
         previous = json.loads(existing_path.read_text())
     except (json.JSONDecodeError, OSError):
-        return 0
+        return 0, 0
 
     by_id = {c.get("id"): c for c in previous.get("cells", [])}
-    kept = 0
+    kept_outputs = kept_metadata = 0
     for cell in cells:
         old = by_id.get(cell.get("id"))
-        if not old or old.get("source") != cell["source"]:
+        if not old:
             continue
-        if old.get("outputs"):
+        if old.get("metadata"):
+            cell["metadata"] = old["metadata"]
+            kept_metadata += 1
+        if old.get("outputs") and old.get("source") == cell["source"]:
             cell["outputs"] = old["outputs"]
             cell["execution_count"] = old.get("execution_count")
-            kept += 1
-    return kept
+            kept_outputs += 1
+    return kept_outputs, kept_metadata
 
 
-kept = carry_over_outputs(cells, out)
+kept_outputs, kept_metadata = carry_over_state(cells, out)
 out.write_text(json.dumps(nb, indent=1, ensure_ascii=False))
 print(f"Written: {out}  ({out.stat().st_size // 1024} KB)"
-      + (f" — kept saved outputs for {kept} unchanged cell(s)" if kept else ""))
+      + (f" — kept outputs for {kept_outputs} cell(s),"
+         f" metadata for {kept_metadata}" if kept_outputs or kept_metadata else ""))
