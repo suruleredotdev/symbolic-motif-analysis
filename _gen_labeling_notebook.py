@@ -685,7 +685,7 @@ def _call_llm(rec: dict) -> dict:
             model="claude-opus-4-6", max_tokens=300,
             messages=[{"role": "user", "content": content}],
         )
-        raw   = resp.content[0].text.strip()
+        raw   = "".join(b.text for b in resp.content if b.type == "text").strip()
         clean = re.sub(r"^```(?:json)?\\s*|\\s*```$", "", raw, flags=re.MULTILINE).strip()
         result = json.loads(clean)
         result["raw"] = raw

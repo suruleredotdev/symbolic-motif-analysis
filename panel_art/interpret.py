@@ -274,6 +274,21 @@ def parse_motif_key(path_like: str) -> str | None:
     return f"{match.group(1)}/{int(match.group(2))}"
 
 
+def text_of(message: Any) -> str:
+    """Concatenate the text blocks of a Claude response.
+
+    Never index `content[0]`. On models where thinking is on by default the
+    first block is a thinking block, and `content[0].text` raises
+    ``AttributeError: 'ThinkingBlock' object has no attribute 'text'``. Any
+    block type that is not text — thinking, tool use, server tool results — is
+    skipped here rather than crashing the caller.
+    """
+    return "".join(
+        block.text for block in getattr(message, "content", [])
+        if getattr(block, "type", None) == "text"
+    ).strip()
+
+
 def canonical_motif_key(key: str) -> str:
     """Normalise a motif key so crop paths and PipelineState records agree.
 
@@ -1004,9 +1019,7 @@ class Interpreter:
                 self.on_progress(f"{phase}… {now - started:.0f}s, {events} events")
                 last = now
 
-    @staticmethod
-    def _text_of(message: Any) -> str:
-        return "".join(b.text for b in message.content if b.type == "text").strip()
+    _text_of = staticmethod(text_of)
 
     def _json_call(self, content: list[dict], max_tokens: int, schema: dict) -> dict:
         message = self._message(content, max_tokens, schema)

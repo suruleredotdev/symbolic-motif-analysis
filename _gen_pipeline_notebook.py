@@ -1557,10 +1557,15 @@ def _lbl_llm_suggest(_=None):
 
         resp = client.messages.create(
             model="claude-opus-5",
-            max_tokens=400,
+            # Thinking is on by default on this model and shares the max_tokens
+            # budget with the reply, so 400 would truncate the JSON mid-object.
+            # A label suggestion is a small task — low effort keeps it quick.
+            max_tokens=2000,
+            output_config={"effort": "low"},
             messages=[{"role": "user", "content": content}],
         )
-        raw = resp.content[0].text
+        # content[0] is a thinking block, not text — collect the text blocks.
+        raw = "".join(b.text for b in resp.content if b.type == "text")
         # Parse JSON from response
         import re as _re_lbl
         jm = _re_lbl.search(r'\\{[^}]+\\}', raw, _re_lbl.DOTALL)

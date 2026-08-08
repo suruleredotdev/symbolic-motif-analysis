@@ -569,3 +569,52 @@ def test_refusal_is_surfaced_not_swallowed(analysis_dir: Path):
 
     with pytest.raises(RuntimeError, match="declined"):
         Interpreter(client=client).cluster_brief(corpus, stats[0])
+
+
+# ── text_of: the thinking-block trap ─────────────────────────────────────────
+
+def test_text_of_skips_thinking_blocks():
+    """content[0] is a thinking block on models where thinking is on by default."""
+    message = SimpleNamespace(content=[
+        SimpleNamespace(type="thinking", thinking="deliberating"),
+        SimpleNamespace(type="text", text="  the answer  "),
+    ])
+    from panel_art.interpret import text_of
+    assert text_of(message) == "the answer"
+
+
+def test_text_of_joins_multiple_text_blocks():
+    from panel_art.interpret import text_of
+    message = SimpleNamespace(content=[
+        SimpleNamespace(type="text", text="one "),
+        SimpleNamespace(type="thinking", thinking="…"),
+        SimpleNamespace(type="text", text="two"),
+    ])
+    assert text_of(message) == "one two"
+
+
+def test_text_of_on_a_response_with_no_text_is_empty_not_an_error():
+    from panel_art.interpret import text_of
+    assert text_of(SimpleNamespace(content=[])) == ""
+    assert text_of(SimpleNamespace(content=[
+        SimpleNamespace(type="thinking", thinking="x")])) == ""
+
+
+def test_interpreter_reads_past_a_leading_thinking_block(analysis_dir: Path):
+    """The end-to-end path a real response takes, with thinking first."""
+    corpus = load_corpus(analysis_dir)
+    stats = compute_cluster_stats(corpus)
+
+    class ThinkingFirst(StubMessages):
+        def stream(self, **kwargs):
+            self.requests.append(kwargs)
+            message = SimpleNamespace(
+                content=[SimpleNamespace(type="thinking", thinking="considering…"),
+                         SimpleNamespace(type="text", text=self.responses.pop(0))],
+                stop_reason="end_turn", stop_details=None)
+            return _StubStream(message)
+
+    client = StubClient([])
+    client.messages = ThinkingFirst([json.dumps({"name": "interlace"})])
+    brief = Interpreter(client=client).cluster_brief(corpus, stats[0])
+    assert brief["name"] == "interlace"
