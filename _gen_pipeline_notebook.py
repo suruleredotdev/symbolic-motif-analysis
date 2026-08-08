@@ -74,6 +74,9 @@ PANELS_DIR    = _ANA / "panels"
 ANNOTATED_DIR = _ANA / "annotated"
 MOTIFS_DIR    = _ANA / "motifs"
 LABELS_PATH   = _ANA / "motif_labels.json"
+CLUSTERS_PATH = _ANA / "clusters.json"
+EMBED_CACHE   = _ANA / "embeddings_cache.npy"
+EMBED_KEYS    = _ANA / "embeddings_cache_keys.txt"
 
 # ── Shared state ──────────────────────────────────────────────────────────────
 from panel_art.pipeline_state import PipelineState
@@ -83,6 +86,7 @@ PS.load_from_disk(
     annotated_dir=ANNOTATED_DIR,
     panels_dir=PANELS_DIR,
     labels_path=LABELS_PATH,
+    clusters_path=CLUSTERS_PATH,
 )
 
 # Quick summary
@@ -835,8 +839,59 @@ def _run_clustering(_=None):
 
 
 
+# ── Persistence ───────────────────────────────────────────────────────────────
+# Cluster ids are saved on their own, not inside label records: a motif does
+# not need a label to keep its cluster, and most never get one.
+
+btn_save_clusters = widgets.Button(description="Save Clusters", button_style="success",
+    layout=widgets.Layout(width="150px"),
+    tooltip="Write clusters.json — survives a kernel restart, unlike in-memory state")
+btn_load_embed = widgets.Button(description="Load Cached", button_style="",
+    layout=widgets.Layout(width="140px"),
+    tooltip="Reuse the cached embedding matrix instead of recomputing CLIP")
+out_cl_save = widgets.Output()
+
+
+def _cluster_params():
+    return {"preprocess": w_prep_mode.value, "min_cluster_size": w_mcs.value,
+            "min_samples": w_ms.value, "selection_method": w_method.value,
+            "pass2": w_pass2.value, "n_subclusters": w_nsub.value,
+            "clip_model": CLIP_MODEL}
+
+
+def _save_clusters(_=None):
+    out_cl_save.clear_output()
+    with out_cl_save:
+        n = sum(1 for m in PS.motifs if m.included and m.cluster >= 0)
+        if not n:
+            print("Nothing to save — compute embeddings and cluster first")
+            return
+        PS.save_clusters(CLUSTERS_PATH, params=_cluster_params())
+        print(f"Saved {n} cluster assignments -> {CLUSTERS_PATH.name}")
+        if _cl_state["embeddings"] is not None:
+            PS.save_embeddings(EMBED_CACHE, EMBED_KEYS, _cl_state["motif_keys"])
+            print(f"Cached {len(_cl_state['motif_keys'])} embeddings "
+                  f"-> {EMBED_CACHE.name} (skip recompute next session)")
+
+
+def _load_cached_embeddings(_=None):
+    out_embed.clear_output()
+    with out_embed:
+        keys = PS.load_embeddings(EMBED_CACHE, EMBED_KEYS)
+        if not keys:
+            print("No usable cache — click Compute Embeddings")
+            return
+        _cl_state["motif_keys"] = keys
+        _cl_state["embeddings"] = PS.embeddings
+        print(f"Loaded {len(keys)} cached embeddings from {EMBED_CACHE.name}")
+        print("Adjust the sliders below to re-cluster, or Save Clusters to keep "
+              "the assignments already restored from disk.")
+
+
 # ── Wire up ───────────────────────────────────────────────────────────────────
 btn_embed.on_click(_compute_embeddings)
+btn_save_clusters.on_click(_save_clusters)
+btn_load_embed.on_click(_load_cached_embeddings)
 for _w in (w_mcs, w_ms, w_method, w_pass2, w_nsub):
     _w.observe(_run_clustering, names="value")
 
@@ -846,14 +901,17 @@ display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 2: Cluster</h3>"),
     widgets.HTML("<div style='font-size:12px;color:#999;margin-bottom:4px'>"
         "Select preprocessing mode, compute embeddings, then tune clustering. "
-        "Cluster assignments are saved on each motif record. "
+        "<b>Save Clusters</b> writes them to clusters.json and caches the "
+        "embeddings — without it the clustering is lost when the kernel stops. "
         "View scatter map in Stage 3 (Gallery).</div>"),
-    w_prep_mode, btn_embed, out_embed,
+    w_prep_mode, widgets.HBox([btn_embed, btn_load_embed]), out_embed,
     widgets.HTML("<b style='font-size:13px;margin-top:8px'>HDBSCAN clustering</b>"),
     w_mcs, w_ms, w_method,
     widgets.HTML("<b>Pass 2 — sub-cluster noise</b>"),
     w_pass2, w_nsub,
     out_clust,
+    widgets.HTML("<hr style='border-color:#444;margin:8px 0 4px'>"),
+    btn_save_clusters, out_cl_save,
 )\
 """))
 
@@ -1909,7 +1967,16 @@ def _on_save_state(_=None):
         n_lbl = sum(1 for m in PS.motifs if m.label)
         print(f"Saved: {saved_panels} panel _approved.json files "
               f"(bboxes + source + timestamps)")
-        print(f"Saved: {n_lbl} labels + cluster assignments to {path.name}")
+        print(f"Saved: {n_lbl} labels to {path.name}")
+
+        # Clusters go to their own file. Previously they rode along inside
+        # label records, so every unlabelled motif lost its assignment here.
+        n_cl = sum(1 for m in PS.motifs if m.included and m.cluster >= 0)
+        if n_cl:
+            cpath = PS.save_clusters(CLUSTERS_PATH)
+            print(f"Saved: {n_cl} cluster assignments to {cpath.name}")
+        else:
+            print("No cluster assignments to save (run Stage 2 first)")
 
 
 def _on_export_crops(_=None):

@@ -25,6 +25,11 @@ frobenius_artifacts/
         <NNN>_<scale>_iou<X.XXX>.png
     clusters/                Phase 5: cluster JSON output (SVG-based workflow)
     motif_labels.json        labels written by motif_labeling.ipynb / Stage 4
+    clusters.json            cluster assignments — written by Stage 2's
+                             Save Clusters, independent of labels so an
+                             unlabelled motif keeps its cluster
+    embeddings_cache.npy     cached CLIP matrix (+ _keys.txt) so a new
+                             session need not recompute embeddings
     interpretation/          Phase 6: written by scripts/interpret_motifs.py
       clusters.json            per-cluster brief + the statistics behind it
       clusters.md              the same, as a reference sheet
