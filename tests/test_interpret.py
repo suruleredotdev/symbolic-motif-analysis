@@ -83,6 +83,38 @@ def test_load_corpus_attaches_embeddings(analysis_dir: Path, embeddings):
     assert corpus.embedding_for("does/not-exist") is None
 
 
+def test_embeddings_join_across_the_cropped_stem_suffix(analysis_dir: Path, tmp_path: Path):
+    """Crop paths may carry a `_cropped` stem that the detections side strips."""
+    npy, txt = tmp_path / "c.npy", tmp_path / "c.txt"
+    np.save(npy, np.ones((2, 4)))
+    txt.write_text("\n".join([
+        "../../analysis/motifs_norm/panel_a_cropped/000_motif_iou0.9.png",
+        "../../analysis/motifs_norm/panel_a_cropped/001_motif_iou0.9.png",
+    ]))
+    corpus = load_corpus(analysis_dir, embeddings_path=npy, paths_path=txt)
+
+    assert corpus.embedding_for("panel_a/0") is not None      # suffix bridged
+    assert corpus.embedding_for("panel_a/1") is not None
+    assert corpus.embedding_for("panel_b/0") is None          # genuinely absent
+
+
+def test_embedding_coverage_reports_the_join_rate(analysis_dir: Path, embeddings):
+    npy, txt = embeddings
+    assert load_corpus(analysis_dir, npy, txt).embedding_coverage() == (7, 7)
+
+    empty = load_corpus(analysis_dir)
+    assert empty.embedding_coverage() == (0, 7)
+
+
+def test_embedding_coverage_detects_a_stale_embedding_run(analysis_dir: Path, tmp_path: Path):
+    npy, txt = tmp_path / "stale.npy", tmp_path / "stale.txt"
+    np.save(npy, np.ones((1, 4)))
+    txt.write_text("../../analysis/motifs_norm/some_other_panel/000_motif_iou0.9.png")
+
+    matched, total = load_corpus(analysis_dir, npy, txt).embedding_coverage()
+    assert (matched, total) == (0, 7)
+
+
 def test_mismatched_embeddings_and_paths_raise(analysis_dir: Path, tmp_path: Path):
     npy = tmp_path / "bad.npy"
     txt = tmp_path / "bad.txt"

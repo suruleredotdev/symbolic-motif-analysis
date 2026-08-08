@@ -137,7 +137,19 @@ class Corpus:
         self.embeddings = embeddings
         self.embedding_keys: list[str] = list(embedding_keys or [])
         self._panel_img_cache: dict[str, Any] = {}
-        self._embed_row: dict[str, int] = {k: i for i, k in enumerate(self.embedding_keys)}
+
+        # Index each embedding under both its literal key and its canonical form.
+        # Crop paths sometimes carry a "_cropped" stem suffix that PipelineState
+        # strips (it derives stems from *_detections.json and only falls back to
+        # <stem>_cropped.png for the image), so an exact-match-only index would
+        # silently drop those rows — and a missing embedding degrades quietly
+        # into "no cohesion, arbitrary exemplars" rather than failing loudly.
+        self._embed_row: dict[str, int] = {}
+        for row, key in enumerate(self.embedding_keys):
+            if not key:
+                continue
+            self._embed_row.setdefault(key, row)
+            self._embed_row.setdefault(canonical_motif_key(key), row)
 
     # ── Construction ──────────────────────────────────────────────────────
 
@@ -191,7 +203,21 @@ class Corpus:
         if self.embeddings is None:
             return None
         row = self._embed_row.get(key)
+        if row is None:
+            row = self._embed_row.get(canonical_motif_key(key))
         return None if row is None else self.embeddings[row]
+
+    def embedding_coverage(self) -> tuple[int, int]:
+        """``(motifs with an embedding, total motifs)`` — surfaces a bad join.
+
+        A low rate here means the embeddings were computed from a different run
+        than the approved bboxes on disk, which is worth knowing *before*
+        spending a corpus's worth of API calls on degraded statistics.
+        """
+        if self.embeddings is None:
+            return 0, len(self.motifs)
+        matched = sum(1 for m in self.motifs if self.embedding_for(m.key) is not None)
+        return matched, len(self.motifs)
 
     # ── Images ────────────────────────────────────────────────────────────
 
@@ -236,6 +262,19 @@ def parse_motif_key(path_like: str) -> str | None:
     if not match:
         return None
     return f"{match.group(1)}/{int(match.group(2))}"
+
+
+def canonical_motif_key(key: str) -> str:
+    """Normalise a motif key so crop paths and PipelineState records agree.
+
+    Panel crops are written as either ``<stem>.png`` or ``<stem>_cropped.png``,
+    but the detections JSON is always ``<stem>_detections.json`` — so the same
+    motif can be keyed either way depending on which side produced the key.
+    """
+    stem, _, index = key.rpartition("/")
+    if not stem:
+        return key
+    return f"{stem.removesuffix('_cropped')}/{index}"
 
 
 def load_corpus(

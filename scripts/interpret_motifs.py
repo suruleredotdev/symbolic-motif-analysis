@@ -271,6 +271,17 @@ def main(argv: list[str] | None = None) -> int:
     if corpus.embeddings is None:
         print("  NOTE: no embeddings supplied — cluster cohesion, centroid exemplars, "
               "and family adjacency will be unavailable.")
+    else:
+        matched, total = corpus.embedding_coverage()
+        pct = (100 * matched / total) if total else 0.0
+        print(f"  Embeddings joined to {matched}/{total} motifs ({pct:.0f}%)")
+        if matched == 0:
+            print("  WARNING: nothing joined — the embeddings were almost certainly "
+                  "computed from a different run than the approved bboxes on disk. "
+                  "Re-run the embedding notebook, or drop --embeddings.")
+        elif pct < 60:
+            print("  WARNING: low join rate — clusters below the threshold fall back "
+                  "to arbitrary exemplars and report no cohesion.")
 
     stats = compute_cluster_stats(corpus, exemplars=args.exemplars)
 
