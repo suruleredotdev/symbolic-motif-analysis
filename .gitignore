@@ -32,3 +32,6 @@ motif_labels.*.json
 
 # pytest
 .pytest_cache/
+
+# Secrets
+.env
