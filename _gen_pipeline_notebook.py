@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Generate motif_pipeline.ipynb — run with: uv run python _gen_pipeline_notebook.py"""
 import json
+import sys
 from pathlib import Path
 
 
@@ -1987,34 +1988,63 @@ nb = {
 out = Path(__file__).parent / "motif_pipeline.ipynb"
 
 
-def carry_over_state(cells: list[dict], existing_path: Path) -> tuple[int, int]:
-    """Preserve an executed notebook's saved state across regeneration.
+def merge_with_existing(nb: dict, existing_path: Path) -> dict:
+    """Fold the generated notebook into whatever is already on disk.
 
-    The checked-in notebook doubles as the shareable record of a run (see
-    export_html.sh) and carries the collapse state its author set in
-    JupyterLab, so regenerating must not silently discard either.  The two
-    kinds of state have different rules:
+    The checked-in notebook is not purely generated. It is also an executed
+    record of a run, it carries the collapse state its author set in
+    JupyterLab, and it has been hand-extended in Colab with setup cells this
+    script knows nothing about (Drive mount, clone, pip install). Regenerating
+    must not silently discard any of that, so this merges rather than
+    overwrites:
 
-    - **Cell metadata** (``jupyter.source_hidden`` and friends) is a display
-      preference about the cell, not about the code in it, so it survives an
-      edit to the source.
-    - **Outputs** are only carried over when the source is unchanged.  Stale
+    - **Foreign cells** — anything on disk this script does not generate — are
+      kept verbatim, in place. They are somebody's hand-authored work.
+    - **Cell metadata** (``jupyter.source_hidden``, Colab's ``@title`` state)
+      is a display preference about the cell, not about the code in it, so it
+      survives an edit to the source.
+    - **Outputs** are only carried over when the source is unchanged; stale
       output shown under new code is worse than no output.
+    - **Notebook-level metadata** (``colab``, ``widgets``) is preserved, with
+      the generated kernelspec filling in anything absent.
 
-    Returns ``(cells with outputs kept, cells with metadata kept)``.
+    A generated cell whose on-disk source has *diverged* from what this script
+    produces is also left alone, and reported. The notebook has been adapted
+    for Colab in place (environment resolution in Stage 1, a matplotlib backend
+    fallback in Stage 2), so blindly overwriting would undo that. Pass
+    ``--force`` once you have folded those edits back into this file and want
+    the generated source to win.
     """
+    generated = nb["cells"]
     if not existing_path.exists():
-        return 0, 0
+        return nb
     try:
         previous = json.loads(existing_path.read_text())
     except (json.JSONDecodeError, OSError):
-        return 0, 0
+        return nb
 
-    by_id = {c.get("id"): c for c in previous.get("cells", [])}
-    kept_outputs = kept_metadata = 0
-    for cell in cells:
-        old = by_id.get(cell.get("id"))
-        if not old:
+    force = "--force" in sys.argv
+    gen_by_id = {c["id"]: c for c in generated}
+    merged: list[dict] = []
+    placed: set[str] = set()
+    diverged: list[str] = []
+    kept_outputs = kept_metadata = foreign = 0
+
+    for old in previous.get("cells", []):
+        cid = old.get("id")
+        cell = gen_by_id.get(cid)
+        if cell is None:                      # hand-authored — not ours to touch
+            merged.append(old)
+            foreign += 1
+            continue
+        if old.get("source") != cell["source"] and not force:
+            # Diverged: either this script changed, or somebody edited the
+            # notebook directly. Keeping the on-disk version is the safe
+            # default — a lost hand-edit is unrecoverable, a skipped
+            # regeneration is not.
+            diverged.append(cid)
+            merged.append(old)
+            placed.add(cid)
             continue
         if old.get("metadata"):
             cell["metadata"] = old["metadata"]
@@ -2023,11 +2053,26 @@ def carry_over_state(cells: list[dict], existing_path: Path) -> tuple[int, int]:
             cell["outputs"] = old["outputs"]
             cell["execution_count"] = old.get("execution_count")
             kept_outputs += 1
-    return kept_outputs, kept_metadata
+        merged.append(cell)
+        placed.add(cid)
+
+    # Generated cells the previous notebook did not have (a newly added stage).
+    merged.extend(c for c in generated if c["id"] not in placed)
+
+    metadata = {**nb["metadata"], **previous.get("metadata", {})}
+    nb = {**nb, "cells": merged, "metadata": metadata}
+
+    print(f"  merged with existing: kept {foreign} hand-authored cell(s), "
+          f"outputs for {kept_outputs}, metadata for {kept_metadata}")
+    if diverged:
+        print(f"  SKIPPED {len(diverged)} generated cell(s) whose on-disk source has "
+              f"diverged: {', '.join(diverged)}")
+        print("    The notebook was adapted in place (Colab setup, backend fallback).")
+        print("    Fold those edits into this script, or re-run with --force to")
+        print("    overwrite them with the generated source.")
+    return nb
 
 
-kept_outputs, kept_metadata = carry_over_state(cells, out)
+nb = merge_with_existing(nb, out)
 out.write_text(json.dumps(nb, indent=1, ensure_ascii=False))
-print(f"Written: {out}  ({out.stat().st_size // 1024} KB)"
-      + (f" — kept outputs for {kept_outputs} cell(s),"
-         f" metadata for {kept_metadata}" if kept_outputs or kept_metadata else ""))
+print(f"Written: {out}  ({out.stat().st_size // 1024} KB, {len(nb['cells'])} cells)")
