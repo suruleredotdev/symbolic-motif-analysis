@@ -12,6 +12,7 @@ files.  export_crops() writes PNGs as an explicit action.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
@@ -22,6 +23,27 @@ from PIL import Image
 
 
 # ── Data records ─────────────────────────────────────────────────────────────
+
+# Label-file keys are crop paths for backward compatibility with the standalone
+# notebooks.  The canonical form deliberately omits the IoU: it used to be
+# baked in, which meant two writers holding slightly different values for the
+# same motif produced two entries for it, and whichever landed later in the
+# file silently won on load.  Readers parse only the stem and index, so
+# dropping the IoU is compatible in both directions.
+_LEGACY_KEY_RE = re.compile(r"motifs(?:_norm)?/([^/]+)/(\d+)_")
+
+
+def motif_label_key(panel_stem: str, index: int) -> str:
+    """The one key under which a motif's label is stored.  Use this everywhere."""
+    return (f"../../frobenius_artifacts/analysis/motifs_norm/"
+            f"{panel_stem}/{index:03d}_motif.png")
+
+
+def key_to_motif(key: str) -> str | None:
+    """``<panel_stem>/<index>`` for a label key, old form or new.  None if unparseable."""
+    match = _LEGACY_KEY_RE.search(key)
+    return f"{match.group(1)}/{int(match.group(2))}" if match else None
+
 
 @dataclass
 class MotifRecord:
@@ -49,6 +71,12 @@ class MotifRecord:
     notes: str | None = None
     label_source: str | None = None     # "human" | "llm" | "llm-edited"
     label_timestamp: str | None = None
+
+    # Set by save_label(); cleared on load and after a successful write. This is
+    # what "changed in this session" means — the label *source* cannot answer
+    # that, since a motif loaded from disk already carries source="human"
+    # without anyone having touched it this time round.
+    dirty: bool = False
 
     def to_approved_dict(self) -> dict:
         """Serialize to the _approved.json schema (backward compatible)."""
@@ -124,6 +152,7 @@ class PipelineState:
         self._annotated_dir: Path | None = None
         self._panels_dir: Path | None = None
         self._labels_path: Path | None = None
+        self._clusters_path: Path | None = None
 
     # ── Load from disk ────────────────────────────────────────────────────
 
@@ -132,11 +161,13 @@ class PipelineState:
         annotated_dir: Path,
         panels_dir: Path,
         labels_path: Path | None = None,
+        clusters_path: Path | None = None,
     ) -> None:
-        """Read existing _approved.json / _detections.json files + labels."""
+        """Read existing _approved.json / _detections.json files + labels + clusters."""
         self._annotated_dir = Path(annotated_dir)
         self._panels_dir = Path(panels_dir)
         self._labels_path = Path(labels_path) if labels_path else None
+        self._clusters_path = Path(clusters_path) if clusters_path else None
 
         self.panels.clear()
         self.motifs.clear()
@@ -187,6 +218,13 @@ class PipelineState:
         if self._labels_path and self._labels_path.exists():
             self._merge_labels(self._labels_path)
 
+        # Clusters load after labels so a standalone clusters.json wins — it is
+        # the newer, label-independent record of the same assignment.
+        if self._clusters_path and self._clusters_path.exists():
+            applied = self.load_clusters(self._clusters_path)
+            if applied:
+                print(f"  Clusters restored: {applied} motifs")
+
         n_panels = len(self.panels)
         n_motifs = len(self.motifs)
         n_approved = sum(1 for p in self.panels
@@ -219,6 +257,7 @@ class PipelineState:
                 mr.cluster = lbl.get("cluster", -1)
                 mr.label_source = lbl.get("source")
                 mr.label_timestamp = lbl.get("timestamp")
+                mr.dirty = False                 # freshly loaded == unmodified
                 matched += 1
 
         if matched:
@@ -239,23 +278,146 @@ class PipelineState:
         path.write_text(json.dumps(data, indent=2))
         return path
 
-    def save_all_labels(self, path: Path | None = None) -> Path:
-        """Write motif_labels.json for all labeled motifs."""
+    # ── Cluster persistence ───────────────────────────────────────────────
+    #
+    # Cluster ids used to survive only inside label records, so a motif that
+    # was clustered but never labelled lost its assignment on save — which is
+    # most of them on a fresh run.  Clusters now persist on their own.
+
+    def save_clusters(self, path: Path, params: dict | None = None) -> Path:
+        """Write clusters.json — every included motif's cluster assignment.
+
+        Independent of labels: a motif does not need a label to keep its
+        cluster.  `params` records the settings that produced the run so a
+        later session can tell whether an assignment is still current.
+        """
+        assignments = {
+            m.motif_key: m.cluster
+            for m in self.motifs
+            if m.included and m.cluster is not None and m.cluster >= 0
+        }
+        data = {
+            "generated_at": datetime.now().isoformat(),
+            "params": params or {},
+            "n_clusters": len(set(assignments.values())),
+            "assignments": dict(sorted(assignments.items())),
+        }
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(data, indent=2))
+        return path
+
+    def load_clusters(self, path: Path) -> int:
+        """Apply clusters.json onto the motif records.  Returns the count applied.
+
+        Accepts the shape `save_clusters` writes, and also a bare
+        ``{motif_key: cluster_id}`` mapping, which is what the interpretation
+        CLI's ``--clusters`` override takes.
+        """
+        path = Path(path)
+        if not path.exists():
+            return 0
+        raw = json.loads(path.read_text())
+        assignments = raw.get("assignments", raw) if isinstance(raw, dict) else {}
+
+        applied = 0
+        by_key = {m.motif_key: m for m in self.motifs}
+        for key, value in assignments.items():
+            cluster = value.get("cluster") if isinstance(value, dict) else value
+            motif = by_key.get(key)
+            if motif is not None and cluster is not None:
+                motif.cluster = int(cluster)
+                applied += 1
+        return applied
+
+    # ── Embedding cache ───────────────────────────────────────────────────
+
+    def save_embeddings(self, npy_path: Path, keys_path: Path,
+                        keys: list[str] | None = None,
+                        embeddings: "np.ndarray | None" = None) -> Path:
+        """Cache the embedding matrix and its row keys.
+
+        Recomputing CLIP over every crop costs minutes each session; the
+        vectors only change when the crops or the preprocessing mode do.
+
+        Pass `embeddings` explicitly to save a matrix the caller is holding —
+        the notebook keeps its working copy in cell state, and relying on that
+        having been mirrored onto `self.embeddings` is a coupling worth not
+        depending on.  Defaults to `self.embeddings`.
+        """
+        matrix = embeddings if embeddings is not None else self.embeddings
+        if matrix is None:
+            raise ValueError("no embeddings to save — compute them first")
+        keys = keys or [m.motif_key for m in self.included_motifs()]
+        if len(keys) != len(matrix):
+            raise ValueError(
+                f"{len(keys)} keys but {len(matrix)} embedding rows")
+
+        npy_path, keys_path = Path(npy_path), Path(keys_path)
+        npy_path.parent.mkdir(parents=True, exist_ok=True)
+        np.save(npy_path, matrix)
+        keys_path.write_text("\n".join(keys))
+        return npy_path
+
+    def load_embeddings(self, npy_path: Path, keys_path: Path) -> list[str]:
+        """Restore a cached embedding matrix.  Returns its row keys ([] if absent)."""
+        npy_path, keys_path = Path(npy_path), Path(keys_path)
+        if not npy_path.exists() or not keys_path.exists():
+            return []
+        embeddings = np.load(npy_path)
+        keys = [k for k in keys_path.read_text().splitlines() if k.strip()]
+        if len(keys) != len(embeddings):
+            return []                       # stale pair; recompute rather than guess
+        self.embeddings = embeddings
+        return keys
+
+    def save_all_labels(self, path: Path | None = None,
+                        only_changed: bool = False) -> tuple[Path, int]:
+        """Merge this session's labels into motif_labels.json.
+
+        Merges rather than replaces. The file is shared with
+        `scripts/label_motifs.py` and with other labellers, so entries this
+        session knows nothing about — a panel that was not loaded, a label
+        written after this kernel started — are preserved untouched. Rewriting
+        the whole file from memory silently deleted them.
+
+        `only_changed` writes just the motifs edited in this session (see
+        `MotifRecord.dirty`), which is the safe default for a long-running
+        notebook: it cannot regress a label somebody else improved on disk
+        while this kernel held a stale copy of it.
+
+        Returns ``(path, number of entries written)``.
+        """
         path = path or self._labels_path
         assert path is not None
-        out: dict[str, Any] = {}
-        for m in self.motifs:
-            if not m.label:
-                continue
-            # Use a path-like key for backward compat
-            key = (f"../../frobenius_artifacts/analysis/motifs_norm/"
-                   f"{m.panel_stem}/{m.index:03d}_motif_iou"
-                   f"{m.predicted_iou:.3f}.png")
+
+        existing: dict[str, Any] = {}
+        if path.exists():
+            try:
+                existing = json.loads(path.read_text())
+            except json.JSONDecodeError:
+                existing = {}                    # corrupt file: start clean
+
+        candidates = [m for m in self.motifs if m.label
+                      and (m.dirty or not only_changed)]
+
+        written = 0
+        for m in candidates:
             lbl = m.to_label_dict()
-            if lbl:
-                out[key] = lbl
-        path.write_text(json.dumps(out, indent=2))
-        return path
+            if not lbl:
+                continue
+            # Drop any other key that refers to this same motif — older writers
+            # embedded the IoU, so one motif could hold several entries.
+            for stale in [k for k in existing
+                          if key_to_motif(k) == m.motif_key]:
+                del existing[stale]
+            existing[motif_label_key(m.panel_stem, m.index)] = lbl
+            written += 1
+
+        path.write_text(json.dumps(dict(sorted(existing.items())), indent=2))
+        for m in candidates:
+            m.dirty = False
+        return path, written
 
     # ── Panel image access ────────────────────────────────────────────────
 
@@ -303,6 +465,10 @@ class PipelineState:
         """All approved motifs across all panels."""
         return [m for m in self.motifs if m.included]
 
+    def motif_by_key(self, key: str) -> MotifRecord | None:
+        """Look up one motif by its ``<panel_stem>/<index>`` key."""
+        return next((m for m in self.motifs if m.motif_key == key), None)
+
     def manual_templates(self) -> list[dict]:
         """All source='manual' bboxes — ground-truth for SAM Refine templates."""
         return [m.bbox for m in self.motifs
@@ -347,6 +513,7 @@ class PipelineState:
         motif.notes = notes
         motif.label_source = source
         motif.label_timestamp = datetime.now().isoformat()
+        motif.dirty = True
 
     # ── SAM draft-bbox workflow ───────────────────────────────────────────
 

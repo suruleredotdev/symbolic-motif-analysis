@@ -29,3 +29,9 @@ motif_labels.*.json
 # OS / editor cruft
 .DS_Store
 *.swp
+
+# pytest
+.pytest_cache/
+
+# Secrets
+.env

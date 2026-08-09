@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Generate motif_pipeline.ipynb — run with: uv run python _gen_pipeline_notebook.py"""
 import json
+import sys
 from pathlib import Path
 
 
@@ -59,7 +60,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import ipywidgets as widgets
-from IPython.display import display, clear_output, HTML
+from IPython.display import display, clear_output, HTML, Markdown
 from PIL import Image
 
 warnings.filterwarnings("ignore")
@@ -73,6 +74,9 @@ PANELS_DIR    = _ANA / "panels"
 ANNOTATED_DIR = _ANA / "annotated"
 MOTIFS_DIR    = _ANA / "motifs"
 LABELS_PATH   = _ANA / "motif_labels.json"
+CLUSTERS_PATH = _ANA / "clusters.json"
+EMBED_CACHE   = _ANA / "embeddings_cache.npy"
+EMBED_KEYS    = _ANA / "embeddings_cache_keys.txt"
 
 # ── Shared state ──────────────────────────────────────────────────────────────
 from panel_art.pipeline_state import PipelineState
@@ -82,6 +86,7 @@ PS.load_from_disk(
     annotated_dir=ANNOTATED_DIR,
     panels_dir=PANELS_DIR,
     labels_path=LABELS_PATH,
+    clusters_path=CLUSTERS_PATH,
 )
 
 # Quick summary
@@ -834,8 +839,60 @@ def _run_clustering(_=None):
 
 
 
+# ── Persistence ───────────────────────────────────────────────────────────────
+# Cluster ids are saved on their own, not inside label records: a motif does
+# not need a label to keep its cluster, and most never get one.
+
+btn_save_clusters = widgets.Button(description="Save Clusters", button_style="success",
+    layout=widgets.Layout(width="150px"),
+    tooltip="Write clusters.json — survives a kernel restart, unlike in-memory state")
+btn_load_embed = widgets.Button(description="Load Cached", button_style="",
+    layout=widgets.Layout(width="140px"),
+    tooltip="Reuse the cached embedding matrix instead of recomputing CLIP")
+out_cl_save = widgets.Output()
+
+
+def _cluster_params():
+    return {"preprocess": w_prep_mode.value, "min_cluster_size": w_mcs.value,
+            "min_samples": w_ms.value, "selection_method": w_method.value,
+            "pass2": w_pass2.value, "n_subclusters": w_nsub.value,
+            "clip_model": CLIP_MODEL}
+
+
+def _save_clusters(_=None):
+    out_cl_save.clear_output()
+    with out_cl_save:
+        n = sum(1 for m in PS.motifs if m.included and m.cluster >= 0)
+        if not n:
+            print("Nothing to save — compute embeddings and cluster first")
+            return
+        PS.save_clusters(CLUSTERS_PATH, params=_cluster_params())
+        print(f"Saved {n} cluster assignments -> {CLUSTERS_PATH.name}")
+        if _cl_state["embeddings"] is not None:
+            PS.save_embeddings(EMBED_CACHE, EMBED_KEYS, _cl_state["motif_keys"],
+                              embeddings=_cl_state["embeddings"])
+            print(f"Cached {len(_cl_state['motif_keys'])} embeddings "
+                  f"-> {EMBED_CACHE.name} (skip recompute next session)")
+
+
+def _load_cached_embeddings(_=None):
+    out_embed.clear_output()
+    with out_embed:
+        keys = PS.load_embeddings(EMBED_CACHE, EMBED_KEYS)
+        if not keys:
+            print("No usable cache — click Compute Embeddings")
+            return
+        _cl_state["motif_keys"] = keys
+        _cl_state["embeddings"] = PS.embeddings
+        print(f"Loaded {len(keys)} cached embeddings from {EMBED_CACHE.name}")
+        print("Adjust the sliders below to re-cluster, or Save Clusters to keep "
+              "the assignments already restored from disk.")
+
+
 # ── Wire up ───────────────────────────────────────────────────────────────────
 btn_embed.on_click(_compute_embeddings)
+btn_save_clusters.on_click(_save_clusters)
+btn_load_embed.on_click(_load_cached_embeddings)
 for _w in (w_mcs, w_ms, w_method, w_pass2, w_nsub):
     _w.observe(_run_clustering, names="value")
 
@@ -845,14 +902,17 @@ display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 2: Cluster</h3>"),
     widgets.HTML("<div style='font-size:12px;color:#999;margin-bottom:4px'>"
         "Select preprocessing mode, compute embeddings, then tune clustering. "
-        "Cluster assignments are saved on each motif record. "
+        "<b>Save Clusters</b> writes them to clusters.json and caches the "
+        "embeddings — without it the clustering is lost when the kernel stops. "
         "View scatter map in Stage 3 (Gallery).</div>"),
-    w_prep_mode, btn_embed, out_embed,
+    w_prep_mode, widgets.HBox([btn_embed, btn_load_embed]), out_embed,
     widgets.HTML("<b style='font-size:13px;margin-top:8px'>HDBSCAN clustering</b>"),
     w_mcs, w_ms, w_method,
     widgets.HTML("<b>Pass 2 — sub-cluster noise</b>"),
     w_pass2, w_nsub,
     out_clust,
+    widgets.HTML("<hr style='border-color:#444;margin:8px 0 4px'>"),
+    btn_save_clusters, out_cl_save,
 )\
 """))
 
@@ -1555,11 +1615,16 @@ def _lbl_llm_suggest(_=None):
         })
 
         resp = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=400,
+            model="claude-opus-5",
+            # Thinking is on by default on this model and shares the max_tokens
+            # budget with the reply, so 400 would truncate the JSON mid-object.
+            # A label suggestion is a small task — low effort keeps it quick.
+            max_tokens=2000,
+            output_config={"effort": "low"},
             messages=[{"role": "user", "content": content}],
         )
-        raw = resp.content[0].text
+        # content[0] is a thinking block, not text — collect the text blocks.
+        raw = "".join(b.text for b in resp.content if b.type == "text")
         # Parse JSON from response
         import re as _re_lbl
         jm = _re_lbl.search(r'\\{[^}]+\\}', raw, _re_lbl.DOTALL)
@@ -1606,168 +1671,271 @@ _lbl_load_fields()\
 """))
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Cell 6: Interpret — LLM Context Analysis
+# Cell 6: Interpret — join clusters, descriptions, and positions
 # ══════════════════════════════════════════════════════════════════════════════
 cells.append(code("mp-6", """\
 ## ── Stage 5: Interpret ──────────────────────────────────────────────────────
 #
-# LLM-powered interpretation of motifs individually and in panel context.
+# The join: motif descriptions + embedding-derived cluster families + relative
+# positions, run through Claude in three widening passes.
+#
+#   Layout          — deterministic geometry only, no API call. Run it first to
+#                     check the registers and symmetry the model will be told about.
+#   Cluster Brief   — what the selected motif's family is, across every panel.
+#   Panel Reading   — this panel read register by register, using the briefs.
+#   Corpus Synthesis— all briefs + all readings joined into one essay.
+#
+# Each pass feeds the next, so run them in order. Results persist to
+# analysis/interpretation/ and reload on re-run.
 
 import os as _os7
-import base64 as _b647
 
-try:
-    import anthropic as _ant7
-    _ANT7_OK = True
-except ImportError:
-    _ANT7_OK = False
+from IPython.display import Markdown
+from panel_art.interpret import (
+    Corpus, InterpretationStore, Interpreter,
+    build_cluster_prompt, build_panel_prompt,
+    cluster_context_lines, compute_cluster_stats, corpus_scale,
+    render_clusters_markdown, render_panel_markdown,
+)
+from panel_art.layout import render_layout_text
 
-btn_interp_motif = widgets.Button(description="Interpret Motif", button_style="info",
-    layout=widgets.Layout(width="160px"))
-btn_interp_panel = widgets.Button(description="Interpret Panel", button_style="",
-    layout=widgets.Layout(width="160px"))
-out_interp = widgets.Output()
+INTERPRET_DIR = _ANA / "interpretation"
+_store = InterpretationStore(INTERPRET_DIR)
+_store.ensure_dirs()
+
+_interp_state = {
+    "corpus": None,
+    "stats": {},
+    "briefs": _store.load_clusters(),
+    "readings": _store.load_panels(),
+}
 
 
-def _img_b64(pil_img, max_d=512):
-    img = pil_img.copy()
-    img.thumbnail((max_d, max_d), Image.LANCZOS)
-    buf = _gio.BytesIO(); img.save(buf, "PNG")
-    return _b647.standard_b64encode(buf.getvalue()).decode()
+def _interp_corpus(rebuild=False):
+    \"\"\"Build a Corpus over the approved motifs, reusing Stage 2's embeddings.\"\"\"
+    if _interp_state["corpus"] is None or rebuild:
+        embeddings = _cl_state.get("embeddings") if "_cl_state" in globals() else None
+        keys = _cl_state.get("motif_keys") if "_cl_state" in globals() else None
+        corpus = Corpus.from_pipeline_state(PS, embeddings, keys)
+        _interp_state["corpus"] = corpus
+        _interp_state["stats"] = compute_cluster_stats(corpus)
+    return _interp_state["corpus"]
 
 
-def _interp_motif(_=None):
+def _interp_client():
+    if not _os7.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("ANTHROPIC_API_KEY not set — Layout still works without it")
+    return Interpreter(model=w_interp_model.value, effort=w_interp_effort.value)
+
+
+def _selected_motif(corpus):
     included = PS.included_motifs()
     idx = _gal_state.get("cursor", 0)
-    if idx >= len(included): return
-    m = included[idx]
-    key = _os7.environ.get("ANTHROPIC_API_KEY")
-    if not key or not _ANT7_OK:
-        with out_interp: print("ANTHROPIC_API_KEY not set"); return
-
-    btn_interp_motif.description = "Thinking..."
-    btn_interp_motif.disabled = True
-    out_interp.clear_output()
-
-    try:
-        client = _ant7.Anthropic(api_key=key)
-        content = []
-
-        # Crop
-        crop_b64 = _img_b64(PS.crop(m))
-        content.append({"type": "text", "text": "Motif crop:"})
-        content.append({"type": "image",
-            "source": {"type": "base64", "media_type": "image/png", "data": crop_b64}})
-
-        # Panel context
-        panel_img = PS.panel_image(m.panel_stem)
-        from PIL import ImageDraw
-        pdraw = panel_img.copy()
-        drw = ImageDraw.Draw(pdraw)
-        b = m.bbox
-        drw.rectangle([b["x"], b["y"], b["x"]+b["w"], b["y"]+b["h"]],
-                      outline=(0, 255, 64), width=4)
-        panel_b64 = _img_b64(pdraw, max_d=800)
-        content.append({"type": "text", "text": "Full panel (motif highlighted in green):"})
-        content.append({"type": "image",
-            "source": {"type": "base64", "media_type": "image/png", "data": panel_b64}})
-
-        label_ctx = f" Currently labeled: {m.label}." if m.label else ""
-        content.append({"type": "text", "text":
-            f"This is a carved motif from a Yoruba door panel (Frobenius archive). "
-            f"Panel: {m.panel_stem}. Scale: {m.scale}. Cluster: {m.cluster}.{label_ctx}\\n\\n"
-            "Provide a detailed interpretation of this motif:\\n"
-            "1. What does it depict visually?\\n"
-            "2. What is its likely cultural/iconographic significance in Yoruba art?\\n"
-            "3. How does it relate to the surrounding panel composition?"
-        })
-
-        resp = client.messages.create(
-            model="claude-sonnet-4-20250514", max_tokens=800,
-            messages=[{"role": "user", "content": content}])
-        out_interp.clear_output()
-        with out_interp:
-            print(resp.content[0].text)
-    except Exception:
-        out_interp.clear_output()
-        with out_interp: import traceback; traceback.print_exc()
-    finally:
-        btn_interp_motif.description = "Interpret Motif"
-        btn_interp_motif.disabled = False
+    if not included or idx >= len(included):
+        return None
+    return corpus.by_key(included[idx].motif_key)
 
 
-def _interp_panel(_=None):
+def _current_stem(corpus):
     stem = _seg_state.get("stem")
-    if not stem:
-        with out_interp: print("Select a panel in Stage 1 first"); return
-    key = _os7.environ.get("ANTHROPIC_API_KEY")
-    if not key or not _ANT7_OK:
-        with out_interp: print("ANTHROPIC_API_KEY not set"); return
+    if stem:
+        return stem
+    motif = _selected_motif(corpus)
+    return motif.panel_stem if motif else None
 
-    btn_interp_panel.description = "Thinking..."
-    btn_interp_panel.disabled = True
+
+# ── Widgets ───────────────────────────────────────────────────────────────────
+w_interp_model = widgets.Dropdown(
+    options=["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5"],
+    value="claude-opus-5", description="Model:",
+    layout=widgets.Layout(width="260px"))
+w_interp_effort = widgets.Dropdown(
+    options=["low", "medium", "high", "xhigh", "max"], value="high",
+    description="Effort:", layout=widgets.Layout(width="200px"))
+
+btn_interp_layout = widgets.Button(description="Layout", button_style="",
+    layout=widgets.Layout(width="130px"),
+    tooltip="Registers, symmetry, nesting — computed, no API call")
+btn_interp_cluster = widgets.Button(description="Cluster Brief", button_style="info",
+    layout=widgets.Layout(width="150px"),
+    tooltip="Characterise the selected motif's family across the whole corpus")
+btn_interp_panel = widgets.Button(description="Panel Reading", button_style="info",
+    layout=widgets.Layout(width="150px"),
+    tooltip="Read the current panel register by register, using the cluster briefs")
+btn_interp_corpus = widgets.Button(description="Corpus Synthesis", button_style="success",
+    layout=widgets.Layout(width="170px"),
+    tooltip="Join every brief and reading into a single interpretation")
+
+out_interp = widgets.Output()
+out_interp_status = widgets.Output()
+
+
+def _interp_status():
+    out_interp_status.clear_output()
+    with out_interp_status:
+        scale = corpus_scale(_interp_corpus())
+        print(f"{scale['panels']} panels | {scale['motifs']} motifs | "
+              f"{scale['clusters']} families | {scale['labelled']} labelled")
+        print(f"Briefs: {len(_interp_state['briefs'])}/{scale['clusters']}  |  "
+              f"Readings: {len(_interp_state['readings'])}/{scale['panels']}  |  "
+              f"Corpus essay: {'yes' if _store.corpus_path.exists() else 'no'}")
+        print(f"Saved under {INTERPRET_DIR}")
+
+
+def _interp_busy(button, label):
+    button._label = button.description
+    button.description = label
+    button.disabled = True
+
+
+def _interp_done(button):
+    button.description = getattr(button, "_label", button.description)
+    button.disabled = False
+
+
+# ── Layout (no API) ───────────────────────────────────────────────────────────
+def _on_layout(_=None):
     out_interp.clear_output()
+    corpus = _interp_corpus(rebuild=True)
+    stem = _current_stem(corpus)
+    with out_interp:
+        if not stem:
+            print("Select a panel in Stage 1, or a motif in the gallery, first")
+            return
+        layout = corpus.layout_for(stem)
+        _store.save_layout(stem, layout)
+        print(render_layout_text(layout))
+        print(f"\\nSaved to {_store.layouts_dir / (stem + '.json')}")
+    _interp_status()
 
+
+# ── Pass 1: cluster brief ─────────────────────────────────────────────────────
+def _on_cluster(_=None):
+    out_interp.clear_output()
+    corpus = _interp_corpus(rebuild=True)
+    motif = _selected_motif(corpus)
+    if motif is None or motif.cluster < 0:
+        with out_interp:
+            print("Select a clustered motif in the gallery first "
+                  "(unclustered motifs have no family to brief)")
+        return
+
+    stats = _interp_state["stats"].get(motif.cluster)
+    _interp_busy(btn_interp_cluster, "Thinking...")
     try:
-        client = _ant7.Anthropic(api_key=key)
-        content = []
+        with out_interp:
+            print(f"Briefing cluster {motif.cluster} ({stats.size} motifs across "
+                  f"{stats.panel_spread} panel(s))...")
+        brief = _interp_client().cluster_brief(corpus, stats)
+        _interp_state["briefs"][str(motif.cluster)] = brief
+        _store.save_clusters(_interp_state["briefs"])
+        (INTERPRET_DIR / "clusters.md").write_text(
+            render_clusters_markdown(_interp_state["briefs"]), encoding="utf-8")
 
-        # Panel image with all bboxes drawn
-        panel_img = PS.panel_image(stem)
-        from PIL import ImageDraw
-        pdraw = panel_img.copy()
-        drw = ImageDraw.Draw(pdraw)
-        motifs = [m for m in PS.motifs_for_panel(stem) if m.included]
-        motif_desc = []
-        for m in motifs:
-            b = m.bbox
-            drw.rectangle([b["x"], b["y"], b["x"]+b["w"], b["y"]+b["h"]],
-                          outline=(0, 255, 64), width=3)
-            drw.text((b["x"]+4, b["y"]+4), str(m.index), fill=(0, 255, 64))
-            desc = f"#{m.index} ({m.scale})"
-            if m.label: desc += f" - {m.label}"
-            motif_desc.append(desc)
-
-        panel_b64 = _img_b64(pdraw, max_d=1000)
-        content.append({"type": "text", "text": "Panel with all detected motifs highlighted:"})
-        content.append({"type": "image",
-            "source": {"type": "base64", "media_type": "image/png", "data": panel_b64}})
-
-        motif_list = "\\n".join(motif_desc)
-        content.append({"type": "text", "text":
-            f"This is a Yoruba carved door panel: {stem}\\n"
-            f"Detected motifs:\\n{motif_list}\\n\\n"
-            "Interpret the panel as a whole:\\n"
-            "1. What narrative or scene does it depict?\\n"
-            "2. How do the individual motifs relate to each other compositionally?\\n"
-            "3. What cultural/ceremonial context might this panel represent?"
-        })
-
-        resp = client.messages.create(
-            model="claude-sonnet-4-20250514", max_tokens=1000,
-            messages=[{"role": "user", "content": content}])
         out_interp.clear_output()
         with out_interp:
-            print(resp.content[0].text)
+            display(HTML(f"<h4>Cluster {motif.cluster}: {brief.get('name', '?')}</h4>"))
+            for key in ("visual_definition", "variation", "distribution_note",
+                        "iconographic_reading", "relation_to_neighbours"):
+                if brief.get(key):
+                    display(HTML(f"<b>{key.replace('_', ' ').title()}.</b> {brief[key]}"))
+            display(HTML(f"<i>Confidence: {brief.get('confidence', '?')}</i>"))
+            for q in brief.get("open_questions", []):
+                print(f"  ? {q}")
     except Exception:
         out_interp.clear_output()
-        with out_interp: import traceback; traceback.print_exc()
+        with out_interp:
+            import traceback; traceback.print_exc()
     finally:
-        btn_interp_panel.description = "Interpret Panel"
-        btn_interp_panel.disabled = False
+        _interp_done(btn_interp_cluster)
+        _interp_status()
 
 
-btn_interp_motif.on_click(_interp_motif)
-btn_interp_panel.on_click(_interp_panel)
+# ── Pass 2: panel reading ─────────────────────────────────────────────────────
+def _on_panel(_=None):
+    out_interp.clear_output()
+    corpus = _interp_corpus(rebuild=True)
+    stem = _current_stem(corpus)
+    if not stem:
+        with out_interp:
+            print("Select a panel in Stage 1 first")
+        return
+
+    _interp_busy(btn_interp_panel, "Thinking...")
+    try:
+        with out_interp:
+            n_briefs = len(_interp_state["briefs"])
+            print(f"Reading {stem} with {n_briefs} cluster brief(s) as context...")
+            if not n_briefs:
+                print("  (no briefs yet — run Cluster Brief first for corpus-aware readings)")
+        reading = _interp_client().panel_reading(
+            corpus, stem, _interp_state["briefs"], _interp_state["stats"])
+        _interp_state["readings"][stem] = reading
+        _store.save_panel(stem, reading)
+
+        out_interp.clear_output()
+        with out_interp:
+            display(Markdown(render_panel_markdown(reading)))
+    except Exception:
+        out_interp.clear_output()
+        with out_interp:
+            import traceback; traceback.print_exc()
+    finally:
+        _interp_done(btn_interp_panel)
+        _interp_status()
+
+
+# ── Pass 3: corpus synthesis ──────────────────────────────────────────────────
+def _on_corpus(_=None):
+    out_interp.clear_output()
+    corpus = _interp_corpus(rebuild=True)
+    briefs, readings = _interp_state["briefs"], _interp_state["readings"]
+    if not briefs and not readings:
+        with out_interp:
+            print("Nothing to synthesise yet — run Cluster Brief and Panel Reading first")
+        return
+
+    _interp_busy(btn_interp_corpus, "Thinking...")
+    try:
+        with out_interp:
+            print(f"Synthesising {len(briefs)} families and {len(readings)} panel "
+                  "readings into one interpretation... (this is the slowest pass)")
+        markdown = _interp_client().corpus_synthesis(
+            briefs, readings, corpus_scale(corpus))
+        _store.save_corpus(markdown)
+
+        out_interp.clear_output()
+        with out_interp:
+            display(Markdown(markdown))
+    except Exception:
+        out_interp.clear_output()
+        with out_interp:
+            import traceback; traceback.print_exc()
+    finally:
+        _interp_done(btn_interp_corpus)
+        _interp_status()
+
+
+btn_interp_layout.on_click(_on_layout)
+btn_interp_cluster.on_click(_on_cluster)
+btn_interp_panel.on_click(_on_panel)
+btn_interp_corpus.on_click(_on_corpus)
 
 display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 5: Interpret</h3>"),
     widgets.HTML("<div style='font-size:12px;color:#999;margin-bottom:6px'>"
-        "Interpret Motif: the selected motif in its panel context. "
-        "Interpret Panel: all motifs on the current panel as a composition.</div>"),
-    widgets.HBox([btn_interp_motif, btn_interp_panel]),
-    out_interp,
-)\
+        "Three widening passes, each feeding the next: "
+        "<b>Cluster Brief</b> characterises the selected motif's family across every "
+        "panel; <b>Panel Reading</b> reads the current panel register by register "
+        "using those briefs; <b>Corpus Synthesis</b> joins everything into one "
+        "interpretation. <b>Layout</b> shows the geometry the model is given — "
+        "no API call.</div>"),
+    widgets.HBox([w_interp_model, w_interp_effort]),
+    widgets.HBox([btn_interp_layout, btn_interp_cluster,
+                  btn_interp_panel, btn_interp_corpus]),
+    out_interp_status, out_interp,
+)
+_interp_status()\
 """))
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1796,11 +1964,24 @@ def _on_save_state(_=None):
             if any(m.included for m in motifs):
                 PS.save_approved(stem)
                 saved_panels += 1
-        path = PS.save_all_labels(LABELS_PATH)
-        n_lbl = sum(1 for m in PS.motifs if m.label)
+        # Only what was edited in this session, merged into whatever is on
+        # disk. The label file is shared with scripts/label_motifs.py and with
+        # other labellers, so writing every in-memory label would regress
+        # anything improved on disk while this kernel held a stale copy.
+        path, n_lbl = PS.save_all_labels(LABELS_PATH, only_changed=True)
         print(f"Saved: {saved_panels} panel _approved.json files "
               f"(bboxes + source + timestamps)")
-        print(f"Saved: {n_lbl} labels + cluster assignments to {path.name}")
+        print(f"Saved: {n_lbl} label(s) edited this session, merged into {path.name}"
+              if n_lbl else f"Labels: nothing edited this session ({path.name} untouched)")
+
+        # Clusters go to their own file. Previously they rode along inside
+        # label records, so every unlabelled motif lost its assignment here.
+        n_cl = sum(1 for m in PS.motifs if m.included and m.cluster >= 0)
+        if n_cl:
+            cpath = PS.save_clusters(CLUSTERS_PATH)
+            print(f"Saved: {n_cl} cluster assignments to {cpath.name}")
+        else:
+            print("No cluster assignments to save (run Stage 2 first)")
 
 
 def _on_export_crops(_=None):
@@ -1882,5 +2063,97 @@ nb = {
 }
 
 out = Path(__file__).parent / "motif_pipeline.ipynb"
-out.write_text(json.dumps(nb, indent=1, ensure_ascii=False))
-print(f"Written: {out}  ({out.stat().st_size // 1024} KB)")
+
+
+def merge_with_existing(nb: dict, existing_path: Path) -> dict:
+    """Fold the generated notebook into whatever is already on disk.
+
+    The checked-in notebook is not purely generated. It is also an executed
+    record of a run, it carries the collapse state its author set in
+    JupyterLab, and it has been hand-extended in Colab with setup cells this
+    script knows nothing about (Drive mount, clone, pip install). Regenerating
+    must not silently discard any of that, so this merges rather than
+    overwrites:
+
+    - **Foreign cells** — anything on disk this script does not generate — are
+      kept verbatim, in place. They are somebody's hand-authored work.
+    - **Cell metadata** (``jupyter.source_hidden``, Colab's ``@title`` state)
+      is a display preference about the cell, not about the code in it, so it
+      survives an edit to the source.
+    - **Outputs** are only carried over when the source is unchanged; stale
+      output shown under new code is worse than no output.
+    - **Notebook-level metadata** (``colab``, ``widgets``) is preserved, with
+      the generated kernelspec filling in anything absent.
+
+    A generated cell whose on-disk source has *diverged* from what this script
+    produces is also left alone, and reported. The notebook has been adapted
+    for Colab in place (environment resolution in Stage 1, a matplotlib backend
+    fallback in Stage 2), so blindly overwriting would undo that. Pass
+    ``--force`` once you have folded those edits back into this file and want
+    the generated source to win.
+    """
+    generated = nb["cells"]
+    if not existing_path.exists():
+        return nb
+    try:
+        previous = json.loads(existing_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return nb
+
+    force = "--force" in sys.argv
+    gen_by_id = {c["id"]: c for c in generated}
+    merged: list[dict] = []
+    placed: set[str] = set()
+    diverged: list[str] = []
+    kept_outputs = kept_metadata = foreign = 0
+
+    for old in previous.get("cells", []):
+        cid = old.get("id")
+        cell = gen_by_id.get(cid)
+        if cell is None:                      # hand-authored — not ours to touch
+            merged.append(old)
+            foreign += 1
+            continue
+        if old.get("source") != cell["source"] and not force:
+            # Diverged: either this script changed, or somebody edited the
+            # notebook directly. Keeping the on-disk version is the safe
+            # default — a lost hand-edit is unrecoverable, a skipped
+            # regeneration is not.
+            diverged.append(cid)
+            merged.append(old)
+            placed.add(cid)
+            continue
+        if old.get("metadata"):
+            cell["metadata"] = old["metadata"]
+            kept_metadata += 1
+        if old.get("outputs") and old.get("source") == cell["source"]:
+            cell["outputs"] = old["outputs"]
+            cell["execution_count"] = old.get("execution_count")
+            kept_outputs += 1
+        merged.append(cell)
+        placed.add(cid)
+
+    # Generated cells the previous notebook did not have (a newly added stage).
+    merged.extend(c for c in generated if c["id"] not in placed)
+
+    # Preserve the existing key order; only add what is missing. Reordering
+    # metadata that Colab wrote produces a diff carrying no content change.
+    metadata = dict(previous.get("metadata", {}))
+    for key, value in nb["metadata"].items():
+        metadata.setdefault(key, value)
+    nb = {**nb, "cells": merged, "metadata": metadata}
+
+    print(f"  merged with existing: kept {foreign} hand-authored cell(s), "
+          f"outputs for {kept_outputs}, metadata for {kept_metadata}")
+    if diverged:
+        print(f"  SKIPPED {len(diverged)} generated cell(s) whose on-disk source has "
+              f"diverged: {', '.join(diverged)}")
+        print("    The notebook was adapted in place (Colab setup, backend fallback).")
+        print("    Fold those edits into this script, or re-run with --force to")
+        print("    overwrite them with the generated source.")
+    return nb
+
+
+nb = merge_with_existing(nb, out)
+out.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n")
+print(f"Written: {out}  ({out.stat().st_size // 1024} KB, {len(nb['cells'])} cells)")

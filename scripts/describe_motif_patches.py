@@ -49,6 +49,9 @@ except ImportError:
 
 from PIL import Image
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from panel_art.interpret import text_of  # noqa: E402
+
 # ─── Prompt ───────────────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT = """\
@@ -151,7 +154,9 @@ def describe_patch(
                     ],
                 }],
             )
-            raw = response.content[0].text.strip()
+            # Not content[0]: on models with thinking on by default the
+            # first block is a thinking block, which has no .text.
+            raw = text_of(response)
 
             # Parse JSON
             try:

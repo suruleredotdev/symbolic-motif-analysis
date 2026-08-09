@@ -63,4 +63,8 @@ package = true
 [dependency-groups]
 dev = [
     "jupyterlab>=4.6.2",
+    "pytest>=8.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
