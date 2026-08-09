@@ -169,6 +169,8 @@ panel_art/                  Core package — the 5-phase pipeline
   similarity.py                 Phase 5: Hu moments/embeddings + HDBSCAN
   layout.py                     Phase 6: registers, symmetry, nesting from bboxes
   interpret.py                  Phase 6: cluster briefs → panel readings → synthesis
+  site_template.py              Phase 7: the exported page — chrome, views, cross-links
+  brand.py                      surulere.dev mark and background tiles, inlined
   pipeline.py                   CLI orchestration of Phases 1-5
   pipeline_state.py              Run tracking / staleness checks (HITL Phase 2)
 
@@ -179,12 +181,16 @@ scripts/                    Standalone data-prep & pipeline utility scripts
   embed_motif_patches.py         CLIP (ViT-L/14) + DINOv2 (ViT-L/14) embeddings
   describe_motif_patches.py      Claude-generated structured visual descriptions
   interpret_motifs.py            Phase 6 driver (cluster/panel/corpus stages)
+  label_motifs.py                Label propagation from cluster briefs / per motif
+  export_interpretation_site.py  Phase 7: analysis + interpretation → one HTML file
   dino_perceptual_hash_demo.py   DINO-based perceptual hashing experiment
 
 tests/                      pytest suite for the deterministic layers
   test_layout.py                 Register/symmetry/containment geometry
   test_interpret.py              Corpus loading, cluster stats, prompt assembly
   test_interpret_cli.py          CLI stages, resume, failure handling
+  test_export_site.py            Payload assembly, cross-reference aliases, page shell
+  test_pipeline_state.py         Run tracking / staleness checks
 
 extract_crops.py            PNG crop extraction from SAM detections (geometric
                              containment filtering to drop sub-crop artefacts)
@@ -331,10 +337,7 @@ See [`INTERPRETATION.md`](./INTERPRETATION.md) for the design.
 
 **The shippable artifact.** `export_interpretation_site.py` turns the
 interpretation into one self-contained HTML page — every panel image and motif
-crop embedded, no server and no asset directory. Each panel is presented as an
-annotated plate: numbered detection boxes tinted by motif family, the recovered
-registers drawn as bands, and an apparatus column carrying the panel's reading
-and, when a box is selected, that motif's annotation and its family.
+crop embedded as a data URI, no server, no asset directory, no build step.
 
 ```bash
 uv run python scripts/export_interpretation_site.py \
@@ -344,11 +347,44 @@ uv run python scripts/export_interpretation_site.py \
 # → analysis/interpretation/site.html
 ```
 
+The page is four views over one corpus, in the surulere.dev tool chrome
+(`design-system.md` in `suruleredotdev/african-artifacts`):
+
+| View | Gallery | Detail |
+|---|---|---|
+| **Plates** | every panel, tinted by the families on it | the annotated plate — detection boxes over the image, registers as bands |
+| **Motifs** | every crop, grouped by family, panel, or label | the motif zoomed, with its place on the plate and its family beside it |
+| **Families** | one card per cluster, with exemplars | — |
+| **Synthesis** | the corpus essay | — |
+
+Three regions stay in sync: the centre holds the object, the right column
+holds what has been *said* about it (corpus brief → object → plate reading →
+motif annotation and its family), and the bottom row holds what is *known*
+about it. Breadcrumbs and the browser's Back button walk in and out of a
+detail; the whole location lives in the URL hash, so any depth can be linked.
+
+**Prose is navigation.** Panel stems and object ids named inside a reading or
+the synthesis become links to the plate they name — a sentence like "six of
+nine members come from a single object (EBA-Div_00302)" can be *checked*.
+Three spellings resolve: the full stem, the object, and the bare catalogue
+number. `#3` inside a plate's reading links to that detection.
+
 It needs no API key and degrades on partial data: panels without a reading
 still render with their motifs and geometry, families without a brief still
-show their members and statistics. Arrow keys walk a plate in the reading order
-the layout pass computed. Use `--max-dim` / `--quality` to trade file size
-against image detail.
+show their members and statistics. Arrow keys walk a plate in the reading
+order the layout pass computed.
+
+| Flag | Effect |
+|---|---|
+| `--max-dim` / `--quality` | trade file size against image detail |
+| `--no-motif-crops` | embed only family exemplars — smaller file, no motif thumbnails |
+| `--panels STEM…` | limit to some plates (families still span the corpus) |
+| `--fragment` | drop the `<html>`/`<head>` wrapper, for a host that supplies its own |
+
+The default output is a whole document — doctype, charset, viewport meta,
+inlined favicon — so it works opened off disk and is responsive on a phone.
+Nothing is fetched at runtime; the only external URL in the file is the
+masthead link back to surulere.dev.
 
 **Bootstrapping labels.** Cluster briefs work on a corpus with zero labels,
 so the fastest route to a complete v1 is to let them seed the labels:
@@ -419,6 +455,16 @@ Edit `subset_panels.txt` to change the selection, or pass `--list`. Use
 
 Each bundle gets a `MANIFEST.md` recording its panels and source catalogue
 numbers. See [`TERMS.md`](./TERMS.md) before sharing one onward.
+
+**What not to commit.** `analysis/` and `frobenius_artifacts/` stay gitignored:
+they are large, fully regenerable from the pipeline, and the panel PNGs inherit
+the source photographs' licensing. Nothing in them needs to be in the repo for
+the site to exist — `export_interpretation_site.py` embeds every image it needs
+as a data URI, so the built `site.html` is a complete, standalone copy of the
+state of the analysis at the moment it was built. Ship *that* (or host it), and
+leave the artifacts where they are. The same licensing question applies to the
+built page as to a subset bundle, since the images travel inside it: read
+`TERMS.md` first, and use `--panels` to narrow what a shared copy contains.
 
 Upload the staging directory to the shared Drive folder:
 
