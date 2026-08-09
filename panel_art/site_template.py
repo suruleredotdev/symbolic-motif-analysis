@@ -348,6 +348,46 @@ PAGE = r"""<div id="layout">
   text-transform: uppercase; color: var(--txt-color-annotation);
   margin-bottom: .3rem;
 }
+/* The masthead of a card: counts, then faces, then a rule the prose sits
+   under. Ruled off rather than merely spaced, so the eye can tell at once
+   where the measurements stop and the claims start. */
+.summary {
+  display: flex; flex-direction: column; gap: .45rem;
+  margin: .5rem 0 .1rem; padding-bottom: .6rem;
+  border-bottom: 1px dashed var(--border-color);
+}
+.summary + p, .summary + .serif, .summary + .empty { margin-top: .55rem; }
+.tally {
+  display: flex; flex-wrap: wrap; gap: .1rem .75rem;
+  font-family: var(--mono); font-size: .72rem; line-height: 1.5;
+}
+.tally b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.tally .k { color: var(--txt-color-annotation); }
+
+/* A legend, not a gallery — small enough that eight fit without scrolling. */
+.fam-row {
+  display: grid; gap: .35rem;
+  grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr));
+  margin-top: .1rem;
+}
+.fam-row button {
+  border: var(--border-width) dashed var(--border-color);
+  padding: .2rem; text-align: left; min-width: 0;
+  transition: border-color .2s ease;
+}
+.fam-row button:hover { border-style: solid; }
+.fam-row button.is-on { border-style: solid; border-color: var(--accent-color); }
+.fam-row img, .fam-row .blank {
+  display: block; width: 100%; aspect-ratio: 1; object-fit: contain;
+  background: var(--sunk);
+}
+.fam-row .cap {
+  display: flex; align-items: center; gap: .25rem;
+  font-family: var(--mono); font-size: .62rem; line-height: 1.3; padding-top: .15rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.fam-row .cap.dim { color: var(--txt-color-annotation); display: block; }
+
 dl.meta {
   display: grid; grid-template-columns: auto 1fr; gap: .15rem .7rem;
   margin: .55rem 0 0; font-size: .74rem;
@@ -1178,27 +1218,16 @@ function renderFamiliesView() {
     + ids.map((cid) => {
         const f = DATA.families[cid];
         const on = state.family === Number(cid);
-        const crops = (f.exemplars || []).map((key) => {
-          const src = cropOf(key), ref = MOTIF_BY_KEY.get(key);
-          if (!src || !ref) return "";
-          return `<button data-motif="${esc(key)}" data-zoom="1"
-            title="${esc(ref.p.stem)} #${ref.m.index}">
-            <img src="${src}" alt="${esc(ref.p.stem)} motif ${ref.m.index}" loading="lazy">
-          </button>`;
-        }).join("");
         return `<div class="card${on ? " is-active" : ""}"
                      style="${on ? "border-style:solid" : ""}">
           <div class="eyebrow">Cluster ${cid}</div>
           <h3><span class="swatch" style="background:${familyColor(Number(cid))}"></span>
             ${esc(f.name || "Unnamed family")}</h3>
+          ${familySummary(Number(cid), f, 12)}
           ${f.visual_definition ? `<p class="serif">${esc(f.visual_definition)}</p>` : ""}
           ${f.iconographic_reading ? `<p class="serif"><em>${esc(f.iconographic_reading)}</em></p>` : ""}
-          <dl class="meta">
-            <dt>members</dt><dd>${f.size}</dd>
-            <dt>plates</dt><dd>${f.panel_spread}</dd>
-            <dt>cohesion</dt><dd>${f.cohesion == null ? "&mdash;" : f.cohesion.toFixed(3)}</dd>
-          </dl>
-          <div class="strip">${crops}</div>
+          ${f.visual_definition || f.iconographic_reading ? "" :
+            `<p class="empty">No brief written for this family yet.</p>`}
           <div class="chips"><button class="chip${on ? " is-on" : ""}" data-family="${cid}">
             ${on ? "brief shown" : "show brief"}</button></div>
         </div>`;
@@ -1214,6 +1243,47 @@ function renderSynthesisView() {
     DATA.synthesis || `<p class="empty">No corpus synthesis has been generated yet.</p>`
   }</article>`;
   linkifyRefs(host);
+}
+
+/* ══ Card summaries ═══════════════════════════════════════════════════════
+   A brief is a wall of prose, and prose is the wrong thing to meet first.
+   Every summarising card therefore opens with what it is made of — the counts,
+   then the faces — and only then makes its claim.  Counts read value-first
+   ("6 members · 5 plates") because at a glance the number is the news. */
+
+const tally = (...pairs) =>
+  `<div class="tally">` + pairs
+    .filter(([, v]) => v !== null && v !== undefined && v !== "")
+    .map(([k, v]) => `<span><b>${v}</b> <span class="k">${k}</span></span>`)
+    .join("") + `</div>`;
+
+/* Motif crops, as a row of buttons that open the motif they show. */
+function cropStrip(keys, limit) {
+  const faces = keys.slice(0, limit).map((key) => {
+    const src = cropOf(key), ref = MOTIF_BY_KEY.get(key);
+    if (!src || !ref) return "";
+    return `<button data-motif="${esc(key)}" data-zoom="1"
+      title="${esc(ref.p.stem)} #${ref.m.index}${ref.m.label ? " — " + esc(ref.m.label) : ""}">
+      <img src="${src}" alt="${esc(ref.p.stem)} motif ${ref.m.index}" loading="lazy"></button>`;
+  }).join("");
+  return faces ? `<div class="strip">${faces}</div>` : "";
+}
+
+/* Plates, likewise — the corpus's own thumbnails rather than its motifs'. */
+function plateStrip(panels, limit) {
+  const faces = panels.slice(0, limit).map((p) =>
+    `<button data-panel="${esc(p.stem)}" title="${esc(p.stem)} — ${
+      plural(p.motifs.length, "motif")}">
+      <img src="${p.image}" alt="Panel ${esc(p.stem)}" loading="lazy"></button>`).join("");
+  return faces ? `<div class="strip">${faces}</div>` : "";
+}
+
+function familySummary(cid, f, cropLimit) {
+  return `<div class="summary">`
+    + tally(["members", f.size], ["plates", f.panel_spread],
+            ["cohesion", f.cohesion == null ? null : f.cohesion.toFixed(3)],
+            ["confidence", f.confidence ? esc(f.confidence) : null])
+    + cropStrip(f.exemplars || [], cropLimit) + `</div>`;
 }
 
 /* ══ Sidebar ══════════════════════════════════════════════════════════════
@@ -1245,31 +1315,37 @@ function renderSidebar() {
 function corpusCard() {
   const s = DATA.scale;
   const top = Object.entries(DATA.families)
-    .sort((a, b) => b[1].size - a[1].size).slice(0, 6);
+    .sort((a, b) => b[1].size - a[1].size).slice(0, 8);
   return `<div class="card">
     <div class="eyebrow">The corpus</div>
     <h3>${esc(DATA.title)}</h3>
+    <div class="summary">
+      ${tally(["plates", s.panels], ["objects", OBJECTS.size], ["motifs", s.motifs],
+              ["families", s.clusters], ["labelled", s.labelled],
+              ["unclustered", s.unclustered], ["read", `${s.readings}/${s.panels}`])}
+      ${plateStrip(PANELS, 8)}
+    </div>
     ${DATA.synthesis_lead
-      ? `<div class="serif" style="margin-top:.45rem">${DATA.synthesis_lead}</div>`
+      ? `<div class="serif">${DATA.synthesis_lead}</div>`
       : `<p class="empty">No corpus synthesis has been generated yet — the plates,
-         motifs, and families below are what the pipeline recovered on its own.</p>`}
-    <dl class="meta">
-      <dt>plates</dt><dd>${s.panels}</dd>
-      <dt>objects</dt><dd>${OBJECTS.size}</dd>
-      <dt>motifs</dt><dd>${s.motifs}</dd>
-      <dt>labelled</dt><dd>${s.labelled}</dd>
-      <dt>families</dt><dd>${s.clusters}</dd>
-      <dt>unclustered</dt><dd>${s.unclustered}</dd>
-      <dt>plates read</dt><dd>${s.readings} of ${s.panels}</dd>
-    </dl>
+         motifs, and families above are what the pipeline recovered on its own.</p>`}
     ${DATA.synthesis ? `<div class="chips"><button class="chip" id="go-synthesis">
       Read the full synthesis</button></div>` : ""}
   </div>` + (top.length ? `<div class="card">
     <div class="eyebrow">Largest families</div>
-    <div class="chips">${top.map(([cid, f]) =>
-      `<button class="chip${state.family === Number(cid) ? " is-on" : ""}" data-family="${cid}">
-        <span class="swatch" style="background:${familyColor(Number(cid))}"></span>
-        ${esc(f.name || "cluster " + cid)} ${f.size}</button>`).join("")}</div>
+    <div class="fam-row">${top.map(([cid, f]) => {
+      const on = state.family === Number(cid);
+      const key = (f.exemplars || [])[0];
+      const src = key ? cropOf(key) : null;
+      return `<button data-family="${cid}" class="${on ? "is-on" : ""}"
+        title="${esc(f.name || "cluster " + cid)} — ${plural(f.size, "member")} across
+               ${plural(f.panel_spread, "plate")}">
+        ${src ? `<img src="${src}" alt="" loading="lazy">`
+              : `<span class="blank" style="background:${familyColor(Number(cid))}"></span>`}
+        <span class="cap"><span class="swatch"
+          style="background:${familyColor(Number(cid))}"></span>${f.size}</span>
+        <span class="cap dim">${esc(f.name || "cluster " + cid)}</span></button>`;
+    }).join("")}</div>
   </div>` : "");
 }
 
@@ -1386,26 +1462,22 @@ function familyCard(cid, expanded) {
   if (!f) return "";
   let html = `<div class="card"><div class="eyebrow">Motif family</div>`
     + `<h3><span class="swatch" style="background:${familyColor(cid)}"></span>`
-    + `${esc(f.name || `Cluster ${cid}`)}</h3>`;
-  for (const field of expanded
-      ? ["visual_definition", "variation", "distribution_note"] : ["visual_definition"]) {
-    if (f[field]) html += `<p class="serif">${esc(f[field])}</p>`;
+    + `${esc(f.name || `Cluster ${cid}`)}</h3>`
+    + familySummary(cid, f, expanded ? 12 : 6);
+
+  const fields = expanded
+    ? ["visual_definition", "variation", "distribution_note"] : ["visual_definition"];
+  let said = false;
+  for (const field of fields) {
+    if (f[field]) { html += `<p class="serif">${esc(f[field])}</p>`; said = true; }
   }
-  if (f.iconographic_reading) html += `<p class="serif"><em>${esc(f.iconographic_reading)}</em></p>`;
-  const rows = [
-    ["members", f.size],
-    ["plates", f.panel_spread],
-    ["cohesion", f.cohesion == null ? "&mdash;" : f.cohesion.toFixed(3)],
-    ["confidence", esc(f.confidence || "—")],
-  ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
-  html += `<dl class="meta">${rows}</dl>`;
-  if (expanded && (f.exemplars || []).length) {
-    html += `<div class="strip">${f.exemplars.map((key) => {
-      const src = cropOf(key), ref = MOTIF_BY_KEY.get(key);
-      return src && ref ? `<button data-motif="${esc(key)}" data-zoom="1"
-        title="${esc(ref.p.stem)} #${ref.m.index}"><img src="${src}"
-        alt="${esc(ref.p.stem)} motif ${ref.m.index}" loading="lazy"></button>` : "";
-    }).join("")}</div>`;
+  if (f.iconographic_reading) {
+    html += `<p class="serif"><em>${esc(f.iconographic_reading)}</em></p>`;
+    said = true;
+  }
+  if (!said) {
+    html += `<p class="empty">No brief written for this family yet — the counts
+      and members above are what the clustering found on its own.</p>`;
   }
   return html + `</div>`;
 }
