@@ -7,10 +7,13 @@ writes ONE self-contained HTML file: every panel image and motif crop is
 embedded as a data URI, so the result can be emailed, dropped on a static
 host, or opened straight off disk with no server and no asset directory.
 
-The page presents each panel as an annotated plate — numbered detection boxes
-over the image, tinted by motif family, with the recovered registers drawn as
-bands — beside an apparatus column carrying that panel's reading and, when a
-box is selected, that motif's annotation and its family.
+The page is four views over one corpus — plates, motifs, families, synthesis —
+in the surulere.dev tool chrome. Each is a gallery that opens into a detail,
+with the centre holding the object, the right column holding what has been
+*said* about it, and the bottom row holding what is *known* about it. Panel
+and object identifiers named inside a reading become links back to the plate
+they name, so a claim about the corpus can be checked rather than taken on
+faith.
 
 Degrades on partial data by design. Panels with no reading still render with
 their motifs and geometry; families with no brief still show their members and
@@ -41,6 +44,7 @@ import html
 import io
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -159,6 +163,50 @@ def markdown_to_html(text: str) -> str:
     return "\n".join(out)
 
 
+# ── Identifiers ──────────────────────────────────────────────────────────────
+
+_PANEL_SUFFIX = re.compile(r"_panel_\d+$")
+
+
+def object_id(stem: str) -> str:
+    """The source object a panel stem was cut from.
+
+    Panels are named `<object>_panel_NN`, so dropping the suffix recovers the
+    object — which is the unit the archive catalogues and the unit the readings
+    talk about ("six of nine members come from a single object").
+    """
+    return _PANEL_SUFFIX.sub("", stem)
+
+
+def reference_aliases(stems: list[str]) -> dict[str, list[str]]:
+    """Identifier → the panels it names, for turning prose into navigation.
+
+    Three spellings of the same thing all get registered, because a reading
+    may use any of them: the full stem, the object it came from, and the bare
+    catalogue number that opens the object id (`EBA-Div_00302` out of
+    `EBA-Div_00302_Ife_q166566_i1_panel_00`).  An alias has to carry a digit
+    and at least five characters to qualify, which is what keeps ordinary
+    prose words from being linkified.
+    """
+    refs: dict[str, list[str]] = {}
+
+    def register(alias: str, stem: str) -> None:
+        if len(alias) < 5 or not any(c.isdigit() for c in alias):
+            return
+        bucket = refs.setdefault(alias, [])
+        if stem not in bucket:
+            bucket.append(stem)
+
+    for stem in stems:
+        obj = object_id(stem)
+        register(stem, stem)
+        register(obj, stem)
+        parts = obj.split("_")
+        if len(parts) > 2:
+            register("_".join(parts[:2]), stem)
+    return refs
+
+
 # ── Payload assembly ─────────────────────────────────────────────────────────
 
 def build_payload(
@@ -169,11 +217,16 @@ def build_payload(
     crop_dim: int,
     quality: int,
     crops_per_family: int,
+    motif_crops: bool = True,
     verbose: bool = True,
 ) -> dict:
     briefs = store.load_clusters()
     readings = store.load_panels()
     stats = compute_cluster_stats(corpus, exemplars=crops_per_family)
+
+    # One crop per motif, keyed and shared: the motif gallery, the family
+    # exemplar strips, and the motif card all point at the same bytes.
+    crops: dict[str, str] = {}
 
     panels: list[dict] = []
     for n, stem in enumerate(stems, start=1):
@@ -189,8 +242,13 @@ def build_payload(
                   f"{len(layout.registers)} register(s)"
                   f"{'' if reading else ', no reading'}")
 
+        if motif_crops:
+            for motif in motifs:
+                _embed_crop(corpus, motif, crops, crop_dim, quality)
+
         panels.append({
             "stem": stem,
+            "object": object_id(stem),
             "title": (reading or {}).get("title") or stem,
             "width": corpus.panels[stem].width,
             "height": corpus.panels[stem].height,
@@ -206,6 +264,15 @@ def build_payload(
     families = {}
     for cid, st in stats.items():
         brief = briefs.get(str(cid), {})
+        exemplars = []
+        for key in st.exemplar_keys[:crops_per_family]:
+            motif = corpus.by_key(key)
+            if motif is None:
+                continue
+            if key not in crops and not _embed_crop(corpus, motif, crops,
+                                                    crop_dim, quality):
+                continue
+            exemplars.append(key)
         families[str(cid)] = {
             "name": brief.get("name"),
             "visual_definition": brief.get("visual_definition"),
@@ -216,25 +283,50 @@ def build_payload(
             "size": st.size,
             "panel_spread": st.panel_spread,
             "cohesion": st.cohesion,
-            "crops": _family_crops(corpus, st, crop_dim, quality, crops_per_family),
+            "exemplars": exemplars,
         }
 
     scale = corpus_scale(corpus)
     scale["readings"] = sum(1 for p in panels if p["reading"])
-    synthesis = (store.corpus_path.read_text(encoding="utf-8")
-                 if store.corpus_path.exists() else "")
+    synthesis = markdown_to_html(
+        store.corpus_path.read_text(encoding="utf-8")
+        if store.corpus_path.exists() else "")
 
     return {
+        "title": "Symbolic Motif Analysis",
+        "generated": date.today().isoformat(),
         "panels": panels,
         "families": families,
+        "crops": crops,
+        "refs": reference_aliases([p["stem"] for p in panels]),
         "scale": scale,
-        "synthesis": markdown_to_html(synthesis),
+        "synthesis": synthesis,
+        "synthesis_lead": _lead_paragraph(synthesis),
     }
+
+
+def _embed_crop(corpus, motif, crops: dict[str, str], crop_dim: int, quality: int) -> bool:
+    """Add `motif`'s crop to the shared index. False if the image is missing."""
+    if motif.key in crops:
+        return True
+    try:
+        crops[motif.key] = data_uri(corpus.crop(motif, padding=6), crop_dim, quality)
+    except (OSError, KeyError):                  # missing or unreadable panel PNG
+        return False
+    return True
+
+
+def _lead_paragraph(synthesis_html: str) -> str:
+    """The first paragraph of the synthesis, for the corpus card in the sidebar."""
+    match = re.search(r"<p>.*?</p>", synthesis_html, re.DOTALL)
+    return match.group(0) if match else ""
 
 
 def _motif_payload(motif, placement) -> dict:
     b = motif.bbox
     payload = {
+        "key": motif.key,
+        "panel_stem": motif.panel_stem,
         "index": motif.index,
         "x": b["x"], "y": b["y"], "w": b["w"], "h": b["h"],
         "cluster": motif.cluster,
@@ -269,24 +361,6 @@ def _reading_payload(reading: dict | None) -> dict | None:
     }
 
 
-def _family_crops(corpus, stats, crop_dim, quality, limit) -> list[dict]:
-    """Exemplar crops for a family — centroid-nearest when embeddings exist."""
-    crops = []
-    for key in stats.exemplar_keys[:limit]:
-        motif = corpus.by_key(key)
-        if motif is None:
-            continue
-        try:
-            crops.append({
-                "stem": motif.panel_stem,
-                "index": motif.index,
-                "src": data_uri(corpus.crop(motif, padding=6), crop_dim, quality),
-            })
-        except (OSError, KeyError):              # missing panel PNG
-            continue
-    return crops
-
-
 # ── CLI ──────────────────────────────────────────────────────────────────────
 
 def build_parser() -> argparse.ArgumentParser:
@@ -309,9 +383,16 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-dim", type=int, default=1400,
                    help="Longest edge for embedded panel images")
     p.add_argument("--crop-dim", type=int, default=160,
-                   help="Longest edge for embedded family crops")
+                   help="Longest edge for embedded motif crops")
     p.add_argument("--quality", type=int, default=82, help="JPEG quality")
-    p.add_argument("--crops-per-family", type=int, default=8)
+    p.add_argument("--crops-per-family", type=int, default=8,
+                   help="Exemplar crops shown per family")
+    p.add_argument("--no-motif-crops", action="store_true",
+                   help="Embed only family exemplars, not every motif — smaller "
+                        "file, but the motif gallery loses its thumbnails")
+    p.add_argument("--fragment", action="store_true",
+                   help="Emit the page without its <html>/<head> wrapper, for "
+                        "hosts that supply their own")
     return p
 
 
@@ -355,20 +436,22 @@ def main(argv: list[str] | None = None) -> int:
         corpus, store, stems,
         max_dim=args.max_dim, crop_dim=args.crop_dim, quality=args.quality,
         crops_per_family=args.crops_per_family,
+        motif_crops=not args.no_motif_crops,
     )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(render(payload), encoding="utf-8")
+    out_path.write_text(render(payload, standalone=not args.fragment), encoding="utf-8")
     size_mb = out_path.stat().st_size / 1_048_576
 
     print(f"\n{'═' * 68}")
     print(f"Wrote {out_path} ({size_mb:.1f} MB)")
     print(f"  {len(payload['panels'])} plates, {payload['scale']['readings']} with readings, "
-          f"{len(payload['families'])} families"
+          f"{len(payload['families'])} families, {len(payload['crops'])} crops"
           f"{', synthesis included' if payload['synthesis'] else ', no synthesis yet'}")
     if size_mb > 16:
         print("  WARNING: over 16 MB — too large to publish as an artifact. "
-              "Lower --max-dim or --quality, or split with --panels.")
+              "Lower --max-dim or --quality, drop --no-motif-crops in, "
+              "or split with --panels.")
     print(f"\nOpen it directly:  open {out_path}")
     return 0
 
