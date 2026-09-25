@@ -26,6 +26,11 @@ subset_share*.tar.gz
 # Per-labeller output from motif_labeling.ipynb (MOTIF_LABELER=<name>)
 motif_labels.*.json
 
+# Generated run logs and site exports (regenerable; see scripts/)
+interpretation-*.txt
+dry-run-*.txt
+*-plate.html
+
 # OS / editor cruft
 .DS_Store
 *.swp
