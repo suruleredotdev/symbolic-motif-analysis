@@ -40,3 +40,4 @@ dry-run-*.txt
 
 # Secrets
 .env
+*dry-run.txt
