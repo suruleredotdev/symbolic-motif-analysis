@@ -355,7 +355,8 @@ def _reading_payload(reading: dict | None) -> dict | None:
         return None
     return {
         key: reading.get(key) for key in (
-            "title", "summary", "composition", "narrative", "confidence",
+            "title", "object_type", "panel_type", "summary", "composition",
+            "narrative", "hypotheses", "confidence",
             "register_readings", "cross_panel_links", "uncertainties",
         )
     }

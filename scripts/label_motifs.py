@@ -50,6 +50,7 @@ from panel_art.interpret import (  # noqa: E402
     Corpus,
     InterpretationStore,
     Interpreter,
+    MOTIF_READING_SCHEMA,
     SYSTEM_PROMPT,
     compute_cluster_stats,
     encode_image,
@@ -61,22 +62,13 @@ from panel_art.pipeline_state import (  # noqa: E402
     motif_label_key,
 )
 
-GENERATED_SOURCES = {"llm", "cluster-brief", "llm-edited"}
+# Unreviewed model output. "llm-edited" means a person rewrote a model draft,
+# so it is protected like any other human label.
+GENERATED_SOURCES = {"llm", "cluster-brief"}
 
-MOTIF_LABEL_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "label": {"type": "string",
-                  "description": "2-4 words, snake_case, naming what this motif is"},
-        "description": {"type": "string",
-                        "description": "One sentence on what is visually present"},
-        "iconography": {"type": "string",
-                        "description": "Probable significance, or 'unclear'"},
-        "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
-    },
-    "required": ["label", "description", "iconography", "confidence"],
-    "additionalProperties": False,
-}
+# Kept under its old name for callers; the schema itself lives with the other
+# prompts in panel_art.interpret.
+MOTIF_LABEL_SCHEMA = MOTIF_READING_SCHEMA
 
 
 # ── Label store ──────────────────────────────────────────────────────────────
@@ -155,7 +147,9 @@ def run_from_briefs(corpus: Corpus, store: InterpretationStore, labels: dict,
             continue
 
         name = brief["name"]
-        description = brief.get("visual_definition", "")
+        # motif_gloss is written for one instance; visual_definition describes
+        # the family ("each member ..."), which reads wrongly on a single motif.
+        description = brief.get("motif_gloss") or brief.get("visual_definition", "")
         icon = brief.get("iconographic_reading", "") or "unclear"
         print(f"  cluster {cid} -> {name}  ({len(members)} motifs)")
 
@@ -179,9 +173,11 @@ def build_motif_prompt(corpus: Corpus, motif, brief: dict | None) -> str:
     placement = next((p for p in layout.placements if p.key == motif.key), None)
 
     lines = [
-        f"Label motif #{motif.index} on panel {motif.panel_stem}.",
+        f"Read motif #{motif.index} on {motif.panel_stem}.",
         "",
-        "The first image is the motif crop; the second is the whole panel for context.",
+        "The first image is the motif crop; the second is the whole object it is part "
+        "of. This motif is ONE element within that larger board — describe this "
+        "element, where it sits, and what it does in the whole, not a group of motifs.",
         "",
         "WHERE IT SITS:",
     ]
@@ -194,15 +190,24 @@ def build_motif_prompt(corpus: Corpus, motif, brief: dict | None) -> str:
     lines.append("PANEL STRUCTURE:")
     lines.append(render_layout_text(layout, max_relations=8))
 
+    neighbours = [m for m in corpus.motifs_for_panel(motif.panel_stem)
+                  if m.key != motif.key and m.label]
+    if neighbours:
+        lines += ["", "OTHER MOTIFS ON THE SAME OBJECT:"]
+        lines += [f"  {m.summary_line()}" for m in neighbours[:12]]
+
     if brief and brief.get("name"):
-        lines += ["", f"ITS FAMILY (cluster {motif.cluster}, characterised across the corpus):",
-                  f"  {brief['name']} — {brief.get('visual_definition', '')}",
+        family = brief.get("motif_gloss") or brief.get("visual_definition", "")
+        lines += ["", f"ITS VISUAL FAMILY (cluster {motif.cluster}, across the corpus):",
+                  f"  {brief['name']} — {family}",
                   f"  Iconography: {brief.get('iconographic_reading', 'unclear')}",
                   "",
-                  "Say where this motif departs from the family description, if it does."]
+                  "Say where this motif departs from the family, if it does."]
 
-    lines += ["", "Give a label for this motif specifically. Prefer the family's "
-                  "vocabulary where it fits, so labels stay comparable across the corpus."]
+    lines += ["", "Give a concise reading of this one motif: label, what is seen and "
+                  "where, its likely meaning (Yoruba context first, cross-cultural "
+                  "parallel second), and its role on the board. Prefer the family's "
+                  "vocabulary where it fits, so labels stay comparable."]
     return "\n".join(lines)
 
 
@@ -245,7 +250,9 @@ def run_per_motif(corpus: Corpus, store: InterpretationStore, labels: dict,
             print(f"    FAILED after {time.monotonic() - started:.0f}s: {exc}")
             continue
 
-        write_label(labels, motif, data.get("label", ""), data.get("description", ""),
+        description = " ".join(x for x in (data.get("description", ""),
+                                            data.get("role_on_board", "")) if x)
+        write_label(labels, motif, data.get("label", ""), description,
                     data.get("iconography", ""), source="llm",
                     notes=f"confidence: {data.get('confidence', '?')}")
         written += 1

@@ -101,10 +101,12 @@ class MotifView:
     notes: str | None = None
     label_source: str | None = None
 
-    # Sources a model wrote. Anything else — including a missing source on an
-    # older record — is treated as a person's assertion, which is the safe way
-    # round: it protects human work from being overwritten or discounted.
-    GENERATED_SOURCES = frozenset({"llm", "cluster-brief", "llm-edited"})
+    # Sources a model wrote unreviewed. Anything else — including a missing
+    # source on an older record — is treated as a person's assertion, which is
+    # the safe way round: it protects human work from being overwritten or
+    # discounted. "llm-edited" is a model draft a person rewrote, so it counts
+    # as theirs.
+    GENERATED_SOURCES = frozenset({"llm", "cluster-brief"})
 
     @property
     def has_text(self) -> bool:
@@ -565,27 +567,146 @@ def _attach_cluster_neighbours(
 # Prompt construction — separated from the API call so it can be inspected
 # ══════════════════════════════════════════════════════════════════════════════
 
-SYSTEM_PROMPT = """\
-You are an art historian specialising in West African visual culture, with deep \
-expertise in Yoruba carved wooden objects — door panels (ilekun), Ifa divination \
-boards (opon Ifa), house posts, and Benin relief plaques — and in the early \
-20th-century record of them, especially the Frobenius expeditions of 1910–1912.
+# The system prompt is assembled from named sections so each can be read,
+# tested and revised on its own. Order matters: who is reading, what the
+# project argues, what the collection is, what to reach for, how to write.
 
-You are reading the output of a computer-vision pipeline: motifs segmented from \
-archival photographs and pen-and-ink survey drawings, embedded with CLIP, and \
-clustered with HDBSCAN. The clusters are visual families discovered from the \
-data, not established iconographic categories, and the labels attached to them \
-are a mixture of human and model-generated guesses.
+ROLE = """\
+You are an anthropologist, art historian and scholar of symbolism. You read \
+Yoruba carved wood — door leaves (ilẹ̀kùn), house and veranda posts (òpó), Ifá \
+divination trays (ọpọ́n Ifá) and tappers (ìróké) — and the early 20th-century \
+record of it, above all the Frobenius expedition of 1910–12. You are also \
+practised in reading symbolic and early writing systems: how Egyptian \
+hieroglyphs were deciphered (the Rosetta Stone; Champollion's rebus, \
+determinative and phonetic-complement principles; figures facing the direction \
+of reading; registers as lines of text), how Maya glyphs were read (the \
+Dresden Codex; Knorozov; dynastic stelae recording accession, war, captives and \
+calendar counts), and the Yoruba sign-systems that sit between image and text: \
+àrokò object-messages, the binary signatures of the Ifá odù, and textile \
+pattern. You know cross-cultural symbolism (the ouroboros from Tutankhamun's \
+shrine to Byzantine alchemy, serpent, crocodile, horse, tortoise, monkey) well \
+enough to use it as comparison without letting it overwrite local meaning."""
 
-Work from what is visually present and from the evidence you are given. Where \
-you draw on knowledge of Yoruba iconography, mythology, or the Frobenius record, \
-say so explicitly and mark how confident you are. Distinguish clearly between \
-(a) what the image shows, (b) what the pipeline's grouping implies, and (c) what \
-you are inferring from cultural knowledge. Segmentation errors are common — a \
-detection may be a fragment, a duplicate, or an artefact of the photograph \
-rather than a carved element — so say when a reading depends on a detection you \
-doubt. Do not invent provenance, dates, or attributions that were not given to you.\
-"""
+THESIS = """\
+THE PROJECT'S WORKING THESIS (test it; do not assume it):
+The carved panels are an extension of oral history — a pictographic record \
+carried alongside a primarily oral tradition, the way stelae and codices \
+carried Egyptian and Maya history. Two hypotheses guide the reading:
+  1. Panels as chronicles. Some panels may be dynastic or civic chronicles: \
+sequences of crowned or enthroned figures (a king list such as the ~50 Ọọ̀ni \
+of Ifẹ̀), interspersed with scenes of war, tyranny, sacrifice and divination, \
+and with widely shared symbols of renewal and succession (the ouroboros / \
+coiled serpent).
+  2. Pattern as number. Woven, plaited and hatched bands may count something — \
+reigns, years, generations, or verses — the way an Ifá tray's marks index the \
+16 principal and 256 composite odù.
+James C. Scott's suggestion that 'pre-literate' peoples can be post-literate — \
+keeping knowledge in orality and material form in times of war and upheaval — \
+is why an encoded record in carving is plausible here. For every reading, say \
+plainly whether it supports, weakens, or does not bear on these hypotheses."""
+
+CORPUS_CONTEXT = """\
+THE COLLECTION AND ITS HISTORY:
+- Sources: photographs and pen-and-ink survey drawings from the Frobenius \
+Institute archive (EBA, FoA, KBA series), made during and after the German \
+Inner-African Expedition (D.I.A.F.E.) of 1910–12. Some KBA items are mount \
+sheets reproducing plates from Frobenius, Das unbekannte Afrika (1923).
+- Places: Ilé-Ifẹ̀, Modákẹ́kẹ́ (beside Ifẹ̀), Ado-Ekiti. Read place names from \
+file names and captions only.
+- Background worth knowing, for readings of war and rule: after Ọ̀yọ́ fell \
+(early 19th c.) Oyo refugees settled beside Ifẹ̀; Modákẹ́kẹ́ was founded for \
+them c. 1845 and fought Ifẹ̀ repeatedly (Ifẹ̀ fell in 1849 and 1882). In the \
+Kiriji / Ekitiparapọ war (1877–86) Ibadan, with Modákẹ́kẹ́, fought the \
+Ekiti–Ijesa confederacy (Ado-Ekiti among it), which Ifẹ̀ joined after Ibadan \
+and Modákẹ́kẹ́ attacked it in 1882; long-range imported rifles gave the war its \
+name. The 1886 settlement ordered Modákẹ́kẹ́ evacuated, which was carried out \
+in 1909; its people returned only in 1921. Ifẹ̀ had three Ọọ̀ni in 1910 \
+(Adélékàn Olúbùṣe I d. 1910; Adékọ́lá, two months; Adémilúyì Ajagun, 1910–30). \
+Ado-Ekiti's ruler is the Ewì. So the Modákẹ́kẹ́ objects were recorded in a \
+freshly emptied war town, and firearms, horses and captives on a carving are \
+period evidence, not only symbols.
+- Panel types to test for: chronicle of rulers; war and its structures \
+(warriors, rifles, cavalry, captives, walls); divination instruments; \
+architectural ornament; and documentation sheets (a drawing or plate about an \
+object, not the object)."""
+
+SYMBOL_NOTES = """\
+KNOWN AND RECURRING SYMBOLS (starting points, never conclusions):
+- Coiled serpent / ouroboros: renewal, continuity, succession, earth and \
+threshold power; compare Egyptian and Byzantine ouroboroi; Òṣùmàrè the \
+rainbow-serpent.
+- Horse and rider: rank, Ọ̀yọ́ cavalry power, war, arrival of a dignitary; \
+associated with Ṣàngó.
+- Crocodile, lizard, mudfish: water, liminality, Olókun and royal power (compare \
+Benin mudfish-legged kings); the agama lizard in origin stories.
+- Tortoise (Ìjàpá): cunning, longevity, trickster tales; offering animal.
+- Monkey: mimicry, trickery, Ẹ̀ṣù's mischief; masquerade.
+- Frontal face at the head of an Ifá tray: ojú ọpọ́n, conventionally Ẹ̀ṣù.
+- Kneeling figure: supplication, greeting, offering; figures holding rifles, \
+bows or cutlasses: warriors, guards, hunters.
+- Interlace / plait / guilloche: framing and binding; read against textile \
+(aṣọ olónà) — but, as Lisa Aronson warned of Yoruba cloth, 'the meaning is far \
+from watertight': one motif can carry different meanings for different makers, \
+media and communities (e.g. the agbérí ẹja 'fish head' tied to Olókun, shared \
+with Ijaw trade partners).
+- Cross-cultural archives (e.g. ARAS) are for comparison, not decoding. Use \
+their three-step order: describe what is seen; give its meaning in its own \
+culture; only then offer cross-cultural parallels."""
+
+METHOD = """\
+HOW TO READ:
+- A detection is one element on a larger object. Read it in place: say where it \
+sits (top of the rim, left leaf, third register) and what it does there. Never \
+describe a single motif as a group ('members', 'each member', 'this family').
+- Keep three kinds of claim distinct and labelled: what is seen; what Yoruba \
+context supports (ritual, political, oral-historical); what cross-cultural \
+comparison suggests. Mark confidence.
+- A label or note written by a person is the strongest evidence you have; build \
+on it and use its vocabulary. Model-written labels are drafts you may overrule.
+- Orality is the archive: point to where a reading could be checked — oríkì \
+(praise poetry), Ifá verses, town histories (Samuel Johnson, The History of \
+the Yorubas, 1921), Frobenius's The Voice of Africa (1913), and later \
+scholarship (Drewal, Pemberton & Abiodun; Abiodun's Yoruba Art and Language; \
+Akintoye; Ajayi & Smith, Yoruba Warfare in the Nineteenth Century). Never \
+invent a quotation, a verse, a date, a carver or a provenance.
+- Segmentation is imperfect: a box may be a fragment, a duplicate, blank ground \
+or a paper mount. Mention it once, briefly, where it changes a reading — not as \
+the headline.
+- Build upward: motif → panel → story. Each level should say what the level \
+below adds up to."""
+
+STYLE = """\
+HOW TO WRITE:
+Plain, concise, readable English for a curious non-specialist. Short \
+paragraphs. No pipeline statistics or bookkeeping unless asked. Do not retitle \
+or dismiss the collection; read what is there. Prefer 'may record' to 'is' \
+when inferring. Length follows evidence: a thin panel gets a short reading."""
+
+SYSTEM_PROMPT = "\n\n".join([ROLE, THESIS, CORPUS_CONTEXT, SYMBOL_NOTES, METHOD, STYLE])
+
+CONFIDENCE = {"type": "string", "enum": ["high", "medium", "low"]}
+
+MOTIF_READING_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "label": {"type": "string",
+                  "description": "2-4 words, snake_case, naming what this one motif is"},
+        "description": {"type": "string",
+                        "description": "1-2 sentences: what is visibly carved, and where it "
+                                       "sits on its board (e.g. 'at the head of the tray rim')."},
+        "iconography": {"type": "string",
+                        "description": "1-3 sentences: its likely meaning in Yoruba context, "
+                                       "then any cross-cultural parallel, labelled as such. "
+                                       "'unclear' if nothing is supportable."},
+        "role_on_board": {"type": "string",
+                          "description": "One sentence: what this element does in the whole "
+                                         "composition (axis, frame, divider, protagonist, "
+                                         "attendant, count, ...)."},
+        "confidence": CONFIDENCE,
+    },
+    "required": ["label", "description", "iconography", "role_on_board", "confidence"],
+    "additionalProperties": False,
+}
 
 CLUSTER_SCHEMA = {
     "type": "object",
@@ -593,63 +714,80 @@ CLUSTER_SCHEMA = {
         "name": {
             "type": "string",
             "description": "2-4 words, snake_case, naming the visual family "
-                           "(e.g. interlaced_knotwork, standing_attendant_figure)",
+                           "(e.g. interlace_band, kneeling_figure)",
+        },
+        "motif_gloss": {
+            "type": "string",
+            "description": "One sentence describing a SINGLE instance of this family as "
+                           "it would appear on its own board — written so it can be copied "
+                           "onto any one motif. Never say 'members' or 'each'.",
         },
         "visual_definition": {
             "type": "string",
-            "description": "What every member of this family has in common, visually.",
+            "description": "1-2 sentences: what instances of this family share, visually.",
         },
         "variation": {
             "type": "string",
-            "description": "How members differ from one another, and whether the "
-                           "cluster looks like one family or several merged.",
+            "description": "1-2 sentences: how instances differ, and whether this looks "
+                           "like one family or several merged.",
         },
         "distribution_note": {
             "type": "string",
-            "description": "What the spread across panels and scales suggests — "
-                           "a border element, a narrative subject, an artefact.",
+            "description": "1-2 sentences: where on the objects it occurs and what that "
+                           "suggests it does (frame, divider, subject, axis).",
         },
         "iconographic_reading": {
             "type": "string",
-            "description": "Probable symbolic or iconographic significance, with "
-                           "the basis stated. Use 'unclear' rather than guessing.",
+            "description": "1-3 sentences: Yoruba meaning first, cross-cultural parallel "
+                           "second, basis stated. 'unclear' rather than guessing.",
         },
         "relation_to_neighbours": {
             "type": "string",
-            "description": "How this family relates to the embedding-adjacent "
-                           "clusters listed, if the relation is meaningful.",
+            "description": "How this family relates to the embedding-adjacent clusters "
+                           "listed, if the relation is meaningful; else empty.",
         },
-        "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+        "confidence": CONFIDENCE,
         "open_questions": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "What would have to be checked to firm this up.",
+            "description": "At most 3: what would firm this up.",
         },
     },
     "required": [
-        "name", "visual_definition", "variation", "distribution_note",
+        "name", "motif_gloss", "visual_definition", "variation", "distribution_note",
         "iconographic_reading", "relation_to_neighbours", "confidence",
         "open_questions",
     ],
     "additionalProperties": False,
 }
 
+PANEL_TYPES = ["chronicle_of_rulers", "war_and_conflict", "divination_instrument",
+               "architectural_ornament", "documentation_sheet", "other"]
+
 PANEL_SCHEMA = {
     "type": "object",
     "properties": {
-        "title": {"type": "string", "description": "A short descriptive title for the panel."},
-        "summary": {"type": "string", "description": "Two or three sentences: what this panel is."},
+        "title": {"type": "string", "description": "A short plain title for the object."},
+        "object_type": {"type": "string",
+                        "description": "What the object is: door leaf, veranda post, "
+                                       "opon Ifa (round/rectangular), tapper, vessel, survey "
+                                       "drawing, mount sheet, ..."},
+        "panel_type": {"type": "string", "enum": PANEL_TYPES,
+                       "description": "The closest reading type."},
+        "summary": {"type": "string",
+                    "description": "Two sentences: what this object is and what it shows."},
         "register_readings": {
             "type": "array",
-            "description": "One entry per register, top to bottom.",
+            "description": "One entry per zone in reading order (registers top to bottom; "
+                           "for trays, arcs of the rim from the head). 1-3 sentences each.",
             "items": {
                 "type": "object",
                 "properties": {
                     "register": {"type": "integer"},
                     "motifs": {"type": "array", "items": {"type": "integer"},
-                               "description": "Motif indices in this register, left to right."},
+                               "description": "Motif indices in this zone."},
                     "reading": {"type": "string",
-                                "description": "What this band depicts and how it is organised."},
+                                "description": "What this zone depicts, in 1-3 sentences."},
                 },
                 "required": ["register", "motifs", "reading"],
                 "additionalProperties": False,
@@ -657,32 +795,68 @@ PANEL_SCHEMA = {
         },
         "composition": {
             "type": "string",
-            "description": "How the registers, symmetry, nesting, and field relate — "
-                           "the panel's overall organisation.",
+            "description": "1-3 sentences: how the parts are organised (axis, frame, "
+                           "registers, symmetry, scale).",
         },
         "narrative": {
             "type": "string",
-            "description": "The reading of the panel as a whole: what it may be "
-                           "recording, telling, or asserting.",
+            "description": "One short paragraph: the story or statement this object may "
+                           "record, laddered up from its motifs, with the basis stated.",
+        },
+        "hypotheses": {
+            "type": "string",
+            "description": "1-2 sentences: does this object support, weaken or not bear on "
+                           "the chronicle and pattern-as-number hypotheses, and why.",
         },
         "cross_panel_links": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "Connections to the wider corpus via shared motif families.",
+            "description": "At most 4 short links to other objects in the collection.",
         },
         "uncertainties": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "Detections or readings you doubt, and why.",
+            "description": "At most 4 short items, including any detection problem that "
+                           "changes the reading.",
         },
-        "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+        "confidence": CONFIDENCE,
     },
     "required": [
-        "title", "summary", "register_readings", "composition", "narrative",
-        "cross_panel_links", "uncertainties", "confidence",
+        "title", "object_type", "panel_type", "summary", "register_readings",
+        "composition", "narrative", "hypotheses", "cross_panel_links", "uncertainties",
+        "confidence",
     ],
     "additionalProperties": False,
 }
+
+# How the corpus essay is laid out, shared by the three-pass and direct paths.
+# Story first, apparatus last: the reader should meet the collection's account
+# of itself before they meet the pipeline's caveats.
+CORPUS_ESSAY_BRIEF = """\
+Write the interpretation as a Markdown essay of roughly 1,200-1,800 words, \
+readable by a curious non-specialist. Use this shape:
+
+1. **The story in brief** — one paragraph telling what this collection, read \
+as a whole and in a sensible order, may record. No statistics.
+2. **Reading the collection in order** — group the objects into a few \
+chapters (for example by place, object type or theme: rule, war, divination) \
+and walk through them, citing panel identifiers. Show how motifs build into \
+each object's statement and how objects build into the larger account.
+3. **The vocabulary** — a compact Markdown table of the recurring motifs: \
+motif | where it appears | what it may mean (Yoruba context; cross-cultural \
+parallel if useful).
+4. **What this says about the thesis** — whether the evidence supports, \
+weakens or leaves open the chronicle and pattern-as-number hypotheses, and \
+what kind of record (chronicle, instrument, emblem, inventory) these carvings \
+most look like.
+5. **Where to check it** — oral and archival sources that could confirm or \
+overturn the main readings (oríkì, Ifá verses, town histories, Frobenius's \
+own notes, museum holdings), and at most five short data notes on the pipeline \
+where they affect a conclusion.
+
+Cite panel identifiers where they carry the argument. Keep what is seen, what \
+Yoruba context supports and what comparison suggests distinguishable, but do \
+not let hedging crowd out the reading."""
 
 
 def build_cluster_prompt(stats: ClusterStats, members: Sequence[MotifView],
@@ -741,9 +915,11 @@ def build_cluster_prompt(stats: ClusterStats, members: Sequence[MotifView],
 
     lines.append("")
     lines.append(
-        "Characterise this family as a recurring element of the carving vocabulary. "
-        "Judge whether it is one coherent family or several merged, and say what "
-        "its distribution across panels implies about its function."
+        "Characterise this family as a recurring element of the carving vocabulary, "
+        "briefly. Judge whether it is one coherent family or several merged, and "
+        "say what its placement on the objects implies about its function. Write "
+        "`motif_gloss` for one instance on its own board: it is copied onto "
+        "individual motifs, so it must never speak of 'members' or 'each'."
     )
     return "\n".join(lines)
 
@@ -755,7 +931,9 @@ def build_panel_prompt(
 ) -> str:
     """Text half of a panel-reading request (the annotated panel image is attached)."""
     lines: list[str] = []
-    lines.append("Read this carved panel from the Frobenius archive as a whole composition.")
+    lines.append(f"Read this object from the Frobenius archive: {layout.panel_stem}.")
+    lines.append("Identify what it is first (door leaf, post, Ifa tray, survey drawing, "
+                 "mount sheet ...), then read it as one composition.")
     lines.append("")
     lines.append("SPATIAL STRUCTURE (computed from the detection geometry):")
     lines.append(render_layout_text(layout))
@@ -774,12 +952,15 @@ def build_panel_prompt(
     lines.append("")
     lines.append(
         "The attached image is the panel with every detection outlined and numbered "
-        "to match the indices above. Read the panel register by register in the "
-        "reading order given, then as a single composition. Use the spatial "
-        "structure — which motifs share a register, what is centred, what is "
-        "mirrored, what encloses what — as evidence for how the panel is organised, "
-        "and use the corpus-wide family descriptions to say what recurs here from "
-        "elsewhere in the collection versus what is particular to this panel."
+        "to match the indices above. The detections are parts of one object, not a "
+        "set of separate things. Read it zone by zone in its own reading order — "
+        "registers top to bottom for doors and posts; for a tray, round the rim from "
+        "the face at its head — then as a whole. The computed registers are a guide, "
+        "not a fact: override them when the object is round, framed or cropped. Use "
+        "the family descriptions to say what recurs elsewhere and what is particular "
+        "here. Then ladder up: what story or statement might this object carry, and "
+        "does it bear on the chronicle and pattern-as-number hypotheses? Keep every "
+        "field short."
     )
     return "\n".join(lines)
 
@@ -792,17 +973,10 @@ def build_corpus_prompt(
     """Text for the final synthesis pass — no images, purely a join of the passes above."""
     lines: list[str] = []
     lines.append(
-        "Below are the results of a motif-level analysis of a collection of carved "
-        "West African panels: first every recurring motif family found across the "
-        "collection, then a reading of each individual panel. Synthesise them into "
-        "one interpretation of the collection."
-    )
-    lines.append("")
-    lines.append("CORPUS SCALE:")
-    lines.append(
-        f"  {corpus_stats.get('panels', 0)} panels, {corpus_stats.get('motifs', 0)} "
-        f"approved motif detections, {corpus_stats.get('clusters', 0)} motif families "
-        f"({corpus_stats.get('unclustered', 0)} detections left unclustered by HDBSCAN)."
+        "Below are the readings of a collection of carved Yoruba objects from the "
+        "Frobenius archive: first the recurring motif families, then a reading of "
+        "each object. Read the collection as a whole and tell the story it may "
+        "record, building from motifs to objects to the collection."
     )
 
     lines.append("")
@@ -824,29 +998,29 @@ def build_corpus_prompt(
         lines.append("")
         lines.append(f"— {stem}: {reading.get('title', '')} "
                      f"[confidence: {reading.get('confidence', '?')}]")
+        kind = " / ".join(x for x in (reading.get("object_type"),
+                                       reading.get("panel_type")) if x)
+        if kind:
+            lines.append(f"  Object: {kind}")
         lines.append(f"  {reading.get('summary', '')}")
         lines.append(f"  Composition: {reading.get('composition', '')}")
         lines.append(f"  Narrative: {reading.get('narrative', '')}")
+        if reading.get("hypotheses"):
+            lines.append(f"  Hypotheses: {reading['hypotheses']}")
         for link in reading.get("cross_panel_links", []) or []:
             lines.append(f"  Link: {link}")
 
+    # Scale goes last and is labelled as apparatus: an essay that opens with
+    # detection counts reads as a report on the pipeline, not on the carvings.
     lines.append("")
     lines.append(
-        "Write the synthesis as a Markdown essay. Cover: what visual vocabulary "
-        "this collection shares and how it is deployed; which families are "
-        "structural (borders, framing, ground) versus which carry subject matter; "
-        "what recurring compositional grammar the panel readings have in common "
-        "(register structure, symmetry, centring, scale hierarchy); what the "
-        "cross-panel recurrences suggest about workshops, regions, or a shared "
-        "repertoire; and what this does and does not support saying about these "
-        "carvings as a communicative system.\n\n"
-        "Be specific — cite cluster names and panel identifiers where they carry "
-        "the argument. Keep the evidential distinction visible throughout: what is "
-        "observed, what the clustering implies, what is inferred. End with a "
-        "section on the weakest points in the analysis and what evidence would "
-        "settle them. Do not pad the essay with restatement; length should follow "
-        "from what the evidence supports."
+        f"DATA NOTE (for section 5 only, not the opening): "
+        f"{corpus_stats.get('panels', 0)} panels, {corpus_stats.get('motifs', 0)} "
+        f"approved motif detections, {corpus_stats.get('clusters', 0)} motif families "
+        f"({corpus_stats.get('unclustered', 0)} detections left unclustered by HDBSCAN)."
     )
+    lines.append("")
+    lines.append(CORPUS_ESSAY_BRIEF)
     return "\n".join(lines)
 
 
@@ -872,16 +1046,10 @@ def build_direct_prompt(
     scale = corpus_scale(corpus)
 
     lines.append(
-        "Below is a complete motif-level analysis of a collection of carved West "
-        "African panels: the recurring motif families found across the collection, "
-        "then every panel with its motifs and the spatial structure recovered from "
-        "the detection geometry. Interpret the collection."
-    )
-    lines.append("")
-    lines.append(
-        f"CORPUS: {scale['panels']} panels, {scale['motifs']} approved motif "
-        f"detections, {scale['clusters']} motif families "
-        f"({scale['unclustered']} unclustered), {scale['labelled']} labelled."
+        "Below is a motif-level analysis of a collection of carved Yoruba objects "
+        "from the Frobenius archive: the recurring motif families, then every "
+        "object with its motifs and the spatial structure recovered from the "
+        "detection geometry. Read the collection and tell the story it may record."
     )
 
     lines.append("")
@@ -925,22 +1093,14 @@ def build_direct_prompt(
 
     lines.append("")
     lines.append(
-        "Write the interpretation as a Markdown essay. Cover: what visual "
-        "vocabulary this collection shares and how it is deployed; which families "
-        "are structural (borders, framing, ground) versus which carry subject "
-        "matter; the compositional grammar the panels have in common (register "
-        "structure, symmetry, centring, scale hierarchy); what the cross-panel "
-        "recurrences suggest about workshops, regions, or a shared repertoire; "
-        "and read the most legible individual panels in enough detail to show the "
-        "grammar working.\n\n"
-        "Be specific — cite cluster numbers and panel identifiers where they carry "
-        "the argument. Keep the evidential distinction visible throughout: what the "
-        "pipeline observed, what the clustering implies, what you are inferring "
-        "from cultural knowledge. Note that you are working from the pipeline's "
-        "descriptions and geometry, not from the images themselves, and say where "
-        "that limits a reading. End with the weakest points in the analysis and "
-        "what evidence would settle them."
+        f"DATA NOTE (for section 5 only, not the opening): {scale['panels']} panels, "
+        f"{scale['motifs']} approved motif detections, {scale['clusters']} motif "
+        f"families ({scale['unclustered']} unclustered), {scale['labelled']} labelled. "
+        "You are working from the pipeline's descriptions and geometry, not from the "
+        "images themselves; say so where it limits a reading."
     )
+    lines.append("")
+    lines.append(CORPUS_ESSAY_BRIEF)
     return "\n".join(lines)
 
 
@@ -1325,7 +1485,12 @@ def render_panel_markdown(reading: dict) -> str:
     lines.append("")
     lines.append(f"*{reading.get('panel_stem', '')}* — confidence: "
                  f"**{reading.get('confidence', 'unknown')}**")
-    lines.append("")
+    kind = " · ".join(x for x in (reading.get("object_type"),
+                                   (reading.get("panel_type") or "").replace("_", " "))
+                      if x)
+    if kind:
+        lines.append(f"*{kind}*")
+        lines.append("")
     lines.append(reading.get("summary", ""))
 
     registers = reading.get("register_readings") or []
@@ -1350,6 +1515,12 @@ def render_panel_markdown(reading: dict) -> str:
         lines.append("## Reading")
         lines.append("")
         lines.append(reading["narrative"])
+
+    if reading.get("hypotheses"):
+        lines.append("")
+        lines.append("## Against the thesis")
+        lines.append("")
+        lines.append(reading["hypotheses"])
 
     links = reading.get("cross_panel_links") or []
     if links:
