@@ -1,0 +1,94 @@
+{
+ "motifs": {
+  "0": {
+   "label": "fringed_bag_with_strap",
+   "description": "A large object at the foot of the plank: an arched strap or handle above a body of striated and chequered bands, ending in a row of pendant tassels.",
+   "iconography": "Most likely a beaded or woven bag (àpò) — a diviner's or hunter's bag — or a crown with a bead fringe. Either way, an object of office rather than a figure.",
+   "confidence": "low",
+   "bbox": {
+    "x": 54,
+    "y": 810,
+    "w": 167,
+    "h": 239
+   }
+  },
+  "1": {
+   "label": "lizard_from_above",
+   "description": "A large reptile seen from above at the top of the plank: an oval body marked with a dotted cross, four bent legs at the corners and a dotted spine that runs on down as the tail (#2).",
+   "iconography": "A lizard or crocodile. The agama lizard appears in Yoruba origin stories and the crocodile stands for water power and royal danger (Olókun; the Benin mudfish-and-crocodile kings). Cross-culturally a guardian of thresholds.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 19,
+    "y": 236,
+    "w": 142,
+    "h": 331
+   }
+  },
+  "2": {
+   "label": "reptile_tail_and_hatched_panel",
+   "description": "The long dotted tail of the reptile (#1) running down the plank, beside a column of X-in-square, herringbone and diagonal hatching.",
+   "iconography": "The tail joins the reptile to the objects below; the hatched column is woven or beaded pattern.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 19,
+    "y": 492,
+    "w": 113,
+    "h": 301
+   }
+  },
+  "3": {
+   "label": "ring_over_fish_form",
+   "description": "Beside the tail, a small ring above a small group of short uprights and a pointed, fish-like form marked with two lozenges.",
+   "iconography": "Possibly a mudfish with a ring (bracelet or cowrie string) above — water and wealth — but the carving is worn.",
+   "confidence": "low",
+   "bbox": {
+    "x": 115,
+    "y": 594,
+    "w": 94,
+    "h": 193
+   }
+  }
+ },
+ "panel": {
+  "title": "Ife plank: lizard or crocodile, patterned tail and a fringed bag",
+  "object_type": "carved plank or slab",
+  "panel_type": "architectural_ornament",
+  "summary": "A narrow, abraded plank with a large reptile seen from above at the top, its long tail running down beside hatched panels, and a fringed bag or crown at the bottom.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     1
+    ],
+    "reading": "A lizard or crocodile, legs splayed, with a dotted cross on its back."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     2,
+     3
+    ],
+    "reading": "Its tail running down beside hatched panels and a small ring-and-fish form."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     0
+    ],
+    "reading": "A fringed bag or crown with a strap."
+   }
+  ],
+  "composition": "One long axis: the reptile's body and tail tie the top of the plank to the objects below, with pattern filling the sides.",
+  "narrative": "The plank pairs a powerful reptile with objects of office — a fringed bag or crown and a possible mudfish. Read with its sister planks, it may complete a set in which rulers (panel 01) and a staff-holder (panel 00) are joined by emblems of the water-and-earth powers that support kingship. The old reading took the reptile for a human figure.",
+  "hypotheses": "Neutral for 'chronicle' (no rulers here), but the reptile and fringed regalia fit a royal programme across the plate. Nothing clearly numerical.",
+  "cross_panel_links": [
+   "Reptiles also cross the lower register of FoA_04-5578_panel_02 and the rims of the drawn trays KBA_10300 and KBA_10305.",
+   "Sister planks EBA-Div_00311 panels 00 and 01."
+  ],
+  "uncertainties": [
+   "The surface is heavily worn; #3 in particular is unclear.",
+   "#1 and #2 split one reptile into two boxes."
+  ],
+  "confidence": "low"
+ }
+}

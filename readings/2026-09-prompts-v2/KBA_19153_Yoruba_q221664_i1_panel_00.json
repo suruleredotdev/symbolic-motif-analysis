@@ -1,0 +1,44 @@
+{
+ "motifs": {
+  "0": {
+   "label": "bearded_figure_gripping_posts_looped_legs",
+   "description": "The pasted print: a figure with a large square head under a ridged crown or hair, lozenge eyes and a pointed beard, gripping a post on each side at head and waist height; below, the body divides into two legs that sweep out and back up to the posts.",
+   "iconography": "A ruler or deity holding the frame — the 'looped-leg' figure also on KBA_19154 and in the middle of the three crowned figures on EBA-Div_00311_01 and 00312_01. Legs turned into curling forms are the mudfish-legged king of Ife and Benin art, tied to Olókun's sea wealth.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 350,
+    "y": 219,
+    "w": 252,
+    "h": 320
+   }
+  }
+ },
+ "panel": {
+  "title": "Mount sheet: a bearded figure holding two posts, from a temple board dug up at Modakeke in 1910",
+  "object_type": "archive mount sheet with a printed detail (after Frobenius 1923, pl. 184)",
+  "panel_type": "documentation_sheet",
+  "summary": "A small print, 'enlarged 2×', of a figure gripping two posts, with a German caption: 'Plate 184, old West African wood carving. Detail of a carved temple board, excavated by the D.I.A.F.E. in 1910 at Modeke [Modakeke], Yorubaland. From Leo Frobenius, Das unbekannte Afrika, Munich 1923.'",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "One figure: crowned, bearded, gripping the frame, legs looped out to the posts."
+   }
+  ],
+  "composition": "A single frontal figure filling a narrow frame, its hands and legs joined to the posts — the figure is the frame.",
+  "narrative": "One of three details from the same plate and the same board (with KBA_19154 and KBA_19155). The caption matters as much as the image: the board was 'excavated' at Modakeke in 1910, one year after the town was forcibly emptied under the 1886 peace terms. The Modakeke carvings in this collection were probably gathered from a deserted town — its chronicle carried away as it ended.",
+  "hypotheses": "Supports 'chronicle of rulers' weakly: the crowned, looped-leg figure is the collection's clearest king type.",
+  "cross_panel_links": [
+   "Same board: KBA_19154, KBA_19155.",
+   "Looped-leg king: EBA-Div_00311_panel_01, EBA-Div_00312_panel_01.",
+   "Modakeke photographs: FoA_04-5578 to 5599."
+  ],
+  "uncertainties": [
+   "A print of a drawing of a carving.",
+   "'Excavated' may mean 'recovered' rather than dug from the ground."
+  ],
+  "confidence": "medium"
+ }
+}

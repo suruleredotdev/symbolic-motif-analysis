@@ -1,0 +1,225 @@
+{
+ "motifs": {
+  "0": {
+   "label": "four_ribbed_arcs",
+   "description": "Four long curved forms, smooth above and banded with rings and zigzags toward their ends, laid side by side against the right edge of the central disc beneath a crocodile.",
+   "iconography": "They read most like carved elephant tusks or horns — ivory as royal wealth, horns as trumpets or medicine containers. Placed as a bracket to the disc, they may also be the crocodile's ribbed tail. Four of them: a small count worth noting.",
+   "confidence": "low",
+   "bbox": {
+    "x": 591,
+    "y": 163,
+    "w": 138,
+    "h": 331
+   }
+  },
+  "1": {
+   "bbox": {
+    "x": 850,
+    "y": 276,
+    "w": 75,
+    "h": 191
+   },
+   "label": "hatched_creature_right_border",
+   "description": "In the right border, a creature with a large round eye and a beaked head over a cross-hatched body, with a leaf spray to its left and a second hatched form below.",
+   "iconography": "Perhaps a bird (hornbill or fowl) or a chameleon seen side-on; with the leaves, part of the tray's inventory of bush life.",
+   "confidence": "low"
+  },
+  "2": {
+   "bbox": {
+    "x": 409,
+    "y": 22,
+    "w": 134,
+    "h": 111
+   },
+   "label": "crowned_face_oju_opon",
+   "description": "At the head of the tray, a projecting face with lidded eyes, straight nose and radiating whiskers, under a bar of three studs and a crown of three large bosses.",
+   "iconography": "The ojú ọpọ́n face of Ẹ̀ṣù, here crowned: the messenger given a king's headdress, which sets a royal tone for the whole border.",
+   "confidence": "high"
+  },
+  "3": {
+   "bbox": {
+    "x": 23,
+    "y": 116,
+    "w": 74,
+    "h": 168
+   },
+   "label": "standing_man_with_staff",
+   "description": "In the left border, a naked male figure standing frontally with a chevron-patterned torso band, holding an upright staff or spear at his side.",
+   "iconography": "A man of standing, or a guard, with a staff of office or a spear; the counterpart to the load-bearer below him (#6).",
+   "confidence": "medium"
+  },
+  "4": {
+   "bbox": {
+    "x": 852,
+    "y": 87,
+    "w": 80,
+    "h": 204
+   },
+   "label": "inverted_squatting_figure",
+   "description": "In the upper right border, a figure carved head-down with legs splayed upward and hands at the knees, beside small leaves, oriented toward the centre of the tray.",
+   "iconography": "An inverted or tumbling figure; on trays, figures are often turned to face the working field, but head-down figures can also mark a fall or a birth.",
+   "confidence": "low"
+  },
+  "5": {
+   "bbox": {
+    "x": 578,
+    "y": 493,
+    "w": 187,
+    "h": 98
+   },
+   "label": "reclining_figure_with_long_beaked_bird",
+   "description": "On the lower border, a figure lying on its back with a patterned torso, arm raised, and at its feet a bird with a long beak.",
+   "iconography": "Reclining figures recur around this border; the bird may be a hornbill or a fowl for sacrifice. Rest, sickness or death, with the offering beside it.",
+   "confidence": "low"
+  },
+  "6": {
+   "bbox": {
+    "x": 18,
+    "y": 288,
+    "w": 76,
+    "h": 152
+   },
+   "label": "figure_supporting_load_on_head",
+   "description": "In the left border, a standing figure with both arms raised to steady a load or bowl on its head.",
+   "iconography": "A carrier or caryatid: the porter, or a devotee bringing an offering, a common figure on tray rims and veranda posts alike.",
+   "confidence": "medium"
+  },
+  "7": {
+   "bbox": {
+    "x": 835,
+    "y": 512,
+    "w": 95,
+    "h": 78
+   },
+   "label": "splayed_figure_with_goggle_eyes",
+   "description": "In the lower-right corner, a figure with large round eyes and a hatched body lying with limbs splayed, beside a hatched cone-shaped form.",
+   "iconography": "Possibly a frog or tortoise-like creature rather than a person; the cone may be a fish or a bundle. Low certainty.",
+   "confidence": "low"
+  },
+  "8": {
+   "bbox": {
+    "x": 578,
+    "y": 28,
+    "w": 95,
+    "h": 150
+   },
+   "label": "crocodile_over_small_animal",
+   "description": "Right of the head face, a crocodile with a long toothed snout and scaled back rears upward, with a small quadruped head beneath it.",
+   "iconography": "The crocodile, power of the river and of dangerous authority, seizing or standing over a lesser animal. It sits directly above the four ribbed arcs (#0), which may be its tail.",
+   "confidence": "medium"
+  },
+  "9": {
+   "bbox": {
+    "x": 245,
+    "y": 370,
+    "w": 110,
+    "h": 115
+   },
+   "label": "serpent_coiled_round_animal",
+   "description": "In the arc left of the disc, a long scaled snake coiling in loops around a smaller animal with a pointed head.",
+   "iconography": "A python taking its prey, or a serpent binding a creature: the coil as capture and containment, close to the collection's ouroboros theme but not tail-biting.",
+   "confidence": "medium"
+  },
+  "10": {
+   "bbox": {
+    "x": 212,
+    "y": 190,
+    "w": 85,
+    "h": 105
+   },
+   "label": "monkey_holding_ring",
+   "description": "In the upper-left arc, a figure with a round-eyed, monkey-like head and a zigzag-banded body, holding a looped ring or coil against its side.",
+   "iconography": "The monkey, trickster and imitator, beside a ring; compare the monkey near the leaders on the Ado-Ekiti door (EBA-Div_00303 #32).",
+   "confidence": "low"
+  },
+  "11": {
+   "bbox": {
+    "x": 500,
+    "y": 460,
+    "w": 60,
+    "h": 130
+   },
+   "label": "columns_of_leaves",
+   "description": "Beside the tab at the foot, two columns of stacked veined leaves separated by a raised rib.",
+   "iconography": "Medicinal leaves (ewé), the domain of Ọ̀sanyìn: the herbal remedies that often follow an Ifá prescription.",
+   "confidence": "high"
+  },
+  "12": {
+   "bbox": {
+    "x": 670,
+    "y": 26,
+    "w": 184,
+    "h": 105
+   },
+   "label": "two_reclining_figures_top_right",
+   "description": "In the top-right border, two figures lying head to foot, one with a patterned torso, the other raising an arm that holds a short object.",
+   "iconography": "Reclining figures, one perhaps armed or carrying a tool; scenes of rest, sickness or struggle that recur around this border.",
+   "confidence": "low"
+  },
+  "13": {
+   "bbox": {
+    "x": 157,
+    "y": 505,
+    "w": 167,
+    "h": 70
+   },
+   "label": "reclining_figure_holding_cord",
+   "description": "On the lower-left border, a bearded figure lying on its back with legs drawn up, holding a long looped cord that arches over its body.",
+   "iconography": "A figure bound or holding a rope; cords on trays can mean binding, captivity, or the tether of an animal to be sacrificed.",
+   "confidence": "low"
+  }
+ },
+ "panel": {
+  "title": "Rectangular Ifá tray: crowned face, crocodile, tusks and a crowded world",
+  "object_type": "opon Ifá, rectangular with a central disc",
+  "panel_type": "divination_instrument",
+  "summary": "A wide tray with three working fields (a disc between two rectangles) and a border packed with figures, animals and objects. A crowned, whiskered face projects at the top; a crocodile stands beside it above four ribbed tusk-like arcs; the rest of the border holds weapons, a drum, a studded board, leaves, snakes, monkeys and people.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     2,
+     8,
+     12
+    ],
+    "reading": "Top border: the crowned face at the centre; to its right a crocodile over a small animal and two reclining figures. To its left (unboxed) a cutlass, a drum, a studded board and a reclining figure."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     3,
+     6,
+     10,
+     9,
+     0,
+     4,
+     1
+    ],
+    "reading": "Sides and arcs: a standing man with a staff and a load-bearer on the left border; a monkey with a ring and a serpent coiled round an animal in the left arc; the four ribbed arcs against the disc; an inverted figure and a hatched creature on the right border."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     13,
+     11,
+     5,
+     7
+    ],
+    "reading": "Foot: a figure holding a looped cord, columns of leaves by the tab, a reclining figure with a long-beaked bird, and a splayed creature in the corner."
+   }
+  ],
+  "composition": "Three fields on one horizontal axis, a face and tab on the vertical axis, and a border that fills every gap. Left and right halves answer each other loosely rather than mirror.",
+  "narrative": "The border reads like an inventory of a town's life around the place where Ifá speaks: weapons and a drum (war and festival), a game board, medicinal leaves (ewé, the domain of Ọ̀sanyìn), people carrying and reclining, and the dangerous animals — crocodile, snake — that sacrifice keeps at bay. The crowned face and the tusks give the whole a royal note.",
+  "hypotheses": "Some support for carving as an archive of social life, not of rulers. Small counted groups (four arcs, rows of leaves) are possible but untested counts.",
+  "cross_panel_links": [
+   "Crocodile: FoA_04-5586, KBA_10300, EBA-Div_00311_panel_02.",
+   "Snake coiling round a figure and monkeys: the Ado-Ekiti door's monkey (EBA-Div_00303 #32).",
+   "Three-field layout is unique in the collection."
+  ],
+  "uncertainties": [
+   "The left field and the unboxed top-left objects are read from the photograph.",
+   "The arcs could be a tail, horns or tusks; the studded board could be a bed or a basket."
+  ],
+  "confidence": "medium"
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "motifs": {
+  "0": {
+   "label": "hooded_figure_crossed_bands_over_serpent",
+   "description": "The pasted drawing: a face inside a pointed triangular hood, two bands crossing in an X over the body with a ring at the crossing and a hand holding a small object, fringed wing-like panels to the sides, a small seated figure at the foot, and a wavy serpent with a head running along the base; posts topped with small heads at each side.",
+   "iconography": "The pointed hood and crossed bands are the war leader's marks seen on the Ado-Ekiti door (#23, #34). The serpent along the ground line is the door's frame-serpent — the boundary animal. Captioned as a scene 'from mythology'.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 398,
+    "y": 217,
+    "w": 203,
+    "h": 314
+   }
+  }
+ },
+ "panel": {
+  "title": "Mount sheet: a hooded figure with crossed bands above a serpent, from a Yoruba compound door (pl. 183)",
+  "object_type": "archive mount sheet with a partial drawing of a door (after Frobenius 1923, pl. 183)",
+  "panel_type": "documentation_sheet",
+  "summary": "A small partial drawing ('right figure') from Plate 183, captioned 'West African wood carving. Door of a Yoruba compound with scenes from mythology; figures in relief filling the surface. Collection of the D.I.A.F.E. 1910.'",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "One figure: pointed hood, crossed bands, a small figure at its feet, a serpent along the base."
+   }
+  ],
+  "composition": "A figure filling a door panel between two posts, standing on a serpent ground line.",
+  "narrative": "Frobenius called this door 'mythological', but the figure has the same pointed hood and crossed bands as the leaders on the Ado-Ekiti war door. That shows the problem with the 1910 labels: what the collector read as myth may be a portrait of a known war chief. The serpent on the ground line frames the scene as on the other doors.",
+  "hypotheses": "Supports 'war' if the crossed bands mark a war leader; the collector's 'mythology' label should not settle it.",
+  "cross_panel_links": [
+   "Pointed hood and crossed bands: EBA-Div_00303 (#23, #34), KBA_17553 (#1), KBA_19155.",
+   "Serpent frames: FoA_04-5578, KBA_10298."
+  ],
+  "uncertainties": [
+   "A partial drawing; the rest of the door is not shown.",
+   "The side panels could be a cloak, fans or shields."
+  ],
+  "confidence": "medium"
+ }
+}

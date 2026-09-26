@@ -1,0 +1,118 @@
+{
+ "motifs": {
+  "0": {
+   "label": "tapper_lower_shaft",
+   "description": "The lower shaft of the tapper below the triangle band: ring collars over a plain, faceted cylinder.",
+   "iconography": "The grip — plain where the hand holds it. Overlaps #1, #3 and #4.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 43,
+    "y": 597,
+    "w": 82,
+    "h": 236
+   }
+  },
+  "1": {
+   "label": "tapper_base",
+   "description": "The bottom end of the tapper with a pencilled archive number beside it.",
+   "iconography": "Plain base of the grip; no imagery.",
+   "confidence": "high",
+   "bbox": {
+    "x": 0,
+    "y": 722,
+    "w": 124,
+    "h": 151
+   }
+  },
+  "2": {
+   "label": "tapper_triangle_band",
+   "description": "A band of raised triangles over ring collars, just below the tapper's face.",
+   "iconography": "A sawtooth band separating the head from the grip — the same triangle chain used as a divider on doors and tray rims.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 42,
+    "y": 503,
+    "w": 82,
+    "h": 90
+   }
+  },
+  "3": {
+   "label": "tapper_base_detail",
+   "description": "A crop inside the base (#1): a smooth faceted surface.",
+   "iconography": "Duplicate area of the base; no separate motif.",
+   "confidence": "high",
+   "bbox": {
+    "x": 43,
+    "y": 756,
+    "w": 81,
+    "h": 77
+   }
+  },
+  "4": {
+   "label": "tapper_ring_collars",
+   "description": "A crop of the ring collars at the top of the lower shaft (inside #0).",
+   "iconography": "Turned rings marking a division of the tapper; duplicate area of #0.",
+   "confidence": "high",
+   "bbox": {
+    "x": 43,
+    "y": 620,
+    "w": 82,
+    "h": 58
+   }
+  },
+  "5": {
+   "label": "tapper_fluted_collar",
+   "description": "A fluted collar at the top of the tapper's face, where the pointed tip — set with a column of small circles — begins.",
+   "iconography": "The division between the point that strikes the tray and the head that faces the client.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 49,
+    "y": 277,
+    "w": 69,
+    "h": 60
+   }
+  }
+ },
+ "panel": {
+  "title": "Modakeke Ifá tapper with ringed point and a single face",
+  "object_type": "divination tapper (ìróké), in the round",
+  "panel_type": "divination_instrument",
+  "summary": "A tapper whose pointed tip carries a column of small circles, above a fluted collar, a single face, ring collars, a triangle band and a plain grip. The detections are all bands of the shaft; the face was missed.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     5
+    ],
+    "reading": "Fluted collar under the circle-studded point."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     2
+    ],
+    "reading": "Triangle band below the face."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     0,
+     4,
+     3,
+     1
+    ],
+    "reading": "Ring collars and the plain grip, boxed several times over."
+   }
+  ],
+  "composition": "A single axis: point, face, bands, grip.",
+  "narrative": "Another tapper from the Modakeke kit. The circles running up the point are worth noting: small repeated marks on a divination tool are the kind of feature that could encode a count, though here they are more likely decoration.",
+  "hypotheses": "Neutral for 'chronicle'. The circles on the point are a small 'pattern as number' candidate.",
+  "cross_panel_links": [
+   "FoA_04-5598 and FoA_04-5599_panel_00 (tappers)."
+  ],
+  "uncertainties": [
+   "Six boxes on four bands; #3 and #4 duplicate #1 and #0."
+  ],
+  "confidence": "low"
+ }
+}

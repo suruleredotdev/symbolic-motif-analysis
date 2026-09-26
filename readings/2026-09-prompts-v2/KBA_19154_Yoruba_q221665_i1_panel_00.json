@@ -1,0 +1,43 @@
+{
+ "motifs": {
+  "0": {
+   "label": "crowned_figure_with_two_staffs_looped_legs",
+   "description": "The pasted print: a thin figure with a tall ridged crown and a stern face, holding an upright staff with a square head in each hand; a ribbed, egg-shaped torso and a belt; legs bent sharply outward and up into a W that meets the staffs.",
+   "iconography": "A crowned ruler with two staffs of office and looped, 'mudfish' legs — the king type shared with EBA-Div_00311_01 and 00312_01. The tall ridged crown recalls the beaded crowns (adé) of the Ado-Ekiti door.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 365,
+    "y": 200,
+    "w": 236,
+    "h": 400
+   }
+  }
+ },
+ "panel": {
+  "title": "Mount sheet: a crowned figure with two staffs and looped legs, from the Modakeke temple board",
+  "object_type": "archive mount sheet with a printed detail (after Frobenius 1923, pl. 184)",
+  "panel_type": "documentation_sheet",
+  "summary": "A small print, 'enlarged 2×', of a crowned figure holding two staffs, captioned 'from Plate 184 … partial drawing of a carved temple board, excavated by the D.I.A.F.E. in 1910 at Modeke [Modakeke], Yorubaland'.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "One figure: tall crown, two staffs, looped legs."
+   }
+  ],
+  "composition": "A frontal figure whose staffs and legs make a closed frame around the body.",
+  "narrative": "The clearest drawing of the collection's king figure: crown, two staffs, legs turned into loops. The same type stands in the middle of the three crowned figures on the Ife planks (EBA-Div_00311_01, 00312_01), so the image travelled between Ife and Modakeke — the two rival towns shared one picture of kingship.",
+  "hypotheses": "Supports 'chronicle of rulers': a repeated, recognisable king image across towns.",
+  "cross_panel_links": [
+   "Same board: KBA_19153, KBA_19155.",
+   "Same king type: EBA-Div_00311_panel_01, EBA-Div_00312_panel_01.",
+   "Crowns: EBA-Div_00303 (#29)."
+  ],
+  "uncertainties": [
+   "The looped legs could also be a stool or a stylised garment."
+  ],
+  "confidence": "medium"
+ }
+}

@@ -1,0 +1,133 @@
+{
+ "motifs": {
+  "0": {
+   "label": "plaited_band_base",
+   "description": "A horizontal band of three-strand plait closing the bottom of the plank's frame.",
+   "iconography": "The lower edge of the woven frame that encloses the three figures; plait as binding and enclosure.",
+   "confidence": "high",
+   "bbox": {
+    "x": 17,
+    "y": 944,
+    "w": 218,
+    "h": 79
+   }
+  },
+  "1": {
+   "label": "plaited_band_top",
+   "description": "A horizontal band of plait closing the top of the frame, below the plank's uncarved upper end.",
+   "iconography": "The upper edge of the same woven frame (see #0).",
+   "confidence": "high",
+   "bbox": {
+    "x": 0,
+    "y": 174,
+    "w": 199,
+    "h": 72
+   }
+  },
+  "2": {
+   "label": "crowned_figure_mudfish_legs",
+   "description": "The lowest of three stacked figures in the central channel: a square head under a crown of pointed triangles, fists raised with objects, and legs drawn as two long loops meeting in a 'W'.",
+   "iconography": "The pointed crown marks a king (adé). Looped legs recall the mudfish-legged ruler of Olókun and Benin imagery — a sign of divine kingship. In a chronicle reading, one ruler in a sequence of three.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 85,
+    "y": 699,
+    "w": 82,
+    "h": 177
+   }
+  },
+  "3": {
+   "label": "plaited_side_band",
+   "description": "The long left-hand band of plait running the full height between the top and bottom bands.",
+   "iconography": "Left side of the woven frame; one continuous border split by the detector from #5.",
+   "confidence": "high",
+   "bbox": {
+    "x": 0,
+    "y": 245,
+    "w": 72,
+    "h": 692
+   }
+  },
+  "4": {
+   "label": "crowned_figure_with_staffs",
+   "description": "The top figure of the three: a square head under a zigzag-banded crown, a short staff in each hand, legs outlined in a long inverted 'V'.",
+   "iconography": "A crowned person holding two staffs — a ruler with emblems of office, heading the column.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 55,
+    "y": 244,
+    "w": 97,
+    "h": 185
+   }
+  },
+  "5": {
+   "label": "plaited_side_band",
+   "description": "The long right-hand band of plait, mirror of #3.",
+   "iconography": "Right side of the woven frame.",
+   "confidence": "high",
+   "bbox": {
+    "x": 156,
+    "y": 248,
+    "w": 77,
+    "h": 689
+   }
+  },
+  "6": {
+   "label": "figure_with_round_head",
+   "description": "The middle figure: a head inside a round outline (a cap, halo or mask), fists holding objects, a striated lower body.",
+   "iconography": "Unlike the two crowned figures, this one wears a round head-covering — perhaps a different office, a priest, or a ruler shown differently. Its place between two crowns keeps it within the sequence.",
+   "confidence": "low",
+   "bbox": {
+    "x": 69,
+    "y": 452,
+    "w": 90,
+    "h": 204
+   }
+  }
+ },
+ "panel": {
+  "title": "Ife plank: three crowned figures in a woven frame",
+  "object_type": "carved plank (door leaf or post face)",
+  "panel_type": "chronicle_of_rulers",
+  "summary": "A tall plank whose carving is a frame of plait on all four sides enclosing a channel with three frontal figures stacked one above the other. Two of the three wear pointed or zigzag crowns and hold objects in both hands.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     1
+    ],
+    "reading": "Top band of plait."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     3,
+     4,
+     6,
+     2,
+     5
+    ],
+    "reading": "Between two full-height plait bands: a crowned figure with staffs (#4), a figure in a round cap (#6), and a crowned figure with looped legs (#2)."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     0
+    ],
+    "reading": "Bottom band of plait."
+   }
+  ],
+  "composition": "Frame-and-file: a closed woven border around a single column of three figures of similar size, spaced evenly on the axis.",
+  "narrative": "Three crowned or capped rulers, one above another, held inside an unbroken woven frame, is the closest thing in the collection to a king list: a line of succession presented as equal, repeated authority. The frame's continuity would suit a lineage. Which rulers, if any, cannot be said from the carving; Ife's own list of Ọọ̀ni is the obvious oral source to test it against.",
+  "hypotheses": "Supports 'chronicle' more directly than any tray: a vertical sequence of crowned figures. Weakly relevant to 'pattern as number' (three figures; the plait is not obviously counted).",
+  "cross_panel_links": [
+   "EBA-Div_00312_panel_01 repeats the same frame-and-three-figures scheme.",
+   "The looped legs of #2 compare with the displayed figure on EBA-Div_00311_panel_00 (#5)."
+  ],
+  "uncertainties": [
+   "The crowns could be crested coiffures; the photograph is soft.",
+   "The side bands #3 and #5 are one frame split into boxes, not motifs."
+  ],
+  "confidence": "medium"
+ }
+}

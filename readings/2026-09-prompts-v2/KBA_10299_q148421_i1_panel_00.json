@@ -1,0 +1,52 @@
+{
+ "motifs": {
+  "0": {
+   "label": "blank_divining_field",
+   "description": "The hatched rectangle at the centre of the drawing — the tray's plain working surface, drawn with horizontal lines. It is the only area marked on the sheet; all the carving lies outside it.",
+   "iconography": "The field where the odù are marked in iyẹ̀rọsùn powder. Not a motif; it shows the detector finding the void rather than the carving.",
+   "confidence": "high",
+   "bbox": {
+    "x": 301,
+    "y": 254,
+    "w": 376,
+    "h": 268
+   }
+  }
+ },
+ "panel": {
+  "title": "Survey drawing of a pillow-shaped Ifá tray (54 cm) — probably the tray in FoA_04-5588",
+  "object_type": "pen-and-ink survey drawing of a rectangular opon Ifá",
+  "panel_type": "documentation_sheet",
+  "summary": "A drawing captioned 'Ifabrett, Yoruba 3, greatest length 54 cm' of a cushion-shaped tray with concave sides. A large face with bared teeth flanked by hatched triangles heads the border; crowds of figures, drummers and a kneeling figure holding a round disc fill the rest.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [],
+    "reading": "Top (undetected): the toothed face between two hatched triangles, with seated and kneeling figures on either side."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     0
+    ],
+    "reading": "The hatched working field."
+   },
+   {
+    "register": 2,
+    "motifs": [],
+    "reading": "Sides and foot (undetected): figures with staffs and bowls, drummers, tumbling bodies, and a figure holding a cross-marked disc."
+   }
+  ],
+  "composition": "The same arrangement as the photographed tray FoA_04-5588: a dominant face over a dense, busy rim.",
+  "narrative": "This sheet very probably records the same object as the photograph FoA_04-5588 — the pillow shape, the toothed face with flanking triangles and the disc-holder at the foot all match. That makes the pair a control: the draughtsman's version can be checked against the photograph, which matters because several objects in the collection survive only as drawings. The scene itself is the crowded festival-or-conflict world described for FoA_04-5588.",
+  "hypotheses": "Neutral. Useful as a method check rather than as evidence for either hypothesis.",
+  "cross_panel_links": [
+   "Same object, photographed: FoA_04-5588.",
+   "Other 'Ifabrett, Yoruba 3' sheets: KBA_10300, KBA_15356, KBA_17556."
+  ],
+  "uncertainties": [
+   "The identification with FoA_04-5588 is by visual match, not by catalogue number."
+  ],
+  "confidence": "medium"
+ }
+}

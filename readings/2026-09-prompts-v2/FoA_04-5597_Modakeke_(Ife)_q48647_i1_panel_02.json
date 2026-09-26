@@ -1,0 +1,42 @@
+{
+ "motifs": {
+  "0": {
+   "label": "head_finial_with_marks",
+   "description": "A carved head on a collared shaft: a cross-hatched cap, lidded eyes, broad nose, full lips, small bosses on the cheeks and marks at the temples, a twisted collar at the neck.",
+   "iconography": "A head (orí) — the seat of destiny in Yoruba thought — with facial marks (ilà) that name a lineage or town, and a beaded cap of rank. As a finial it tops a staff or post.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 0,
+    "y": 0,
+    "w": 146,
+    "h": 381
+   }
+  }
+ },
+ "panel": {
+  "title": "Modakeke head finial with cap and facial marks",
+  "object_type": "staff or post finial (object in the round)",
+  "panel_type": "architectural_ornament",
+  "summary": "A single carved head on a collared shaft, photographed on its own: cross-hatched cap, strong facial features, cheek bosses and a twisted collar.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "Cap, face, collar and the start of the shaft, top to bottom."
+   }
+  ],
+  "composition": "Frontal and symmetrical; ornament at the top (cap) and bottom (collar) frames a plain, modelled face.",
+  "narrative": "A person of consequence reduced to the head, the part that carries destiny. Its facial marks are the one element that could tie it to a named lineage, if compared with documented Ife and Oyo marks. The twisted collar repeats the rope border used on door and tray rims.",
+  "hypotheses": "Neutral. Facial marks are a local sign system worth recording but are not a count.",
+  "cross_panel_links": [
+   "Faces with marks: FoA_04-5580 (#0), FoA_04-5599.",
+   "Rope-twist collar: the plait and guilloche borders of FoA_04-5578 and FoA_04-5587."
+  ],
+  "uncertainties": [
+   "The cheek bosses could be damage on the print."
+  ],
+  "confidence": "medium"
+ }
+}

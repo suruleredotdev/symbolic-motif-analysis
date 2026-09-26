@@ -1,0 +1,173 @@
+{
+ "motifs": {
+  "0": {
+   "label": "head_face_oju_opon",
+   "description": "A large face at the top of the tray's rim: heavy-lidded eyes, broad nose, full lips, three vertical cheek marks on each side, a crest of short strokes above, framed by hatched bars.",
+   "iconography": "The ojú ọpọ́n, conventionally Ẹ̀ṣù, which the diviner orients the tray by. The cheek marks are ilà facial marks, which in Yoruba practice identify lineage or town.",
+   "confidence": "high",
+   "bbox": {
+    "x": 358,
+    "y": 17,
+    "w": 215,
+    "h": 140
+   }
+  },
+  "1": {
+   "label": "kneeling_rifleman",
+   "description": "A kneeling man in a peaked cap holding a long gun upright, its stock on the ground, in the rim compartment left of the head.",
+   "iconography": "A rifleman — the same figure as on the tray EBA-Div_00302 (#1, human-annotated). A guard, or the danger a client asks about, in the war years of Modakeke.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 13,
+    "y": 216,
+    "w": 154,
+    "h": 225
+   }
+  },
+  "2": {
+   "label": "sacrificial_fowl",
+   "description": "A bird with a fan-grooved wing and a small head pointing down, in the left rim compartment below the rifleman.",
+   "iconography": "The sacrificial fowl of Ifá, carved almost exactly as on EBA-Div_00302 (#2) — a strong sign of one workshop.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 20,
+    "y": 444,
+    "w": 154,
+    "h": 184
+   }
+  },
+  "3": {
+   "label": "foot_face_inverted",
+   "description": "A second face at the foot of the rim, carved upside down relative to the photograph so that it too looks into the centre; lidded eyes, nose and banded forehead.",
+   "iconography": "A second ojú ọpọ́n at the opposite point, as on EBA-Div_00302 (#3/#7): two faces on one axis.",
+   "confidence": "high",
+   "bbox": {
+    "x": 303,
+    "y": 718,
+    "w": 218,
+    "h": 135
+   }
+  },
+  "4": {
+   "label": "coupling_pair",
+   "description": "Two figures lying together in the upper-left rim compartment, one over the other, legs entwined.",
+   "iconography": "Sex and marriage as a matter brought to Ifá — the theme of the couples on EBA-Div_00302.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 77,
+    "y": 17,
+    "w": 274,
+    "h": 226
+   }
+  },
+  "5": {
+   "label": "struggle_or_coupling_scene",
+   "description": "In the lower-right compartment, a figure with a raised fist tumbling over a second, bearded head.",
+   "iconography": "Either a fight or a coupling; the raised fist suggests conflict — a quarrel or violence put before the diviner.",
+   "confidence": "low",
+   "bbox": {
+    "x": 701,
+    "y": 455,
+    "w": 215,
+    "h": 262
+   }
+  },
+  "6": {
+   "label": "mother_nursing_child",
+   "description": "A seated figure holding a smaller round-headed figure to its chest, in the upper-right compartment.",
+   "iconography": "A mother nursing a child (or an embracing couple): the hoped-for outcome of the fertility consultations shown elsewhere on the rim.",
+   "confidence": "low",
+   "bbox": {
+    "x": 715,
+    "y": 158,
+    "w": 198,
+    "h": 284
+   }
+  },
+  "7": {
+   "bbox": {
+    "x": 70,
+    "y": 662,
+    "w": 244,
+    "h": 171
+   },
+   "label": "reclining_couple_lower_left",
+   "description": "Two figures lying together in the lower-left rim compartment, one with its arm thrown across the other, heads side by side near the foot face.",
+   "iconography": "A second coupling pair, matching #4 across the tray: union and children, the most common request put to Ifá.",
+   "confidence": "medium"
+  },
+  "8": {
+   "bbox": {
+    "x": 577,
+    "y": 23,
+    "w": 219,
+    "h": 191
+   },
+   "label": "crouching_rifleman_with_long_gun",
+   "description": "In the upper-right compartment beside the head face, a man in a peaked cap crouches over a long gun held across his body, its butt resting on the ground line.",
+   "iconography": "A second armed man, answering the kneeling rifleman (#1) on the other side of the face: guns flank Ẹ̀ṣù at the head of the tray, as they flank daily life in a war town.",
+   "confidence": "medium"
+  },
+  "9": {
+   "bbox": {
+    "x": 529,
+    "y": 635,
+    "w": 259,
+    "h": 228
+   },
+   "label": "reclining_figure_under_long_curved_object",
+   "description": "In the lower-right compartment, a figure lying on its back with a hand raised to its face, beneath a long curved bar that runs the width of the compartment.",
+   "iconography": "The bar may be a bow or a gun lying over a fallen or resting man. If fallen, the tray's rim moves from armed men at the head to a casualty at the foot.",
+   "confidence": "low"
+  }
+ },
+ "panel": {
+  "title": "Modakeke Ifá tray: faces, rifleman, fowl, couples and a nursing mother",
+  "object_type": "opon Ifá, round",
+  "panel_type": "divination_instrument",
+  "summary": "A round Ifá tray from Modakeke with a worn central field, a crack across it, and a rim carved with two faces on one axis, two riflemen, a fowl, coupling pairs, a nursing figure and a figure lying under a long curved bar.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0,
+     3
+    ],
+    "reading": "The axis: a face at the head and an inverted face at the foot, both looking inward."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     4,
+     1,
+     2,
+     7
+    ],
+    "reading": "Left side of the rim: a couple, a kneeling rifleman, the sacrificial fowl, and a second couple near the foot."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     8,
+     6,
+     5,
+     9
+    ],
+    "reading": "Right side: a crouching rifleman beside the head, a nursing figure, a struggle or coupling, and a figure lying under a long curved bar near the foot."
+   }
+  ],
+  "composition": "A ring divided into about ten compartments around a used, empty centre, fixed by two faces on one diameter.",
+  "narrative": "The rim lays out a client's world as a diviner would meet it: desire and marriage, birth, conflict, the rifle, and the fowl to be sacrificed, with Ẹ̀ṣù's faces at head and foot. It almost repeats the tray EBA-Div_00302 motif for motif — same fowl, same rifleman, same couples, same lidded faces — so the two trays very probably come from one Modakeke workshop. For a town founded by war refugees and at war for decades, the rifle on a divining tray is history as much as symbol.",
+  "hypotheses": "Neutral-to-weak for 'chronicle' (a world, not a sequence); the rifle dates it to the war era. Not numerical.",
+  "cross_panel_links": [
+   "Near-twin of EBA-Div_00302 — probably the same carver or workshop.",
+   "Faces with ilà marks link to FoA_04-5583 and FoA_04-5588.",
+   "The rifleman links to the Ado-Ekiti door EBA-Div_00303."
+  ],
+  "uncertainties": [
+   "Several compartments are not boxed, so the programme is incomplete.",
+   "#5 could be a fight or a coupling."
+  ],
+  "confidence": "medium"
+ }
+}

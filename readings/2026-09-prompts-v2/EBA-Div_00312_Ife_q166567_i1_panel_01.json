@@ -1,0 +1,114 @@
+{
+ "motifs": {
+  "0": {
+   "label": "open_knot_header",
+   "description": "A broad knot of grooved strands looping around square openings, across the top of the plank above the figures.",
+   "iconography": "A crowning knot over the column of rulers; knots and plaits mark binding and continuity, here placed like a lintel.",
+   "confidence": "high",
+   "bbox": {
+    "x": 9,
+    "y": 82,
+    "w": 205,
+    "h": 143
+   }
+  },
+  "1": {
+   "label": "crowned_figure_looped_legs",
+   "description": "The middle figure of three: crowned, gripping a tall staff in each hand, legs drawn as long loops meeting in a 'W'.",
+   "iconography": "The same looped-legged crowned figure as EBA-Div_00311_panel_01 (#2) — possibly the mudfish-legged king of Olókun imagery. Placed in the middle, it may be a founder or a sacred king among ordinary ones.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 64,
+    "y": 504,
+    "w": 88,
+    "h": 232
+   }
+  },
+  "2": {
+   "label": "crowned_figure_with_staffs",
+   "description": "The lowest figure: a crown with a pointed triangle, a striated (beaded) garment, a tall staff in each hand.",
+   "iconography": "A crowned ruler holding staffs of office; one of three in succession.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 66,
+    "y": 741,
+    "w": 79,
+    "h": 329
+   }
+  },
+  "3": {
+   "label": "crowned_figure_with_staffs",
+   "description": "The top figure: zigzag-banded crown, triangular face, striated garment, a staff and a blade held upright.",
+   "iconography": "A crowned ruler, heading the column.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 60,
+    "y": 222,
+    "w": 100,
+    "h": 276
+   }
+  },
+  "4": {
+   "label": "plaited_side_band",
+   "description": "The long right-hand band of plait running the height of the plank.",
+   "iconography": "Right side of the woven frame around the three rulers.",
+   "confidence": "high",
+   "bbox": {
+    "x": 152,
+    "y": 228,
+    "w": 68,
+    "h": 849
+   }
+  },
+  "5": {
+   "label": "plaited_side_band",
+   "description": "The long left-hand band of plait, mirror of #4.",
+   "iconography": "Left side of the same frame.",
+   "confidence": "high",
+   "bbox": {
+    "x": 6,
+    "y": 225,
+    "w": 59,
+    "h": 830
+   }
+  }
+ },
+ "panel": {
+  "title": "Ife plank: three crowned rulers with staffs under a knot",
+  "object_type": "carved plank (door leaf or post face)",
+  "panel_type": "chronicle_of_rulers",
+  "summary": "A narrow plank framed by plait on both sides and a knot at the top, with three crowned figures stacked in the channel, each holding a staff in each hand. The middle figure has looped legs.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "A crowning knot."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     5,
+     3,
+     1,
+     2,
+     4
+    ],
+    "reading": "Three crowned figures with staffs, top to bottom, between two plait bands; the middle one with looped legs."
+   }
+  ],
+  "composition": "Frame-and-file, the same scheme as EBA-Div_00311_panel_01: a woven frame around three evenly spaced figures on one axis.",
+  "narrative": "Three crowned rulers with staffs of office, repeated down the plank, read most naturally as a succession — a line of kings. Its near-twin (EBA-Div_00311_panel_01) repeats the pattern, giving six crowned figures in two matching columns: the strongest evidence in the collection for carved king lists. Whether these are Ọọ̀ni of Ifẹ̀, and which, would have to be tested against Ife's oral king list and palace tradition.",
+  "hypotheses": "Strong support for 'chronicle of rulers'. For 'pattern as number', the fixed count of three per plank is suggestive only.",
+  "cross_panel_links": [
+   "Twin scheme: EBA-Div_00311_panel_01.",
+   "Crowned rulers also head the Ado-Ekiti door (EBA-Div_00303 #28) and the mount-sheet figures KBA_19153-19157."
+  ],
+  "uncertainties": [
+   "Crowns and coiffures are hard to tell apart at this resolution.",
+   "The side bands #4 and #5 are one frame, not two motifs."
+  ],
+  "confidence": "medium"
+ }
+}

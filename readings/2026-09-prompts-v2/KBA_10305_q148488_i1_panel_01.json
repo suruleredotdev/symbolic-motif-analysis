@@ -1,0 +1,107 @@
+{
+ "motifs": {
+  "0": {
+   "label": "head_face_with_blades",
+   "description": "The top of the drawn rim: a broad face with heavy lids and a tongue-like chin, flanked by upright leaf or blade shapes and zigzag bars, with figures in the compartment to its right.",
+   "iconography": "The ojú ọpọ́n (Ẹ̀ṣù) face; the flanking blades may be leaves or knives — both belong to Ẹ̀ṣù's and Ògún's worlds.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 193,
+    "y": 19,
+    "w": 517,
+    "h": 211
+   }
+  },
+  "1": {
+   "label": "lower_rim_plait_band",
+   "description": "The whole bottom arc of the rim: a large figure-eight plait at the foot, with a fish or reptile head at its left.",
+   "iconography": "Binding at the foot of the tray, opposite the face — the same head-and-plait axis as FoA_04-5583.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 0,
+    "y": 762,
+    "w": 773,
+    "h": 218
+   }
+  },
+  "2": {
+   "label": "chameleon_with_coiled_tail_left",
+   "description": "On the left rim, a creature with a diamond eye and cross-hatched body above a coiled knot of its tail.",
+   "iconography": "A chameleon (or lizard) with a spiral tail, mirrored on the right rim — the creature that tested the new earth in Ife's creation story, and a coil in the ouroboros family.",
+   "confidence": "low",
+   "bbox": {
+    "x": 0,
+    "y": 254,
+    "w": 114,
+    "h": 431
+   }
+  },
+  "3": {
+   "label": "figure_eight_plait",
+   "description": "The central knot of the foot plait, inside #1.",
+   "iconography": "See #1 — a tighter crop of the same plait.",
+   "confidence": "high",
+   "bbox": {
+    "x": 218,
+    "y": 798,
+    "w": 302,
+    "h": 153
+   }
+  },
+  "4": {
+   "label": "small_figures_upper_left",
+   "description": "In the upper-left compartment, two small figures — one crouching, one with a drum-like object — above a zigzag band.",
+   "iconography": "Attendants or musicians near the head of the tray; compare the drummer on FoA_04-5583 (#5).",
+   "confidence": "low",
+   "bbox": {
+    "x": 15,
+    "y": 66,
+    "w": 208,
+    "h": 220
+   }
+  }
+ },
+ "panel": {
+  "title": "Survey drawing of a round Ifá tray: face, chameleons and a plait at the foot",
+  "object_type": "pen-and-ink survey drawing of a round opon Ifá",
+  "panel_type": "divination_instrument",
+  "summary": "A drawing of a round tray with a hatched field, a broad face at the head, a large figure-eight plait at the foot, and on each side a cross-hatched creature with a diamond eye over a coiled tail. It closely matches the photographed Modakeke tray FoA_04-5583.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0,
+     4
+    ],
+    "reading": "Head: the face between blade shapes; small figures to its left, kneeling and staff-holding figures to its right."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     2
+    ],
+    "reading": "Sides: mirrored chameleons with coiled tails (the right one undetected)."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     1,
+     3
+    ],
+    "reading": "Foot: the figure-eight plait."
+   }
+  ],
+  "composition": "Head–foot axis (face and plait) with mirrored creatures on the sides — identical in scheme to FoA_04-5583.",
+  "narrative": "Either a drawing of the Modakeke tray FoA_04-5583 or a twin from the same workshop: face, coiled creatures, figures and plait in the same places. Either way it confirms that the chameleon-and-plait scheme was a repeatable programme, not a one-off.",
+  "hypotheses": "Neutral for 'chronicle'. Its value is as evidence of a repeated workshop formula.",
+  "cross_panel_links": [
+   "Near-identical scheme: FoA_04-5583 (photograph).",
+   "Face-and-plait axis: FoA_04-5587."
+  ],
+  "uncertainties": [
+   "The match with FoA_04-5583 is visual; the face treatments differ in detail.",
+   "#3 duplicates part of #1."
+  ],
+  "confidence": "medium"
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "motifs": {
+  "0": {
+   "label": "horned_figure_with_crossed_blades_sun_moon_posts",
+   "description": "The pasted print: a figure with large round eyes and bared teeth under a striped cap with two pointed horns, two long serrated blades crossed over the chest, standing between scalloped posts topped by a disc (left) and a crescent (right), on a scalloped base.",
+   "iconography": "Crossed bands or blades on the chest match the two leaders of the Ado-Ekiti door (#23, #34) and the face on FoA_04-5583. The disc and crescent on the posts may be sun and moon. A warrior or an òrìṣà with horns of power.",
+   "confidence": "low",
+   "bbox": {
+    "x": 364,
+    "y": 221,
+    "w": 266,
+    "h": 313
+   }
+  }
+ },
+ "panel": {
+  "title": "Mount sheet: a horned figure with crossed blades, between sun and moon posts, from the Modakeke temple board",
+  "object_type": "archive mount sheet with a printed detail (after Frobenius 1923, pl. 184)",
+  "panel_type": "documentation_sheet",
+  "summary": "A small print, 'enlarged 2×', of a round-eyed, horned figure with crossed blades between two posts, captioned 'from Plate 184 … partial drawing of a carved temple board, excavated by the D.I.A.F.E. in 1910 at Modeke [Modakeke], Yorubaland'.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "One figure: horned cap, crossed blades, disc and crescent on the posts."
+   }
+  ],
+  "composition": "A frontal figure boxed between two decorated posts on a scalloped base.",
+  "narrative": "The third figure from the Modakeke board. Where KBA_19153 and 19154 show kings with staffs, this one is armed: crossed blades over the chest, the mark of the war leaders on the Ado-Ekiti door. One board thus held both of the collection's main types — the ruler and the war leader.",
+  "hypotheses": "Supports both 'chronicle of rulers' and 'war': the same board carries a king type and a warrior type.",
+  "cross_panel_links": [
+   "Same board: KBA_19153, KBA_19154.",
+   "Crossed bands: EBA-Div_00303 (#23, #34), FoA_04-5583, KBA_19157."
+  ],
+  "uncertainties": [
+   "The crossed forms could be leaves, whisks or bandoliers rather than blades.",
+   "The disc and crescent may be decoration, not sun and moon."
+  ],
+  "confidence": "medium"
+ }
+}

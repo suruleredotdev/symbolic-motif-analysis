@@ -1,0 +1,59 @@
+{
+ "motifs": {
+  "0": {
+   "label": "left_rim_crocodile_strip",
+   "description": "A tall strip of the tray's left rim containing a net-patterned block, a long crocodile or monitor lizard with cross-hatched skin running down the rim, small creatures and a coiled spiral in the bottom corner.",
+   "iconography": "The crocodile is the rim's largest animal — water power and danger (Olókun). The coiled spiral at the corner belongs to the serpent / renewal family. One strip of a four-sided programme, not a single motif.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 21,
+    "y": 230,
+    "w": 148,
+    "h": 569
+   }
+  }
+ },
+ "panel": {
+  "title": "Rectangular Modakeke Ifá tray: face flanked by scorpions, tortoise at the foot",
+  "object_type": "opon Ifá, rectangular",
+  "panel_type": "divination_instrument",
+  "summary": "A rectangular Ifá tray with a plain field framed by a crowded carved border. A face with cheek marks sits at the top centre between two scorpion- or crab-like creatures; a round disc with a cross, like a tortoise shell, marks the centre of the foot; crocodile, birds, fish and figures fill the sides.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [],
+    "reading": "Top (undetected): corner knot, net blocks, two segmented clawed creatures (scorpions or crabs) flanking the face with ilà marks."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     0
+    ],
+    "reading": "Left side: a crocodile with cross-hatched skin and a spiral at the corner."
+   },
+   {
+    "register": 2,
+    "motifs": [],
+    "reading": "Right side (undetected): a bird, a large fish or leaf form, and a figure with a crested head."
+   },
+   {
+    "register": 3,
+    "motifs": [],
+    "reading": "Foot (undetected): a round cross-marked disc with radiating edges (tortoise shell or sun) between beaded bars, with quadrupeds and a long object that may be a gun at the right."
+   }
+  ],
+  "composition": "Four-sided frame with a marked top (face) and foot (disc), each flanked symmetrically; the sides are crowded and less symmetrical.",
+  "narrative": "A full Ifá cosmos around the working field: Ẹ̀ṣù's face at the head, dangerous creatures (scorpions, crocodile) beside him, a tortoise shell or sun disc at the foot, and birds, fish and people along the sides. The tortoise (Ìjàpá) is a trickster and offering animal; scorpions and crocodile read as the dangers a sacrifice averts.",
+  "hypotheses": "Does not bear on 'chronicle'. Not numerical.",
+  "cross_panel_links": [
+   "Crocodile on the rim: KBA_10300 (drawn tray), FoA_04-5585.",
+   "Tortoises: Ado-Ekiti door EBA-Div_00303 (#25, #26).",
+   "Faces with ilà marks: FoA_04-5580 (#0), FoA_04-5588."
+  ],
+  "uncertainties": [
+   "Only the left strip is detected; the rest is read from the photograph.",
+   "The top creatures could be tortoises or crabs rather than scorpions."
+  ],
+  "confidence": "medium"
+ }
+}

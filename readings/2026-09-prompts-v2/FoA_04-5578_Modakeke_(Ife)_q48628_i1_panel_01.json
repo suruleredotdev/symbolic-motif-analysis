@@ -1,0 +1,41 @@
+{
+ "motifs": {
+  "0": {
+   "label": "full_length_plait",
+   "description": "One unbroken plait of broad, grooved strands running the whole height of the board, set on a plain ground with a notched outer edge.",
+   "iconography": "Pure pattern: plait as a woven cloth or mat translated into wood. Such boards frame doorways; the plait's continuity suits a threshold. Crossings could be counted to test the 'pattern as number' idea.",
+   "confidence": "high",
+   "bbox": {
+    "x": 114,
+    "y": 36,
+    "w": 196,
+    "h": 1416
+   }
+  }
+ },
+ "panel": {
+  "title": "Modakeke board: one continuous plait",
+  "object_type": "door-frame board or post face",
+  "panel_type": "architectural_ornament",
+  "summary": "A long board carved with a single plait from end to end. The edge of a second board carved with concentric roundels shows at the left of the photograph.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "The plait, uninterrupted, top to bottom."
+   }
+  ],
+  "composition": "A single repeating band on one axis; no figure, no break.",
+  "narrative": "A frame piece whose figural partner is missing from the photograph. The roundel board beside it suggests the two once stood together in one doorway. As ornament it carries the woven language that binds the figural boards elsewhere on this plate.",
+  "hypotheses": "Neutral for 'chronicle'. For 'pattern as number', a clean test case: count the crossings and compare with other plait bands.",
+  "cross_panel_links": [
+   "Same plait as the bands on FoA_04-5578 panels 00 and 02 and EBA-Div_00311_panel_01."
+  ],
+  "uncertainties": [
+   "The single box is the whole band; there are no sub-motifs to read."
+  ],
+  "confidence": "high"
+ }
+}

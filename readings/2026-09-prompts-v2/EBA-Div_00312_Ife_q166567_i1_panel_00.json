@@ -1,0 +1,179 @@
+{
+ "motifs": {
+  "0": {
+   "label": "figure_with_tapper_over_ring",
+   "description": "A small frontal figure with a round head standing in the central channel, holding a long rod whose end reaches down into the notched ring below (#1).",
+   "iconography": "Read with the ring, a diviner striking a tray with a tapper (ìróké) — the gesture that opens an Ifá consultation. Otherwise a figure holding a staff of office.",
+   "confidence": "low",
+   "bbox": {
+    "x": 191,
+    "y": 408,
+    "w": 141,
+    "h": 261
+   }
+  },
+  "1": {
+   "label": "compartmented_ring",
+   "description": "A circle whose border is divided into about ten segments with toothed edges and small ovals in some compartments, centred in the channel; the rod from #0 enters it from above.",
+   "iconography": "It looks like a miniature ọpọ́n Ifá seen from above — a compartmented rim around an empty centre — with the tapper touching it. Alternative readings: a coiled serpent, a beaded ring or a drum-head. The segment count is a small 'pattern as number' test.",
+   "confidence": "low",
+   "bbox": {
+    "x": 157,
+    "y": 579,
+    "w": 165,
+    "h": 163
+   }
+  },
+  "2": {
+   "label": "s_scroll_side_band",
+   "description": "The full-height right-hand band of running S-scrolls, framing the central channel.",
+   "iconography": "Right half of the scroll frame that encloses the scene (see #6).",
+   "confidence": "high",
+   "bbox": {
+    "x": 354,
+    "y": 205,
+    "w": 97,
+    "h": 758
+   }
+  },
+  "3": {
+   "label": "hafted_blade",
+   "description": "A small T-shaped object with a flared blade on a short handle, at the lower left of the channel beside the palm (#4).",
+   "iconography": "An axe or hoe — a tool of Ògún (iron) or an offering; with #5 part of a set of implements at the foot of the scene.",
+   "confidence": "low",
+   "bbox": {
+    "x": 154,
+    "y": 747,
+    "w": 53,
+    "h": 108
+   }
+  },
+  "4": {
+   "label": "oil_palm",
+   "description": "A plant with a straight stem and a fan of five or six pointed leaves, at the foot of the central channel between blocks.",
+   "iconography": "Most likely the oil palm — the tree of Ifá, whose nuts (ikin) are the diviner's instruments. With the ring and tapper above, it makes this panel an Ifá scene.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 211,
+    "y": 756,
+    "w": 85,
+    "h": 199
+   }
+  },
+  "5": {
+   "label": "paddle_or_club",
+   "description": "A small club- or paddle-shaped object with a rounded head, at the lower right of the channel.",
+   "iconography": "A tool or offering object paired with the blade (#3); possibly a mallet, paddle or spoon.",
+   "confidence": "low",
+   "bbox": {
+    "x": 300,
+    "y": 729,
+    "w": 39,
+    "h": 99
+   }
+  },
+  "6": {
+   "label": "s_scroll_side_band",
+   "description": "The full-height left-hand band of running S-scrolls, mirror of #2.",
+   "iconography": "Left half of the scroll frame. Scrolls rather than plait: a different frame idiom from its sister plank (panel 01).",
+   "confidence": "high",
+   "bbox": {
+    "x": 36,
+    "y": 211,
+    "w": 119,
+    "h": 754
+   }
+  },
+  "7": {
+   "label": "intimate_couple_with_snake",
+   "description": "Two nude frontal figures side by side at the top of the channel, one reaching to the other's body, a wavy serpent at their left and a tall plank-like object at their right.",
+   "iconography": "A couple — fertility and marriage, as on the Ifá tray EBA-Div_00302 — with a serpent beside them (earth, renewal). The panel places them above the divining scene: the question put to Ifá.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 143,
+    "y": 227,
+    "w": 201,
+    "h": 174
+   }
+  },
+  "8": {
+   "label": "wavy_serpent",
+   "description": "A thin wavy line running down the left edge of the channel beside the couple.",
+   "iconography": "A snake, the serpent of #7 — continuity and threshold power.",
+   "confidence": "low",
+   "bbox": {
+    "x": 145,
+    "y": 264,
+    "w": 39,
+    "h": 304
+   }
+  },
+  "9": {
+   "label": "implements_at_the_base",
+   "description": "The lower compartment as a whole: blade, palm and club set among rectangular blocks at the foot of the channel.",
+   "iconography": "An offering ground or shrine: tools and the palm of Ifá laid out below the consultation.",
+   "confidence": "low",
+   "bbox": {
+    "x": 153,
+    "y": 743,
+    "w": 189,
+    "h": 220
+   }
+  }
+ },
+ "panel": {
+  "title": "Ife board: a couple, a diviner at the tray, and the palm of Ifá",
+  "object_type": "carved board (door leaf or shrine panel)",
+  "panel_type": "divination_instrument",
+  "summary": "A board with two full-height scroll bands enclosing a central channel. Top to bottom: a nude couple with a serpent; a figure whose long rod touches a compartmented ring; and an oil palm with tools at the base.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     7,
+     8
+    ],
+    "reading": "A couple and a serpent — the matter of marriage and fertility."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     0,
+     1
+    ],
+    "reading": "A figure strikes or points into a compartmented ring — likely a diviner with tapper and tray."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     9,
+     3,
+     4,
+     5
+    ],
+    "reading": "The oil palm of Ifá with a blade and a club among blocks — the diviner's tree and offerings."
+   },
+   {
+    "register": 3,
+    "motifs": [
+     6,
+     2
+    ],
+    "reading": "The S-scroll bands that frame the whole."
+   }
+  ],
+  "composition": "A framed axis read downward: people, then the rite, then its source (the palm) and offerings. Scale is small and even; the frame does the enclosing.",
+  "narrative": "The board may picture an Ifá consultation as a story: a couple (the clients), the diviner tapping the tray, and the oil palm whose nuts give the signs. It is the same theme the Ifá tray EBA-Div_00302 puts on its rim — couples and divination — told as a sequence instead of a ring.",
+  "hypotheses": "Supports a narrative reading, though of a rite rather than a reign. The ring's ten segments could be tested as a count; nothing else is numerical.",
+  "cross_panel_links": [
+   "Couples: EBA-Div_00302 (tray).",
+   "Ifá trays and tappers: FoA_04-5598 (four ìróké), FoA_04-5580 and FoA_04-5583 (trays).",
+   "Sister plank EBA-Div_00312_panel_01 from the same photograph."
+  ],
+  "uncertainties": [
+   "The ring could be a coiled serpent or a drum rather than a tray.",
+   "#9 overlaps #3, #4 and #5; #8 overlaps #7."
+  ],
+  "confidence": "medium"
+ }
+}

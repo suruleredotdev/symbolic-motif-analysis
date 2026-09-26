@@ -1,0 +1,66 @@
+{
+ "motifs": {
+  "0": {
+   "label": "head_face_calm",
+   "description": "A small, calm face with lowered lids and a fringe of strokes over the brow, at the top centre of the rim between two ribbed blocks.",
+   "iconography": "The ojú ọpọ́n (Ẹ̀ṣù) at the head of the tray; here serene rather than fierce.",
+   "confidence": "high",
+   "bbox": {
+    "x": 375,
+    "y": 39,
+    "w": 232,
+    "h": 107
+   }
+  },
+  "1": {
+   "label": "fowl_on_right_rim",
+   "description": "A bird with a fan-grooved wing and down-turned head, set in a compartment on the right rim between ribbed bars; a matching bird sits on the left rim.",
+   "iconography": "The sacrificial fowl again (compare EBA-Div_00302 #2, FoA_04-5580 #2): the offering that follows divination, here paired on both sides.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 844,
+    "y": 219,
+    "w": 105,
+    "h": 257
+   }
+  }
+ },
+ "panel": {
+  "title": "Rectangular Modakeke Ifá tray: calm face, paired fowls, a crab and corner mudfish",
+  "object_type": "opon Ifá, rectangular",
+  "panel_type": "divination_instrument",
+  "summary": "A spare rectangular tray whose rim alternates ribbed blocks with plain swellings. A calm face marks the head; a fowl sits on each side; a crab marks the foot; long mudfish-like creatures bend around the four corners.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "The head: a calm face between ribbed blocks."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     1
+    ],
+    "reading": "The sides: a fowl on each, facing each other across the field."
+   },
+   {
+    "register": 2,
+    "motifs": [],
+    "reading": "The foot (undetected): a crab at the centre; mudfish curving round the corners."
+   }
+  ],
+  "composition": "Strictly symmetrical: face and crab on the vertical axis, fowls on the horizontal, mudfish at the corners. Ribbed blocks give the rim a regular beat.",
+  "narrative": "A quiet, orderly tray: Ẹ̀ṣù at the head, the crab and mudfish of the water, and two fowls ready for sacrifice. Four cardinal points, four corners — a small cosmogram around the working field.",
+  "hypotheses": "Neutral for 'chronicle'. The ribbed blocks are regular (eight around the rim) and could be tested against the tray's quartered layout, but no count is evident.",
+  "cross_panel_links": [
+   "Fowls: EBA-Div_00302, FoA_04-5580.",
+   "Crab or scorpion forms: FoA_04-5586."
+  ],
+  "uncertainties": [
+   "The bottom creature could be a tortoise; the corner creatures could be crocodiles."
+  ],
+  "confidence": "medium"
+ }
+}

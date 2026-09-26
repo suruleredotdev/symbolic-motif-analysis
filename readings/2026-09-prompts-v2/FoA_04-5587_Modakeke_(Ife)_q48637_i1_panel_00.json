@@ -1,0 +1,74 @@
+{
+ "motifs": {
+  "0": {
+   "label": "two_strand_guilloche_top_left",
+   "description": "A run of two-strand guilloche — two rounded ropes crossing in regular 'eyes' — along the top rim, left of the face.",
+   "iconography": "Rope-twist binding on the head side of the tray; one of three plait idioms on this rim.",
+   "confidence": "high",
+   "bbox": {
+    "x": 24,
+    "y": 30,
+    "w": 366,
+    "h": 96
+   }
+  },
+  "1": {
+   "label": "hook_chain_top_right",
+   "description": "A run of linked hooks or S-volutes along the top rim, right of the face — a different pattern in the matching slot.",
+   "iconography": "The carver deliberately pairs two different interlaces either side of the face. Such paired difference could mark the two halves of the tray (the right and left hands of Ifá), but that is untested.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 587,
+    "y": 32,
+    "w": 286,
+    "h": 97
+   }
+  },
+  "2": {
+   "label": "plait_bottom_left",
+   "description": "A three- or four-strand plait along the bottom rim, left of the central tab.",
+   "iconography": "Binding at the foot; the bottom rim repeats the top's logic with a tab in place of the face.",
+   "confidence": "high",
+   "bbox": {
+    "x": 98,
+    "y": 648,
+    "w": 273,
+    "h": 103
+   }
+  }
+ },
+ "panel": {
+  "title": "Rectangular Modakeke Ifá tray framed in plait, with a small face and a tab",
+  "object_type": "opon Ifá, rectangular",
+  "panel_type": "divination_instrument",
+  "summary": "A rectangular tray whose rim is almost all interlace — guilloche, hook-chain, knots and plait — broken only by a small face at the top centre, a tab or shield shape at the bottom centre, a net panel and a roundel on the sides.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0,
+     1
+    ],
+    "reading": "Top rim: guilloche left, face at centre (undetected), hook-chain right."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     2
+    ],
+    "reading": "Bottom rim: plait left, a tab at centre, knot chain right; the sides carry knots, a net panel and a roundel."
+   }
+  ],
+  "composition": "A symmetrical frame fixed by face and tab on one axis, but each pair of matching slots is filled with a different interlace.",
+  "narrative": "An Ifá tray that speaks almost entirely in pattern: a small Ẹ̀ṣù face at the head and binding everywhere else. The deliberate variety of plaits suggests the carver was showing a repertoire — or marking positions around the rim that a diviner would recognise.",
+  "hypotheses": "Neutral for 'chronicle'. A good test case for 'pattern as number': count the loops in each segment and compare with the 16 principal odù.",
+  "cross_panel_links": [
+   "Plait bands of the same kind frame the Modakeke posts FoA_04-5578.",
+   "Face-and-tab axis: FoA_04-5947."
+  ],
+  "uncertainties": [
+   "Only three of about eight rim segments are detected; the face is missed."
+  ],
+  "confidence": "medium"
+ }
+}

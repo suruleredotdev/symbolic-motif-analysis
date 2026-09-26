@@ -1,0 +1,60 @@
+{
+ "motifs": {
+  "0": {
+   "label": "tapper_head_with_collars",
+   "description": "The upper part of the tapper's grip: incised ring collars below the smooth point, then a face with a cross-hatched coiffure.",
+   "iconography": "The head on an ìróké marks the tapper's 'person' — the devotee or Ọ̀rúnmìlà's messenger — facing out while the point strikes the tray.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 9,
+    "y": 15,
+    "w": 93,
+    "h": 351
+   }
+  },
+  "1": {
+   "label": "tapper_crosshatched_base",
+   "description": "The base of the tapper: a cylinder covered in diagonal cross-hatching, like netting or basketry.",
+   "iconography": "Woven pattern on the grip — the same net diaper that fills tray rims and post shafts.",
+   "confidence": "high",
+   "bbox": {
+    "x": 0,
+    "y": 604,
+    "w": 109,
+    "h": 253
+   }
+  }
+ },
+ "panel": {
+  "title": "Modakeke Ifá tapper: point, face, kneeling figure, netted base",
+  "object_type": "divination tapper (ìróké), in the round",
+  "panel_type": "divination_instrument",
+  "summary": "A single tapper photographed on its own: a smooth tapering point, ring collars, a face in a cross-hatched cap, a kneeling figure, and a netted base. It is the leftmost of the four on FoA_04-5598, or a close twin.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "Collars and a face at the top of the grip."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     1
+    ],
+    "reading": "The netted base; the kneeling figure between (undetected)."
+   }
+  ],
+  "composition": "Vertical stacking of point, collars, head, kneeling body and textured base — the standard tapper grammar.",
+  "narrative": "An instrument of address: the point strikes the tray to call Ifá, while the carved devotee kneels in respect. It belongs with the Modakeke diviner's kit.",
+  "hypotheses": "Neutral.",
+  "cross_panel_links": [
+   "Same object type: FoA_04-5598, FoA_04-5599_panel_01."
+  ],
+  "uncertainties": [
+   "May duplicate one tapper on FoA_04-5598."
+  ],
+  "confidence": "medium"
+ }
+}
