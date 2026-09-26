@@ -33,7 +33,7 @@ Unified pipeline for motif segmentation, clustering, labeling, and interpretatio
 | Cell | Stage | What it does |
 |------|-------|-------------|
 | 1 | Setup | Load panels, approved bboxes, labels into shared state |
-| 2 | Segment | Review detections, manual draw, SAM Refine — all in one UI |
+| 2 | Segment | Review detections, manual draw, SAM Refine, Claude Suggest — all in one UI |
 | 3 | Cluster | CLIP embeddings + HDBSCAN clustering |
 | 4 | Gallery | Browse motifs grouped by cluster / panel / label |
 | 5 | Label | Edit labels + LLM Suggest via Claude |
@@ -41,7 +41,7 @@ Unified pipeline for motif segmentation, clustering, labeling, and interpretatio
 | 7 | Export | Save state, export crops, progress charts |
 
 **Data provenance**: every bbox, label, and cluster assignment records its source
-(`manual`, `sam_prompted`, `llm`, `human`) and timestamp.\
+(`manual`, `sam_prompted`, `sam_llm`, `llm`, `human`) and timestamp.\
 """))
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -100,7 +100,16 @@ print("Re-run this cell to reload from disk (revert all in-memory changes)")\
 # Cell 2: Segment — Panel Review + Manual Draw
 # ══════════════════════════════════════════════════════════════════════════════
 cells.append(code("mp-2", """\
-%matplotlib widget
+# @title
+# ipympl's interactive backend drives the drag-to-draw boxes below. Colab does
+# not support it — fall back to inline there, which renders panels but disables
+# manual box drawing (Colab labellers work from Stage 4 onward instead).
+try:
+    import google.colab  # noqa: F401
+    get_ipython().run_line_magic("matplotlib", "inline")
+    print("Colab detected: inline backend — manual box drawing is unavailable.")
+except ImportError:
+    get_ipython().run_line_magic("matplotlib", "widget")
 ## ── Segment: Panel Review + Manual Draw ─────────────────────────────────────
 
 import io as _io
@@ -428,7 +437,7 @@ def _seg_on_add(_=None):
     cand = PS.next_draft(stem)
     if cand is not None:
         rec = PS.accept_draft(stem, adjusted_bbox=bbox)
-        tag = "sam_prompted"
+        tag = rec.source
         _seg_load_next_candidate()
         _seg_show_sam_status()
     else:
@@ -458,13 +467,15 @@ import importlib; importlib.reload(_ms)
 
 _ref_sl = dict(continuous_update=False, style={"description_width": "130px"},
                layout=widgets.Layout(width="48%"))
-w_sam_score = widgets.FloatSlider(min=0.50, max=0.99, step=0.01, value=0.85,
+# Defaults come from panel_art.motif_segment — see the notes above
+# prompted_segment() for how they were measured.
+w_sam_score = widgets.FloatSlider(min=0.50, max=0.99, step=0.01, value=_ms.PROMPT_MIN_SCORE,
     description="min SAM score", readout_format=".2f", **_ref_sl)
-w_sam_min_area = widgets.FloatSlider(min=0.005, max=0.20, step=0.005, value=0.01,
+w_sam_min_area = widgets.FloatSlider(min=0.002, max=0.20, step=0.001, value=_ms.PROMPT_MIN_AREA,
     description="min area %", readout_format=".1%", **_ref_sl)
 w_sam_max_area = widgets.FloatSlider(min=0.10, max=0.80, step=0.05, value=0.50,
     description="max area %", readout_format=".0%", **_ref_sl)
-w_sam_edge = widgets.FloatSlider(min=0.0, max=0.15, step=0.005, value=0.03,
+w_sam_edge = widgets.FloatSlider(min=0.0, max=0.30, step=0.005, value=_ms.PROMPT_MIN_EDGE_DENSITY,
     description="min edge density", readout_format=".1%", **_ref_sl)
 
 btn_sam_gen  = widgets.Button(description="SAM Generate", button_style="",
@@ -509,8 +520,16 @@ def _seg_show_sam_status():
             btn_sam_skip.disabled = True
         else:
             rec = cand["record"]
-            print(f"SAM {cursor+1}/{total} — score={rec.predicted_iou:.3f}, "
-                  f"edge={cand['edge_density']:.2f}, novelty={cand['novelty']:.2f}")
+            if cand.get("origin", "sam") == "sam":
+                print(f"SAM {cursor+1}/{total} — score={rec.predicted_iou:.3f}, "
+                      f"edge={cand['edge_density']:.2f}, novelty={cand['novelty']:.2f}")
+            else:
+                what = {"sam_accept": "accepts SAM box", "sam_adjust": "adjusts SAM box",
+                        "llm_add": "adds"}.get(cand["origin"], cand["origin"])
+                snap = " (snapped to SAM edges)" if cand.get("snapped") else ""
+                print(f"Claude {cursor+1}/{total} — {what}: {cand.get('label') or '?'} "
+                      f"[{cand.get('confidence', '')}]{snap}")
+                print(f"  why: {cand.get('reason', '')}")
             print(f"Accepted: {accepted} | Skipped: {skipped} | Remaining: {total - cursor}")
             print("Adjust with drag/sliders, then Add bbox or Skip")
             btn_sam_skip.disabled = False
@@ -530,6 +549,7 @@ def _seg_on_sam_gen(_=None):
         candidates = _ms.prompted_segment(
             img_np, existing,
             approved_templates=templates or None,
+            panel_templates=existing,
             min_score=w_sam_score.value,
             min_area=w_sam_min_area.value,
             max_area=w_sam_max_area.value,
@@ -547,6 +567,89 @@ def _seg_on_sam_gen(_=None):
     finally:
         btn_sam_gen.description = "SAM Generate"
         btn_sam_gen.disabled = False
+
+
+# ── Claude Suggest — review the SAM queue and add what it missed ─────────────
+import panel_art.llm_segment as _llm
+importlib.reload(_llm)
+
+w_llm_model = widgets.Dropdown(options=_llm.MODEL_OPTIONS,
+    value=_llm.DEFAULT_MODEL if _llm.DEFAULT_MODEL in _llm.MODEL_OPTIONS else _llm.MODEL_OPTIONS[0],
+    description="Model:", layout=widgets.Layout(width="260px"))
+w_llm_effort = widgets.Dropdown(options=_llm.EFFORT_OPTIONS, value=_llm.DEFAULT_EFFORT,
+    description="Effort:", layout=widgets.Layout(width="190px"))
+w_llm_sam_first = widgets.Checkbox(value=True, indent=False,
+    description="Run SAM first if the queue is empty",
+    layout=widgets.Layout(width="270px"))
+w_llm_snap = widgets.Checkbox(value=True, indent=False,
+    description="Snap Claude's boxes to SAM edges",
+    layout=widgets.Layout(width="250px"))
+btn_llm = widgets.Button(description="Claude Suggest", button_style="info",
+    layout=widgets.Layout(width="150px"),
+    tooltip="Claude reviews the pending SAM candidates and adds missed motifs")
+out_llm_status = widgets.Output()
+
+
+def _seg_run_sam(stem):
+    existing = [m.bbox for m in PS.motifs_for_panel(stem) if m.included]
+    return _ms.prompted_segment(
+        np.array(PS.panel_image(stem)), existing,
+        approved_templates=PS.manual_templates() or None,
+        panel_templates=existing,
+        min_score=w_sam_score.value, min_area=w_sam_min_area.value,
+        max_area=w_sam_max_area.value, min_edge_density=w_sam_edge.value)
+
+
+def _seg_on_llm(_=None):
+    stem = _seg_state["stem"]
+    if not stem: return
+    btn_llm.description = "Claude thinking..."
+    btn_llm.disabled = True
+    out_llm_status.clear_output()
+    try:
+        pending = [c["record"].bbox for c in PS.pending_drafts(stem)
+                   if c.get("origin", "sam") == "sam"]
+        if not pending and w_llm_sam_first.value:
+            with out_llm_status: print("Queue empty — running SAM Generate first...")
+            PS.cache_sam_candidates(stem, _seg_run_sam(stem))
+            pending = [c["record"].bbox for c in PS.pending_drafts(stem)]
+        existing = [m.bbox for m in PS.motifs_for_panel(stem) if m.included]
+        with out_llm_status:
+            print(f"Asking {w_llm_model.value} (effort {w_llm_effort.value}) to review "
+                  f"{len(pending)} SAM candidate(s) and add missed motifs...")
+        img = PS.panel_image(stem)
+        result = _llm.suggest_boxes(
+            np.array(img), existing, pending,
+            context=f"Panel {stem}.",
+            model=w_llm_model.value, effort=w_llm_effort.value)
+        sugg = result.suggestions
+        if w_llm_snap.value:
+            # Claude chooses what is a motif; SAM places the edges. A reviewed
+            # SAM box accepted as-is is already a SAM mask — leave it.
+            todo = [s for s in sugg if s.origin != "sam_accept"]
+            for s, snapped in zip(todo, _ms.snap_boxes(np.array(img), [s.bbox for s in todo])):
+                if snapped is not None:
+                    s.bbox, s.snapped = snapped, True
+        n = PS.cache_llm_suggestions(stem, sugg)
+        out_llm_status.clear_output()
+        with out_llm_status:
+            n_rev = sum(s.origin != "llm_add" for s in sugg)
+            print(f"{result.model}: kept {n_rev}/{len(pending)} SAM candidate(s), "
+                  f"rejected {len(result.rejected)}, added {n - n_rev} — {n} to review. "
+                  f"Tokens in/out: {result.usage.get('input_tokens')}/{result.usage.get('output_tokens')}")
+            for r in result.rejected:
+                print(f"  rejected SAM #{r['candidate']}: {r['reason']}")
+        _seg_load_next_candidate()
+        _seg_show_sam_status()
+    except _llm.LLMSegmentError as e:
+        out_llm_status.clear_output()
+        with out_llm_status: print(f"Claude Suggest failed: {e}")
+    except Exception:
+        out_llm_status.clear_output()
+        with out_llm_status: import traceback; traceback.print_exc()
+    finally:
+        btn_llm.description = "Claude Suggest"
+        btn_llm.disabled = False
 
 
 def _seg_on_sam_skip(_=None):
@@ -576,6 +679,7 @@ btn_add.on_click(_seg_on_add)
 btn_sam_gen.on_click(_seg_on_sam_gen)
 btn_sam_skip.on_click(_seg_on_sam_skip)
 btn_sam_reset.on_click(_seg_on_sam_reset)
+btn_llm.on_click(_seg_on_llm)
 for _w in (w_mx, w_my, w_mw, w_mh):
     _w.observe(_seg_on_slider, names="value")
 
@@ -610,6 +714,17 @@ _sam_section = widgets.VBox([
 ], layout=widgets.Layout(border="1px solid #664400", padding="6px 10px",
                          margin="4px 0", background="#1a0d00"))
 
+_llm_section = widgets.VBox([
+    widgets.HTML("<b style='font-size:12px;color:#8fa8ff'>"
+                 "Claude Suggest — reviews the SAM queue, adds missed motifs; "
+                 "results replace the queue above (Add / Skip each):</b>"),
+    widgets.HBox([w_llm_model, w_llm_effort]),
+    widgets.HBox([w_llm_sam_first, w_llm_snap]),
+    widgets.HBox([btn_llm]),
+    out_llm_status,
+], layout=widgets.Layout(border="1px solid #334488", padding="6px 10px",
+                         margin="4px 0", background="#0d1026"))
+
 display(
     widgets.HTML("<h3 style='margin:4px 0'>Stage 1: Segment</h3>"),
     w_seg_panel, _filter_help,
@@ -619,6 +734,7 @@ display(
     _seg_fig.canvas,
     _draw_section,
     _sam_section,
+    _llm_section,
     widgets.HTML("<b style='font-size:13px'>Detection cards</b>"),
     out_seg_cards,
 )
@@ -2090,7 +2206,8 @@ def merge_with_existing(nb: dict, existing_path: Path) -> dict:
     for Colab in place (environment resolution in Stage 1, a matplotlib backend
     fallback in Stage 2), so blindly overwriting would undo that. Pass
     ``--force`` once you have folded those edits back into this file and want
-    the generated source to win.
+    the generated source to win, or ``--force-cell=mp-2`` to regenerate only
+    the cells you changed here.
     """
     generated = nb["cells"]
     if not existing_path.exists():
@@ -2101,6 +2218,10 @@ def merge_with_existing(nb: dict, existing_path: Path) -> dict:
         return nb
 
     force = "--force" in sys.argv
+    # --force-cell=mp-2[,mp-5]: let the generated source win for just these
+    # cells, leaving other diverged (Colab-adapted) cells alone.
+    force_cells = {cid for a in sys.argv if a.startswith("--force-cell=")
+                   for cid in a.split("=", 1)[1].split(",")}
     gen_by_id = {c["id"]: c for c in generated}
     merged: list[dict] = []
     placed: set[str] = set()
@@ -2114,7 +2235,7 @@ def merge_with_existing(nb: dict, existing_path: Path) -> dict:
             merged.append(old)
             foreign += 1
             continue
-        if old.get("source") != cell["source"] and not force:
+        if old.get("source") != cell["source"] and not force and cid not in force_cells:
             # Diverged: either this script changed, or somebody edited the
             # notebook directly. Keeping the on-disk version is the safe
             # default — a lost hand-edit is unrecoverable, a skipped
