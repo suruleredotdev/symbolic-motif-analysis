@@ -180,7 +180,9 @@ scripts/                    Standalone data-prep & pipeline utility scripts
   extract_motif_patches.py       SAM 2 automatic mask generation → patch crops
   embed_motif_patches.py         CLIP (ViT-L/14) + DINOv2 (ViT-L/14) embeddings
   describe_motif_patches.py      Claude-generated structured visual descriptions
+  run_interpretation.py          One command: briefs → labels → panels → corpus → site
   interpret_motifs.py            Phase 6 driver (cluster/panel/corpus stages)
+  import_readings.py             Write readings made outside an API run via the pipeline's writers
   label_motifs.py                Label propagation from cluster briefs / per motif
   export_interpretation_site.py  Phase 7: analysis + interpretation → one HTML file
   dino_perceptual_hash_demo.py   DINO-based perceptual hashing experiment
@@ -307,7 +309,17 @@ Run Setup once, then use the Segment / Cluster / Gallery / Label / Interpret
 others. See [`HITL_PLAN.md`](./HITL_PLAN.md) for the review-workflow design
 (candidate pools, manual bbox drawing, dirty-state autosave, run versioning).
 
-**Phase 6 — interpretation.** The final join runs either from the notebook's
+**Phase 6 — interpretation.** The whole interpretation, including per-motif
+labels and the site, runs in one command:
+
+```bash
+uv run python scripts/run_interpretation.py \
+  --analysis-dir analysis/ \
+  --embeddings   motif_embeddings_edges.npy \
+  --paths        motif_paths_edges.txt      # add --dry-run to see the prompts
+```
+
+The steps also run one at a time. The final join runs either from the notebook's
 Stage 5 or headless. Both write to the same `analysis/interpretation/`
 directory and read each other's output, so a run can start in one and finish
 in the other:

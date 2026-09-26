@@ -201,6 +201,39 @@ briefs are checkpointed after each call, so an interrupted run resumes with
 
 ## Usage
 
+**One command, start to finish.** `scripts/run_interpretation.py` runs every
+step in the order their inputs depend on — cluster briefs, a reading per motif
+(`label_motifs.py --per-motif --refresh-generated`, which leaves labels by a
+person alone), a reading per panel, the corpus essay, then the site:
+
+```bash
+export ANTHROPIC_API_KEY=...
+python3 scripts/run_interpretation.py \
+  --analysis-dir frobenius_artifacts/analysis \
+  --embeddings   motif_embeddings_edges.npy \
+  --paths        motif_paths_edges.txt
+#   --dry-run       print every prompt, no key needed, nothing written
+#   --resume        skip briefs and panels already on disk
+#   --only site     rebuild just the page from what is on disk
+```
+
+**Readings made elsewhere.** `scripts/import_readings.py` writes readings that
+did not come from an API run — written in a Claude session without a key, or
+corrected by hand in bulk — through the same writers the pipeline uses, so
+they land in `motif_labels.json` and `interpretation/` exactly as a run would
+leave them. Each motif reading can carry its `bbox`, so it still lands on the
+right motif after boxes are edited and re-indexed; a reading whose box is gone
+is reported, not written. Labels by a person are kept unless `--overwrite`.
+
+```bash
+python3 scripts/import_readings.py --analysis-dir frobenius_artifacts/analysis \
+  --readings path/to/readings --corpus path/to/corpus.md \
+  --model "where these came from"
+python3 scripts/run_interpretation.py --analysis-dir frobenius_artifacts/analysis --only site
+```
+
+The individual stages, when you want one on its own:
+
 ```bash
 # Inspect the joined prompt — no API key, no calls
 python3 scripts/interpret_motifs.py \
