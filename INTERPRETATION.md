@@ -58,7 +58,7 @@ Recommended order: run `--stage direct` first, read it, and escalate to
 `--stage panels --panels <stem>` for the specific panels where the description
 clearly isn't enough.
 
-## Three widening passes
+## Widening passes
 
 Each pass consumes the one before it. That ordering is what makes the output
 cohere rather than repeat itself — a panel reading can refer to "the interlace
@@ -73,6 +73,9 @@ was read.
                             ▼
    layout ────────────▶ ② panel reading  (one call per panel)
    panel image ───────▶     │
+                            ▼
+   pair picker ───────▶ ②b comparison     (one call per likely pair of panels)
+                            │
                             ▼
                        ③ corpus synthesis (one call, over everything)
 ```
@@ -91,8 +94,42 @@ the panel. Returns a register-by-register reading, an account of the
 composition, a narrative reading, links to the wider corpus, and explicit
 uncertainties.
 
-**③ Corpus synthesis** — what does the collection say? Receives every brief and
-every panel reading, no images. Returns a Markdown essay.
+**②b Cross-panel comparison** — how do *these two* objects relate? The panel
+pass sees one object at a time and the synthesis sees only text, so neither can
+notice that a survey drawing records a tray that also survives as a photograph,
+that two trays share a workshop, or that a mount sheet excerpts another object.
+Those identifications change the story: two records of one object are one piece
+of evidence, not two.
+
+Pairs are picked without the API (`panel_art/compare.py`). Every pair of panels
+is scored on three signals, each turned into a rank so none dominates: shared
+motif families weighted by rarity, closeness of the panels' mean motif
+embeddings, and shared rare words (TF-IDF) in labels and panel readings, with
+archive identifiers stripped so a reading cannot match a panel just by citing
+it. A pair qualifies when the two panels are mutual nearest neighbours on any one
+signal, or sit next to each other in the catalogue (crops of one photograph,
+neighbouring accession numbers). Selection works per signal rather than on an
+average because the pairs that matter most are strong on one signal and blank on
+another: a drawing and a photograph of one tray share rare words but no motif
+family, since drawings and photographs cluster apart.
+
+Each chosen pair gets one call with both annotated panels, both readings and
+both motif lists. The model returns a relation (same object, copy or detail,
+same workshop, shared programme, thematic parallel, unrelated), the evidence,
+motif-to-motif correspondences, differences, and what the pair adds to the
+story. The prompt asks for "unrelated" when that is what the images show.
+
+On the September 2026 readings the picker put 7 of 8 hand-found links among its
+88 pairs, at ranks 1, 3, 7, 8, 27, 34 and 63. The miss was a single shared motif
+on otherwise different objects (EBA-Div_00303 ↔ KBA_19157), which is a motif
+comparison, not an object one. `--stage compare --dry-run` prints every pair and
+why it was picked before any call is made. `--max-pairs` (default 100) caps the
+cost, and `--pairs-per-panel` (default 2) sets how many nearest neighbours count.
+
+**③ Corpus synthesis** — what does the collection say? Receives every brief,
+every panel reading and every comparison that found a relation, no images.
+Returns a Markdown essay that groups records of one object and objects from one
+workshop.
 
 ---
 
@@ -189,6 +226,8 @@ analysis/interpretation/
   layouts/<stem>.json   deterministic geometry — written even on --dry-run
   panels/<stem>.json    structured panel reading (+ the layout it used)
   panels/<stem>.md      the same reading, rendered for reading
+  comparisons.json      "<stem_a>|<stem_b>" → cross-panel comparison
+  comparisons.md        the same, rendered for reading
   corpus.md             the synthesis essay
 ```
 
@@ -204,7 +243,8 @@ briefs are checkpointed after each call, so an interrupted run resumes with
 **One command, start to finish.** `scripts/run_interpretation.py` runs every
 step in the order their inputs depend on — cluster briefs, a reading per motif
 (`label_motifs.py --per-motif --refresh-generated`, which leaves labels by a
-person alone), a reading per panel, the corpus essay, then the site:
+person alone), a reading per panel, cross-panel comparisons, the corpus essay,
+then the site:
 
 ```bash
 export ANTHROPIC_API_KEY=...

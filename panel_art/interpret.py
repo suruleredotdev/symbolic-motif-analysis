@@ -840,8 +840,10 @@ readable by a curious non-specialist. Use this shape:
 as a whole and in a sensible order, may record. No statistics.
 2. **Reading the collection in order** — group the objects into a few \
 chapters (for example by place, object type or theme: rule, war, divination) \
-and walk through them, citing panel identifiers. Show how motifs build into \
-each object's statement and how objects build into the larger account.
+and walk through them, citing panel identifiers. Where the comparisons show \
+two records of one object, a copy, or a shared workshop, say so and group \
+them. Show how motifs build into each object's statement and how objects \
+build into the larger account.
 3. **The vocabulary** — a compact Markdown table of the recurring motifs: \
 motif | where it appears | what it may mean (Yoruba context; cross-cultural \
 parallel if useful).
@@ -969,6 +971,7 @@ def build_corpus_prompt(
     cluster_briefs: dict[str, dict],
     panel_readings: dict[str, dict],
     corpus_stats: dict[str, Any],
+    comparisons: dict[str, dict] | None = None,
 ) -> str:
     """Text for the final synthesis pass — no images, purely a join of the passes above."""
     lines: list[str] = []
@@ -1009,6 +1012,17 @@ def build_corpus_prompt(
             lines.append(f"  Hypotheses: {reading['hypotheses']}")
         for link in reading.get("cross_panel_links", []) or []:
             lines.append(f"  Link: {link}")
+
+    if comparisons:
+        from panel_art.compare import comparison_lines
+        compared = comparison_lines(comparisons)
+        if compared:
+            lines.append("")
+            lines.append("═══ CROSS-PANEL COMPARISONS (two objects seen side by side) ═══")
+            lines.append("Use these to group the objects: records of the same object are "
+                         "one piece of evidence, not two; a shared workshop ties objects "
+                         "to one place and time.")
+            lines.extend(compared)
 
     # Scale goes last and is labelled as apparatus: an essay that opens with
     # detection counts reads as a report on the pipeline, not on the carvings.
@@ -1322,6 +1336,37 @@ class Interpreter:
         reading["model"] = self.model
         return reading
 
+    # ── Pass 2b: cross-panel comparison ───────────────────────────────────
+
+    def compare_panels(
+        self,
+        corpus: Corpus,
+        a: str,
+        b: str,
+        readings: dict[str, dict] | None = None,
+        reasons: Sequence[str] = (),
+        max_tokens: int = 8000,
+        max_dim: int = 900,
+    ) -> dict:
+        """Look at two panels side by side and say how they relate."""
+        from panel_art.compare import COMPARISON_SCHEMA, build_comparison_prompt
+
+        readings = readings or {}
+        content: list[dict] = []
+        for tag, stem in (("A", a), ("B", b)):
+            layout = corpus.layout_for(stem)
+            content.append({"type": "text", "text": f"Object {tag} — {stem}:"})
+            content.append(encode_image(annotate_panel(corpus.panel_image(stem), layout),
+                                        max_dim=max_dim))
+        content.append({"type": "text", "text": build_comparison_prompt(
+            a, b, corpus.motifs_for_panel(a), corpus.motifs_for_panel(b),
+            readings.get(a), readings.get(b), reasons)})
+
+        result = self._json_call(content, max_tokens, COMPARISON_SCHEMA)
+        result.update({"a": a, "b": b, "reasons": list(reasons),
+                       "generated_at": _now(), "model": self.model})
+        return result
+
     # ── Single-call alternative to passes 1-3 ─────────────────────────────
 
     def direct_synthesis(
@@ -1346,8 +1391,10 @@ class Interpreter:
         panel_readings: dict[str, dict],
         corpus_stats: dict[str, Any],
         max_tokens: int = 32000,
+        comparisons: dict[str, dict] | None = None,
     ) -> str:
-        prompt = build_corpus_prompt(cluster_briefs, panel_readings, corpus_stats)
+        prompt = build_corpus_prompt(cluster_briefs, panel_readings, corpus_stats,
+                                     comparisons)
         message = self._message([{"type": "text", "text": prompt}], max_tokens)
         if getattr(message, "stop_reason", None) == "refusal":
             raise RuntimeError("Claude declined the corpus synthesis request")
@@ -1414,6 +1461,8 @@ class InterpretationStore:
           layouts/<stem>.json    deterministic geometry (no LLM)
           panels/<stem>.json     structured panel reading
           panels/<stem>.md       the same reading, rendered for humans
+          comparisons.json       "<stem_a>|<stem_b>" → cross-panel comparison
+          comparisons.md         the same, rendered for humans
           corpus.md              final synthesis essay
     """
 
@@ -1423,6 +1472,7 @@ class InterpretationStore:
         self.panels_dir = self.out_dir / "panels"
         self.layouts_dir = self.out_dir / "layouts"
         self.corpus_path = self.out_dir / "corpus.md"
+        self.comparisons_path = self.out_dir / "comparisons.json"
 
     def ensure_dirs(self) -> None:
         self.panels_dir.mkdir(parents=True, exist_ok=True)
@@ -1465,6 +1515,24 @@ class InterpretationStore:
         path = self.layouts_dir / f"{stem}.json"
         path.write_text(json.dumps(layout.as_dict(), indent=2), encoding="utf-8")
         return path
+
+    # ── Comparisons ───────────────────────────────────────────────────────
+
+    def load_comparisons(self) -> dict[str, dict]:
+        if not self.comparisons_path.exists():
+            return {}
+        return json.loads(self.comparisons_path.read_text(encoding="utf-8"))
+
+    def save_comparisons(self, comparisons: dict[str, dict]) -> Path:
+        from panel_art.compare import render_comparisons_markdown
+
+        self.ensure_dirs()
+        ordered = {k: comparisons[k] for k in sorted(comparisons)}
+        self.comparisons_path.write_text(
+            json.dumps(ordered, indent=2, ensure_ascii=False), encoding="utf-8")
+        (self.out_dir / "comparisons.md").write_text(
+            render_comparisons_markdown(comparisons), encoding="utf-8")
+        return self.comparisons_path
 
     # ── Corpus ────────────────────────────────────────────────────────────
 

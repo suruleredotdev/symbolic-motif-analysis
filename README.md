@@ -180,7 +180,7 @@ scripts/                    Standalone data-prep & pipeline utility scripts
   extract_motif_patches.py       SAM 2 automatic mask generation → patch crops
   embed_motif_patches.py         CLIP (ViT-L/14) + DINOv2 (ViT-L/14) embeddings
   describe_motif_patches.py      Claude-generated structured visual descriptions
-  run_interpretation.py          One command: briefs → labels → panels → corpus → site
+  run_interpretation.py          One command: briefs → labels → panels → compare → corpus → site
   interpret_motifs.py            Phase 6 driver (cluster/panel/corpus stages)
   import_readings.py             Write readings made outside an API run via the pipeline's writers
   label_motifs.py                Label propagation from cluster briefs / per motif
@@ -334,8 +334,9 @@ uv run python scripts/interpret_motifs.py \
   --embeddings   motif_embeddings_edges.npy \
   --paths        motif_paths_edges.txt
 
-# The three-pass flow — a call per cluster and per panel, so the model sees
-# the actual crops and annotated panels. Use it where the depth is worth it.
+# The staged flow — a call per cluster, per panel and per likely pair of
+# panels (cross-panel comparison), so the model sees the actual crops and
+# annotated panels. Use it where the depth is worth it.
 uv run python scripts/interpret_motifs.py \
   --analysis-dir analysis/ \
   --embeddings   motif_embeddings_edges.npy \

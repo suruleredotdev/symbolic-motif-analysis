@@ -31,7 +31,7 @@ class FakeInterpreter:
     calls: dict[str, int] = {}
 
     def __init__(self, *args, **kwargs):
-        FakeInterpreter.calls = {"cluster": 0, "panel": 0, "corpus": 0}
+        FakeInterpreter.calls = {"cluster": 0, "panel": 0, "compare": 0, "corpus": 0}
 
     def cluster_brief(self, corpus, stats, **kwargs):
         FakeInterpreter.calls["cluster"] += 1
@@ -45,8 +45,15 @@ class FakeInterpreter:
                 "narrative": "n", "cross_panel_links": [], "uncertainties": [],
                 "confidence": "low", "layout": corpus.layout_for(stem).as_dict()}
 
+    def compare_panels(self, corpus, a, b, readings=None, reasons=(), **kwargs):
+        FakeInterpreter.calls["compare"] += 1
+        return {"a": a, "b": b, "relation": "same_workshop", "evidence": "e",
+                "motif_matches": [{"a": [1], "b": [0], "note": "n"}], "differences": "d",
+                "significance": "s", "confidence": "medium"}
+
     def corpus_synthesis(self, briefs, readings, scale, **kwargs):
         FakeInterpreter.calls["corpus"] += 1
+        FakeInterpreter.last_comparisons = kwargs.get("comparisons")
         return f"# Synthesis\n\n{len(briefs)} families, {len(readings)} panels."
 
 
@@ -91,7 +98,10 @@ def test_full_run_writes_all_three_stages(analysis_dir: Path, embeddings, stub_i
     assert (interpretation / "panels" / "panel_a.md").exists()
     assert "3 families, 2 panels" in (interpretation / "corpus.md").read_text()
 
-    assert FakeInterpreter.calls == {"cluster": 3, "panel": 2, "corpus": 1}
+    assert (interpretation / "comparisons.json").exists()
+    assert (interpretation / "comparisons.md").exists()
+    assert set(FakeInterpreter.last_comparisons) == {"panel_a|panel_b"}
+    assert FakeInterpreter.calls == {"cluster": 3, "panel": 2, "compare": 1, "corpus": 1}
 
 
 def test_resume_skips_work_already_on_disk(analysis_dir: Path, stub_interpreter):
@@ -99,8 +109,8 @@ def test_resume_skips_work_already_on_disk(analysis_dir: Path, stub_interpreter)
     assert FakeInterpreter.calls["cluster"] == 3
 
     cli.main(_args(analysis_dir, "--stage", "all", "--resume"))
-    # Clusters and panels are already written; only the synthesis re-runs.
-    assert FakeInterpreter.calls == {"cluster": 0, "panel": 0, "corpus": 1}
+    # Clusters, panels and comparisons are already written; only the synthesis re-runs.
+    assert FakeInterpreter.calls == {"cluster": 0, "panel": 0, "compare": 0, "corpus": 1}
 
 
 def test_panels_stage_can_be_limited_to_one_panel(analysis_dir: Path, stub_interpreter):

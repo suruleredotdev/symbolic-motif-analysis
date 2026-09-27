@@ -2,7 +2,7 @@
 """
 interpret_motifs.py — Phase 6 driver: turn the cluster analysis into an interpretation.
 
-Runs the three passes in `panel_art/interpret.py` over an analysis directory
+Runs the passes in `panel_art/interpret.py` over an analysis directory
 produced by the pipeline, and writes the results to `<analysis>/interpretation/`.
 
 Usage:
@@ -12,9 +12,9 @@ Usage:
       --embeddings motif_embeddings_edges.npy \\
       --paths      motif_paths_edges.txt
 
-  # The three-pass flow: adds a call per cluster and per panel so the model
-  # sees the actual images. Much slower and costlier — use it once the direct
-  # synthesis shows the analysis is worth the depth.
+  # The staged flow: adds a call per cluster, per panel and per likely pair of
+  # panels so the model sees the actual images. Much slower and costlier — use
+  # it once the direct synthesis shows the analysis is worth the depth.
   python3 scripts/interpret_motifs.py \\
       --analysis-dir frobenius_artifacts/analysis \\
       --embeddings motif_embeddings_edges.npy \\
@@ -24,14 +24,21 @@ Usage:
   # Inspect what would be sent — no API key needed, no calls made
   python3 scripts/interpret_motifs.py --analysis-dir ... --stage all --dry-run
 
+  # Just the cross-panel comparisons: list the pairs first, then run them
+  python3 scripts/interpret_motifs.py --analysis-dir ... --stage compare --dry-run
+  python3 scripts/interpret_motifs.py --analysis-dir ... --stage compare --resume
+
   # Just the cluster briefs, or just one panel
   python3 scripts/interpret_motifs.py --analysis-dir ... --stage clusters
   python3 scripts/interpret_motifs.py --analysis-dir ... --stage panels \\
       --panels EBA-Div_00311_Ife_q166566_i1_panel_00
 
 Stages depend on one another: `panels` reads `clusters.json` if it exists (and
-warns if it does not, since the readings are much thinner without it), and
-`corpus` reads both. `--stage all` runs them in order in a single invocation.
+warns if it does not, since the readings are much thinner without it);
+`compare` picks likely pairs of panels (shared families, embeddings, labels
+and panel readings) and shows the model both at once, to catch a drawing and a
+photograph of one object, copies, and shared workshops; `corpus` reads all of
+them. `--stage all` runs clusters → panels → compare → corpus.
 
 Environment:
   ANTHROPIC_API_KEY  — required unless --dry-run
@@ -68,10 +75,13 @@ from panel_art.interpret import (  # noqa: E402
     stale_briefs,
     render_clusters_markdown,
 )
+from panel_art.compare import build_comparison_prompt, select_pairs  # noqa: E402
 from panel_art.layout import render_layout_text  # noqa: E402
 
 
 # ── Stages ───────────────────────────────────────────────────────────────────
+
+ALL_STAGES = ["clusters", "panels", "compare", "corpus"]
 
 def run_clusters(
     corpus: Corpus,
@@ -180,6 +190,61 @@ def run_panels(
     return readings
 
 
+def run_compare(
+    corpus: Corpus,
+    store: InterpretationStore,
+    interpreter: Interpreter | None,
+    readings: dict[str, dict],
+    only: list[str] | None,
+    resume: bool,
+    dry_run: bool,
+    delay: float,
+    per_panel: int,
+    max_pairs: int,
+    min_score: float,
+) -> dict[str, dict]:
+    comparisons = store.load_comparisons() if resume else {}
+    pairs = select_pairs(corpus, readings, per_panel=per_panel, max_pairs=max_pairs,
+                         min_score=min_score, only=only)
+    todo = [p for p in pairs if p.key not in comparisons]
+
+    print(f"\n{'═' * 68}")
+    print(f"Stage 2b — cross-panel comparisons: {len(todo)} pairs to compare "
+          f"({len(comparisons)} already on disk)")
+    if not readings:
+        print("  NOTE: no panel readings yet — pairs are picked on motif families and "
+              "labels alone. Run --stage panels first for better pairs.")
+
+    for n, pair in enumerate(todo, start=1):
+        print(f"\n  [{n}/{len(todo)}] {pair.a}  ↔  {pair.b}  (score {pair.score:.2f})")
+        if pair.reasons:
+            print(f"    why: {'; '.join(pair.reasons)}")
+
+        if dry_run:
+            print(_boxed(build_comparison_prompt(
+                pair.a, pair.b, corpus.motifs_for_panel(pair.a), corpus.motifs_for_panel(pair.b),
+                readings.get(pair.a), readings.get(pair.b), pair.reasons)))
+            continue
+
+        assert interpreter is not None
+        started = time.monotonic()
+        try:
+            result = interpreter.compare_panels(corpus, pair.a, pair.b, readings, pair.reasons)
+        except Exception as exc:
+            print(f"    FAILED after {time.monotonic() - started:.0f}s: {exc}")
+            continue
+
+        result["score"] = round(pair.score, 4)
+        comparisons[pair.key] = result
+        store.save_comparisons(comparisons)            # checkpoint after each call
+        print(f"    → {result.get('relation', '?')} [{result.get('confidence', '?')}] "
+              f"({time.monotonic() - started:.0f}s)")
+        if delay and n < len(todo):
+            time.sleep(delay)
+
+    return comparisons
+
+
 def run_corpus(
     corpus: Corpus,
     store: InterpretationStore,
@@ -187,23 +252,25 @@ def run_corpus(
     briefs: dict[str, dict],
     readings: dict[str, dict],
     dry_run: bool,
+    comparisons: dict[str, dict] | None = None,
 ) -> str | None:
     scale = corpus_scale(corpus)
 
     print(f"\n{'═' * 68}")
     print(f"Stage 3 — corpus synthesis: {len(briefs)} families, "
-          f"{len(readings)} panel readings")
+          f"{len(readings)} panel readings, {len(comparisons or {})} comparisons")
 
     if not briefs and not readings:
         print("  Nothing to synthesise — run the clusters and panels stages first.")
         return None
 
     if dry_run:
-        print(_boxed(build_corpus_prompt(briefs, readings, scale)))
+        print(_boxed(build_corpus_prompt(briefs, readings, scale, comparisons)))
         return None
 
     assert interpreter is not None
-    markdown = interpreter.corpus_synthesis(briefs, readings, scale)
+    markdown = interpreter.corpus_synthesis(briefs, readings, scale,
+                                            comparisons=comparisons)
     path = store.save_corpus(markdown)
     print(f"\n  Wrote {path} ({len(markdown):,} characters)")
     return markdown
@@ -239,7 +306,7 @@ def _planned_calls(args, stats: dict, corpus: Corpus, store: InterpretationStore
     if args.stage == "direct":
         return 1
 
-    stages = ["clusters", "panels", "corpus"] if args.stage == "all" else [args.stage]
+    stages = ALL_STAGES if args.stage == "all" else [args.stage]
     done_clusters = store.load_clusters() if args.resume else {}
     done_panels = store.load_panels() if args.resume else {}
 
@@ -250,6 +317,10 @@ def _planned_calls(args, stats: dict, corpus: Corpus, store: InterpretationStore
         stems = args.panels or corpus.panel_stems()
         total += sum(1 for s in stems
                      if corpus.motifs_for_panel(s) and s not in done_panels)
+    if "compare" in stages:
+        done = store.load_comparisons() if args.resume else {}
+        # Pairs are picked after the panels stage, so this is an upper bound.
+        total += max(0, args.max_pairs - len(done))
     if "corpus" in stages:
         total += 1
     return total
@@ -281,13 +352,21 @@ def build_parser() -> argparse.ArgumentParser:
                         "(motif key or crop path → cluster id)")
 
     p.add_argument("--stage",
-                   choices=["direct", "clusters", "panels", "corpus", "all"],
+                   choices=["direct", *ALL_STAGES, "all"],
                    default="direct",
                    help="direct: ONE call joining everything already on disk (start here). "
-                        "clusters/panels/corpus: the three-pass flow, which adds a call per "
-                        "cluster and per panel to look at the actual images. all: run all three")
+                        "clusters/panels/compare/corpus: the staged flow, which adds a call "
+                        "per cluster, per panel and per likely pair of panels to look at the "
+                        "actual images. all: run them in that order")
     p.add_argument("--panels", nargs="*", metavar="STEM", default=None,
-                   help="Limit the panels stage to these panel stems")
+                   help="Limit the panels stage to these panel stems (and the compare "
+                        "stage to pairs that involve them)")
+    p.add_argument("--pairs-per-panel", type=int, default=2,
+                   help="Compare stage: a pair qualifies when each panel is among the other's N nearest on some signal")
+    p.add_argument("--max-pairs", type=int, default=100,
+                   help="Compare stage: cap on pairs compared (one API call each)")
+    p.add_argument("--min-pair-score", type=float, default=0.5,
+                   help="Compare stage: drop pairs scoring below this (0-1)")
 
     p.add_argument("--model", default=DEFAULT_MODEL, help="Claude model to use")
     p.add_argument("--effort", default=DEFAULT_EFFORT,
@@ -401,10 +480,11 @@ def main(argv: list[str] | None = None) -> int:
               else f"Interpretation written to {out_dir}")
         return 0
 
-    stages = ["clusters", "panels", "corpus"] if args.stage == "all" else [args.stage]
+    stages = ALL_STAGES if args.stage == "all" else [args.stage]
 
     briefs = store.load_clusters()
     readings = store.load_panels()
+    comparisons = store.load_comparisons()
 
     if "clusters" in stages:
         briefs = run_clusters(corpus, stats, store, interpreter,
@@ -412,8 +492,12 @@ def main(argv: list[str] | None = None) -> int:
     if "panels" in stages:
         readings = run_panels(corpus, stats, store, interpreter, briefs,
                               args.panels, args.resume, args.dry_run, args.delay)
+    if "compare" in stages:
+        comparisons = run_compare(corpus, store, interpreter, readings, args.panels,
+                                  args.resume, args.dry_run, args.delay,
+                                  args.pairs_per_panel, args.max_pairs, args.min_pair_score)
     if "corpus" in stages:
-        run_corpus(corpus, store, interpreter, briefs, readings, args.dry_run)
+        run_corpus(corpus, store, interpreter, briefs, readings, args.dry_run, comparisons)
 
     print(f"\n{'═' * 68}")
     print("Dry run complete — no API calls made." if args.dry_run

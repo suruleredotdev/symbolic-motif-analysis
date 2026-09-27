@@ -124,7 +124,7 @@ def test_import_rejects_a_panel_reading_with_a_bad_type(analysis_dir: Path, tmp_
 def test_runner_orders_steps_so_labels_precede_panels(tmp_path: Path):
     args = runner.build_parser().parse_args(["--analysis-dir", str(tmp_path)])
     steps = runner.plan(args)
-    assert [s for s, *_ in steps] == ["clusters", "labels", "panels", "corpus", "site"]
+    assert [s for s, *_ in steps] == ["clusters", "labels", "panels", "compare", "corpus", "site"]
     labels_argv = dict((s, argv) for s, _, argv in steps)["labels"]
     assert "--per-motif" in labels_argv and "--refresh-generated" in labels_argv
     assert "--overwrite" not in labels_argv

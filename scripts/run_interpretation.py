@@ -10,11 +10,14 @@ Runs the existing scripts in the order their inputs depend on each other:
                                              context of its board; labels by a
                                              person (human, llm-edited) are kept
   3. interpret_motifs.py --stage panels      one reading per object
-  4. interpret_motifs.py --stage corpus      the collection essay
-  5. export_interpretation_site.py           the self-contained site.html
+  4. interpret_motifs.py --stage compare     likely pairs of objects side by side:
+                                             same object, copies, one workshop
+  5. interpret_motifs.py --stage corpus      the collection essay
+  6. export_interpretation_site.py           the self-contained site.html
 
 Labels come before panels because the panel prompt quotes every motif's
-label; the essay comes last because it reads every panel reading.
+label; comparisons follow the panels because pairs are picked partly from
+the readings; the essay comes last because it reads all of them.
 
 Usage:
   export ANTHROPIC_API_KEY=...
@@ -39,7 +42,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-STEPS = ["clusters", "labels", "panels", "corpus", "site"]
+STEPS = ["clusters", "labels", "panels", "compare", "corpus", "site"]
 
 
 def _script(name: str):
@@ -68,6 +71,9 @@ def plan(args) -> list[tuple[str, str, list[str]]]:
                    common + emb + ["--per-motif", "--refresh-generated"] + panels + dry + model),
         "panels": ("interpret_motifs",
                    common + emb + ["--stage", "panels"] + panels + resume + dry + model),
+        "compare": ("interpret_motifs",
+                    common + emb + ["--stage", "compare", "--max-pairs", str(args.max_pairs)]
+                    + panels + resume + dry + model),
         "corpus": ("interpret_motifs",
                    common + emb + ["--stage", "corpus"] + dry + model),
         "site": ("export_interpretation_site", common + emb + panels),
@@ -80,7 +86,7 @@ def plan(args) -> list[tuple[str, str, list[str]]]:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        description="Run clusters → labels → panels → corpus → site in one go",
+        description="Run clusters → labels → panels → compare → corpus → site in one go",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument("--analysis-dir", type=Path, default=Path("frobenius_artifacts/analysis"))
@@ -89,11 +95,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--panels", nargs="*", metavar="STEM", default=None,
                    help="Limit labels, panels and the site to these panel stems")
     p.add_argument("--model", default=None, help="Override each script's default model")
+    p.add_argument("--max-pairs", type=int, default=100,
+                   help="Cap on cross-panel comparisons (one API call each)")
     p.add_argument("--only", nargs="+", choices=STEPS, default=None,
                    help="Run just these steps (still in pipeline order)")
     p.add_argument("--skip", nargs="+", choices=STEPS, default=None)
     p.add_argument("--resume", action="store_true",
-                   help="Skip cluster briefs and panel readings already on disk")
+                   help="Skip briefs, panel readings and comparisons already on disk")
     p.add_argument("--dry-run", action="store_true",
                    help="Print the prompts each step would send; no key needed")
     return p
