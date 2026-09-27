@@ -297,6 +297,12 @@ class PipelineState:
             return
         with (self._annotated_dir / "draft_log.jsonl").open("a") as f:
             for e in entries:
+                e = dict(e)
+                # An Add that was unticked before saving never reached
+                # _approved.json — count it as dropped, not kept.
+                rec = e.pop("_record", None)
+                if e["action"] == "accept" and rec is not None and not rec.included:
+                    e["action"] = "dropped"
                 f.write(json.dumps(e) + "\n")
         self._draft_log = [e for e in self._draft_log if e["panel"] != stem]
 
@@ -658,6 +664,8 @@ class PipelineState:
         for k in ("score", "edge_density", "label", "confidence"):
             if cand.get(k) is not None:
                 entry[k] = round(cand[k], 4) if isinstance(cand[k], float) else cand[k]
+        if action == "accept":
+            entry["_record"] = cand["record"]       # resolved on flush
         self._draft_log.append(entry)
 
     def draft_count(self, stem: str) -> tuple[int, int, int, int]:

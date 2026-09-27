@@ -5,6 +5,8 @@ No network: a stub client records the request and replays a canned reply.
 
 from __future__ import annotations
 
+import base64
+import io
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -122,7 +124,6 @@ def test_large_panels_are_downscaled_and_mapped_back():
     client = StubClient(reply)
     result = llm.suggest_boxes(_panel(w, h), [], [], client=client)
     img_block = next(b for b in client.requests[0]["messages"][0]["content"] if b["type"] == "image")
-    import base64, io
     sent = Image.open(io.BytesIO(base64.b64decode(img_block["source"]["data"])))
     assert max(sent.size) == llm.MAX_IMAGE_EDGE
     assert result.suggestions[0].bbox == {"x": 200, "y": 100, "w": 60, "h": 80}
@@ -219,3 +220,20 @@ def test_trim_outsized_drops_the_odd_large_form():
     boxes = [{"w": 75, "h": 190}, {"w": 134, "h": 111}, {"w": 74, "h": 168},
              {"w": 138, "h": 331}]
     assert {"w": 138, "h": 331} not in ms._trim_outsized(boxes)
+
+
+def test_an_add_unticked_before_save_is_logged_as_dropped(state: PipelineState, analysis_dir: Path):
+    result = llm.suggest_boxes(_panel(), [], CANDS, client=StubClient(REPLY))
+    state.cache_llm_suggestions("panel_a", result.suggestions)
+    kept = state.accept_draft("panel_a")
+    dropped = state.accept_draft("panel_a")
+    dropped.included = False                     # the reviewer unticks it afterwards
+    state.save_approved("panel_a")
+
+    log = [json.loads(line) for line in
+           (analysis_dir / "annotated" / "draft_log.jsonl").read_text().splitlines()]
+    assert [e["action"] for e in log] == ["accept", "dropped"]
+    assert all("_record" not in e for e in log)
+    saved = json.loads((analysis_dir / "annotated" / "panel_a_approved.json").read_text())
+    assert kept.bbox in [m["bbox"] for m in saved]
+    assert dropped.bbox not in [m["bbox"] for m in saved]

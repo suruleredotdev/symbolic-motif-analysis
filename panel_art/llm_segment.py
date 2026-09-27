@@ -50,6 +50,8 @@ DEFAULT_MODEL = os.environ.get("MOTIF_LLM_MODEL", "claude-opus-5-5")
 # Claude Opus 5.5 defaults to medium; placing boxes on a dense board is worth more.
 DEFAULT_EFFORT = os.environ.get("MOTIF_LLM_EFFORT", "high")
 MODEL_OPTIONS = ["claude-opus-5-5", "claude-opus-5", "claude-fable-5-1", "claude-sonnet-5"]
+if DEFAULT_MODEL not in MODEL_OPTIONS:           # an env override the list doesn't know
+    MODEL_OPTIONS.insert(0, DEFAULT_MODEL)
 EFFORT_OPTIONS = ["low", "medium", "high", "xhigh", "max"]
 
 # Long edge sent to the API. Larger images are downscaled by the API anyway;
@@ -246,7 +248,7 @@ def build_content(
     has_cands = bool(candidates)
     lines = [
         f"Panel size: {panel.width}×{panel.height} px.",
-        f"Already approved (grey, E0…): "
+        "Already approved (grey, E0…): "
         + (json.dumps(existing) if existing else "none") + ".",
     ]
     if has_cands:
