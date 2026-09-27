@@ -230,6 +230,29 @@ Run all cells → opens panel selector dropdown
 
 Approved files take precedence over detections files in the next step.
 
+The same review now lives in `motif_pipeline.ipynb` Stage 1, which adds two
+ways to propose boxes the automatic pass missed. Both feed one Add / Skip
+queue:
+
+- **SAM Generate** — prompted SAM in the gaps between approved boxes
+  (`panel_art/motif_segment.prompted_segment`). Once a panel has three or
+  more approved boxes, their sizes set the size window, so regenerating
+  after a few Adds gives tighter candidates.
+- **Claude Suggest** — one Claude call per panel (`panel_art/llm_segment`).
+  It reviews the SAM queue, adds missed motifs with a label and a reason, and
+  snaps its boxes to SAM edges. Needs `ANTHROPIC_API_KEY`.
+
+Every Add / Skip is appended to `annotated/draft_log.jsonl` on save (origin,
+proposed vs final box, IoU, label), so each source's hit rate can be
+reported. To check a change to the SAM defaults against boxes already
+approved:
+
+```
+uv run python scripts/eval_prompted_segment.py <panel_stem>            # current defaults
+uv run python scripts/eval_prompted_segment.py <panel_stem> --legacy   # previous defaults
+uv run python scripts/eval_prompted_segment.py <panel_stem> --seed 3   # after 3 Adds
+```
+
 ---
 
 ### Step 7 — Crop extraction  *(after bbox_review)*

@@ -102,6 +102,15 @@ interpretation/ (cluster briefs, per-panel readings, corpus essay)
     SAM to look only where thresholding already found a discrete dark region,
     which better separates interlaced knotwork borders and dense narrative
     registers. Both modes are available side-by-side in `motif_tuning_v2.ipynb`.
+  - In the review UI (`motif_pipeline.ipynb` Stage 1), **SAM Generate**
+    proposes boxes in the gaps between approved ones. It probes at peaks of
+    carving density with negative points on neighbouring figures, drops
+    flat surface below 12% edge density, and takes its size window from the
+    panel's own approved boxes. **Claude Suggest** then reviews that queue
+    (accept / adjust / reject each candidate), adds the motifs SAM missed,
+    and snaps its boxes to SAM's edges; a person still approves every box.
+    `scripts/eval_prompted_segment.py` scores SAM Generate against a panel's
+    approved boxes.
 - **Vectorization.** Each detected region is cropped from the line-art image,
   binarized, and traced to an SVG with `potrace` (via `svgpathtools`), then
   normalised to a fixed viewBox — giving a compact, scale/position-invariant
@@ -146,12 +155,12 @@ single unified interactive notebook:
   HDBSCAN clusters; `motif_labeling.ipynb` is a cluster-gallery labeling UI
   with Claude-generated label suggestions.
 - **v2 — unified pipeline (`motif_pipeline.ipynb`).** Consolidates the whole
-  human-in-the-loop loop — Setup → Segment (review/manual-draw/SAM-Refine
-  all in one UI) → Cluster → Gallery → Label (with LLM suggestions) →
+  human-in-the-loop loop — Setup → Segment (review/manual-draw/SAM-Refine/
+  Claude Suggest all in one UI) → Cluster → Gallery → Label (with LLM suggestions) →
   Interpret (Layout / Cluster Brief / Panel Reading / Corpus Synthesis) →
   Export — into one notebook with shared, cell-independent state.
   Every bbox, label, and cluster assignment records its own provenance
-  (`manual` / `sam_prompted` / `llm` / `human`) and timestamp. This is the
+  (`manual` / `sam_prompted` / `sam_llm` / `llm` / `human`) and timestamp. This is the
   current recommended entry point for day-to-day use;
   see [`HITL_PLAN.md`](./HITL_PLAN.md), [`LABELING_PLAN.md`](./LABELING_PLAN.md),
   and [`INTERPRETATION.md`](./INTERPRETATION.md)
@@ -251,9 +260,11 @@ External dependencies not installable via pip:
   wget https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt
   wget https://raw.githubusercontent.com/facebookresearch/sam2/main/sam2/configs/sam2.1/sam2.1_hiera_t.yaml
   ```
-- **`ANTHROPIC_API_KEY`** (optional): enables LLM-generated motif label/
-  description suggestions in `motif_labeling.ipynb` and
-  `scripts/describe_motif_patches.py`, and the Phase 6 interpretation passes.
+- **`ANTHROPIC_API_KEY`** (optional): enables Claude Suggest box proposals
+  in `motif_pipeline.ipynb` Stage 1 (model set by `MOTIF_LLM_MODEL`, default
+  `claude-opus-5-5`), LLM-generated motif label/description suggestions in
+  `motif_labeling.ipynb` and `scripts/describe_motif_patches.py`, and the
+  Phase 6 interpretation passes.
   All degrade gracefully without it — Phase 6's spatial analysis and cluster
   statistics run offline (`--dry-run`).
 
