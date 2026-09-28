@@ -1,0 +1,72 @@
+{
+ "motifs": {
+  "0": {
+   "label": "left_rim_crowd_scene",
+   "description": "The whole left side of the rim: a seated figure beside a pedestal bowl, kneeling figures, a large man raising a studded club or string of palm nuts, and tumbling or prostrate bodies toward the corner.",
+   "iconography": "A dense scene rather than one motif: offering (the bowl), force or festivity (the raised club), and bodies falling or dancing. It may show a festival, a sacrifice, or the aftermath of a fight.",
+   "confidence": "low",
+   "bbox": {
+    "x": 22,
+    "y": 32,
+    "w": 322,
+    "h": 709
+   }
+  },
+  "1": {
+   "label": "head_face_bared_teeth",
+   "description": "A large face at the top centre of the rim, far bigger than any other figure: heavy lidded eyes, broad nose and a mouth showing a row of teeth.",
+   "iconography": "The ojú ọpọ́n face of Ẹ̀ṣù. Bared teeth give it a fierce, commanding look over the crowd around the tray.",
+   "confidence": "high",
+   "bbox": {
+    "x": 378,
+    "y": 88,
+    "w": 262,
+    "h": 145
+   }
+  }
+ },
+ "panel": {
+  "title": "Pillow-shaped Modakeke Ifá tray: a great face over a crowded world",
+  "object_type": "opon Ifá, rectangular with concave sides",
+  "panel_type": "divination_instrument",
+  "summary": "A cushion-shaped tray with a small plain centre and a very wide rim packed with figures: a toothed face at the top, drummers and seated figures on the right, a club-bearer and tumbling bodies on the left, and a figure holding a cross-marked disc along the bottom.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     1
+    ],
+    "reading": "The head: a great face with bared teeth."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     0
+    ],
+    "reading": "Left side: offering bowl, kneeling figures, a raised club and falling bodies."
+   },
+   {
+    "register": 2,
+    "motifs": [],
+    "reading": "Right side (undetected): seated drummers with cylindrical drums, a figure with a staff."
+   },
+   {
+    "register": 3,
+    "motifs": [],
+    "reading": "Foot (undetected): a kneeling figure holding a round cross-marked disc (fan, mirror or shield), a leaning figure and more tumbling bodies."
+   }
+  ],
+  "composition": "One enormous face against dozens of small, busy figures that crowd every side and overlap; scale alone ranks the face above everyone.",
+  "narrative": "The most populous tray in the collection turns the rim into a whole community in motion — drumming, offering, carrying, falling — under Ẹ̀ṣù's gaze. It may record a festival (drums, the round fan) or a scene of violence (clubs, fallen bodies); either way, the world the diviner speaks to is crowded and lively, not an inventory.",
+  "hypotheses": "Some support for a narrative reading (actions, not just emblems), but no sequence of rulers. Not numerical.",
+  "cross_panel_links": [
+   "Toothed face: compare the ilà-marked faces on FoA_04-5580 and FoA_04-5586.",
+   "Drummers and a round fan: KBA_10299 (drawn tray with a crowded border)."
+  ],
+  "uncertainties": [
+   "Only two boxes on a rim with dozens of figures; the reading is mostly from the photograph.",
+   "Tumbling figures could be acrobatic dancers or the dead."
+  ],
+  "confidence": "medium"
+ }
+}

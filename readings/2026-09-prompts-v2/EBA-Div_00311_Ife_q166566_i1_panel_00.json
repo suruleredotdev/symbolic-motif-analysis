@@ -1,0 +1,146 @@
+{
+ "motifs": {
+  "0": {
+   "label": "plaited_interlace_field",
+   "description": "A square field of broad, grooved strands woven over and under in a diagonal plait, second compartment from the top of the plank.",
+   "iconography": "Mat or basket weaving rendered in wood — the plait that frames and divides Ife-area carving. It separates the incised sign above from the figure below.",
+   "confidence": "high",
+   "bbox": {
+    "x": 121,
+    "y": 221,
+    "w": 167,
+    "h": 191
+   }
+  },
+  "1": {
+   "label": "spiral_pierced_by_rod",
+   "description": "A large spiral of about nine coils with a straight rod driven diagonally into its centre, filling the lowest compartment of the plank.",
+   "iconography": "A coiled serpent (or snail) run through by a spear or staff — a coil-and-rod emblem that also appears as a ring-and-rod on the Ado-Ekiti door (EBA-Div_00303 #18). The coil fits the project's ouroboros / renewal family; the rod may mark its conquest or binding. The coil count invites a number reading but is untested.",
+   "confidence": "low",
+   "bbox": {
+    "x": 109,
+    "y": 769,
+    "w": 180,
+    "h": 183
+   }
+  },
+  "2": {
+   "label": "incised_cross_sign",
+   "description": "A shallow incised sign at the very top of the plank: a cross whose arms end in angled brackets, like a four-pointed star.",
+   "iconography": "Not a picture but a sign, closer to a mark or glyph — comparable to the geometric signs of àrokò messages or to owners' and makers' marks. Its meaning is unknown.",
+   "confidence": "low",
+   "bbox": {
+    "x": 111,
+    "y": 108,
+    "w": 111,
+    "h": 99
+   }
+  },
+  "3": {
+   "label": "figure_holding_two_staffs",
+   "description": "A frontal standing figure with a large round head marked by a central ridge, a beaded belt, holding a tall staff upright in each hand, filling the plank's central compartment.",
+   "iconography": "Holding two staffs of office marks a ruler, chief or priest; the figure is the plank's protagonist. In a chronicle reading, the principal person of this plank.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 118,
+    "y": 413,
+    "w": 173,
+    "h": 181
+   }
+  },
+  "4": {
+   "label": "kneeling_offering_figures",
+   "description": "Two small figures in the left third of the narrow register below the main figure: one kneeling and raising an object, one seated.",
+   "iconography": "Kneeling with raised hands is offering or greeting before a person of rank — here, the figure above.",
+   "confidence": "low",
+   "bbox": {
+    "x": 111,
+    "y": 652,
+    "w": 69,
+    "h": 112
+   }
+  },
+  "5": {
+   "label": "displayed_figure_w_legs",
+   "description": "A small figure in the centre of the lower narrow register, arms raised to the head and legs drawn as a looped 'W'.",
+   "iconography": "A displayed pose, arms up and legs spread — linked in Yoruba carving to birth, fertility and invocation. The looped legs also recall the mudfish-legged figures of Olókun and the Benin king.",
+   "confidence": "low",
+   "bbox": {
+    "x": 180,
+    "y": 652,
+    "w": 75,
+    "h": 107
+   }
+  },
+  "6": {
+   "label": "figure_with_raised_arm",
+   "description": "A narrow, partly cut figure at the right end of the lower register, one arm raised.",
+   "iconography": "A third attendant in the small register; too fragmentary to read further.",
+   "confidence": "low",
+   "bbox": {
+    "x": 250,
+    "y": 652,
+    "w": 46,
+    "h": 114
+   }
+  }
+ },
+ "panel": {
+  "title": "Ife plank: sign, plait, staff-holder, attendants and pierced spiral",
+  "object_type": "carved plank (door leaf or post face)",
+  "panel_type": "chronicle_of_rulers",
+  "summary": "A narrow plank photographed at an angle, carved in stacked compartments from top to bottom: an incised cross-sign, a plaited field, a figure holding two staffs, a row of small attendants and a large spiral pierced by a rod.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     2
+    ],
+    "reading": "An incised four-pointed cross — a sign rather than an image."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     0
+    ],
+    "reading": "A plaited field separating the sign from the figure."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     3
+    ],
+    "reading": "The protagonist: a frontal figure holding a staff in each hand."
+   },
+   {
+    "register": 3,
+    "motifs": [
+     4,
+     5,
+     6
+    ],
+    "reading": "Small attendants below him: kneeling offerers and a displayed figure."
+   },
+   {
+    "register": 4,
+    "motifs": [
+     1
+    ],
+    "reading": "A nine-coil spiral pierced by a rod — serpent or snail, bound or speared."
+   }
+  ],
+  "composition": "A single vertical column of framed compartments; scale ranks the staff-holder above his small attendants, and the two abstract compartments (plait, spiral) bracket the figures.",
+  "narrative": "Read top to bottom, the plank sets a person of authority — two staffs, attendants kneeling before him — between a woven field and a pierced coil. If the coil is a serpent, the plank may pair a ruler with an emblem of renewal or conquered danger; the incised sign at the top reads like a label or mark. Taken with its sister planks from the same plate, it belongs to a sequence of framed personages.",
+  "hypotheses": "Some support for 'chronicle': a single ranked personage with attendants, one of several on the plate. The nine-coil spiral and plait are candidates for 'pattern as number' but nothing yet links them to a count.",
+  "cross_panel_links": [
+   "Its sister planks EBA-Div_00311 panels 01 and 02 come from the same photograph.",
+   "The coil-and-rod echoes the ring-and-rod emblem on the Ado-Ekiti door (EBA-Div_00303 #18).",
+   "The plaited field is the same idiom that frames FoA_04-5578 and EBA-Div_00312."
+  ],
+  "uncertainties": [
+   "The rod through the spiral could be a crack in the wood.",
+   "#4-#6 split one row of small figures into three boxes."
+  ],
+  "confidence": "medium"
+ }
+}

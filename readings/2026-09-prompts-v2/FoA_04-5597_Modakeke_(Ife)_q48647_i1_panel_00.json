@@ -1,0 +1,47 @@
+{
+ "motifs": {
+  "0": {
+   "label": "female_figure_holding_bowl",
+   "description": "The figure at the top of a slender shaft: a block-like headdress, breasts, and both arms curving down to hold a round, grooved object against the belly; below it the shaft becomes a stack of rings.",
+   "iconography": "A woman presenting a bowl or calabash — the offering posture of devotees, and of the figures that top Ifá tappers and staffs. The grooved round form could also be a swollen belly: fertility.",
+   "confidence": "low",
+   "bbox": {
+    "x": 2,
+    "y": 0,
+    "w": 127,
+    "h": 382
+   }
+  }
+ },
+ "panel": {
+  "title": "Modakeke staff: woman with a bowl above a ringed shaft",
+  "object_type": "staff or tapper (object in the round)",
+  "panel_type": "divination_instrument",
+  "summary": "A slender carved shaft, not a flat panel: at its top a female figure holds a round grooved bowl or belly; below, a twisted collar, a long run of close-set rings and a plain shank with one small hatched mark.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "The finial figure: a woman with a bowl."
+   },
+   {
+    "register": 1,
+    "motifs": [],
+    "reading": "Below (undetected): a twisted collar, about twenty rings, a plain shank."
+   }
+  ],
+  "composition": "Vertical: one figure at the top over long bands of texture — the usual form of an Ifá tapper or ritual staff.",
+  "narrative": "A devotional object: a woman offering, set above a ringed grip. With the four tappers of FoA_04-5598, it belongs to the diviner's kit recorded at Modakeke. The rings could be read as a count, but the carving gives no reason to.",
+  "hypotheses": "Neutral for 'chronicle'. The ring stack is a possible but unsupported count.",
+  "cross_panel_links": [
+   "Tappers: FoA_04-5598.",
+   "Offering women: the nursing figure on FoA_04-5580 (#6)."
+  ],
+  "uncertainties": [
+   "Low-resolution print; the object held could be a bird, a fan or a child."
+  ],
+  "confidence": "low"
+ }
+}

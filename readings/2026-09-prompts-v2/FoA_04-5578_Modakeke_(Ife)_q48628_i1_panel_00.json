@@ -1,0 +1,80 @@
+{
+ "motifs": {
+  "0": {
+   "label": "plaited_band_upper",
+   "description": "A long band of multi-strand, grooved plait filling the upper third of the post face, above the figure.",
+   "iconography": "The woven binding that encloses the figure from above; one half of an interlace–figure–interlace sequence.",
+   "confidence": "high",
+   "bbox": {
+    "x": 9,
+    "y": 279,
+    "w": 158,
+    "h": 479
+   }
+  },
+  "1": {
+   "label": "plaited_band_lower",
+   "description": "The matching plait band below the figure, cut off by the break at the foot of the post.",
+   "iconography": "Lower half of the frame around the figure (see #0).",
+   "confidence": "high",
+   "bbox": {
+    "x": 0,
+    "y": 1157,
+    "w": 157,
+    "h": 333
+   }
+  },
+  "2": {
+   "label": "figure_with_raised_open_hands",
+   "description": "In the middle of the post, under a frieze of hatched triangles, a frontal figure with a very wide crescent-shaped head, large lidded eyes, and both hands raised open at shoulder height.",
+   "iconography": "Raised open hands are the Yoruba gesture of praise, greeting or supplication; on a post the figure also 'holds up' the frieze above like a caryatid. The oversized head stresses orí, the seat of destiny.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 0,
+    "y": 756,
+    "w": 166,
+    "h": 394
+   }
+  }
+ },
+ "panel": {
+  "title": "Modakeke post: a figure with raised hands between plaited bands",
+  "object_type": "veranda post or door stile (fragment)",
+  "panel_type": "architectural_ornament",
+  "summary": "A tall narrow post face from Modakeke carved as plait, figure, plait. The single figure has an enormous head and raises both open hands beneath a triangle frieze.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "Plait band."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     2
+    ],
+    "reading": "The figure with raised open hands under a triangle frieze."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     1
+    ],
+    "reading": "Plait band, broken at the foot."
+   }
+  ],
+  "composition": "A–B–A: a single figure bound above and below by plait, framed by the frieze like a doorway.",
+  "narrative": "A lone figure praising or supporting, held within endless plait. On a Modakeke veranda post it would have greeted everyone entering the compound. Without its missing sections, it reads as a guardian or praise figure rather than part of a chronicle.",
+  "hypotheses": "Does not bear on 'chronicle'. The plait bands could be tested for counted crossings but nothing suggests they count.",
+  "cross_panel_links": [
+   "Same plait-and-figure scheme as FoA_04-5578_panel_02 (same plate).",
+   "Raised-hand figures also appear on EBA-Div_00311_panel_00 and FoA_04-5578_panel_02."
+  ],
+  "uncertainties": [
+   "The post is broken at both ends; there may have been more figures."
+  ],
+  "confidence": "medium"
+ }
+}

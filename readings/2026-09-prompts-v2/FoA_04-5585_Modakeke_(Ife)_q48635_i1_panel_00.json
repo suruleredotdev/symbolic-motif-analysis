@@ -1,0 +1,53 @@
+{
+ "motifs": {
+  "0": {
+   "label": "blank_divining_field",
+   "description": "The smooth, worn, half-round working surface of the tray — the one area marked on this tray, covering the empty centre rather than any carving.",
+   "iconography": "The field where iyẹ̀rọsùn powder is spread and the odù marks are drawn. Its emptiness is the point of the object: everything carved is pushed to the rim. Not a motif, but it records use.",
+   "confidence": "high",
+   "bbox": {
+    "x": 108,
+    "y": 113,
+    "w": 743,
+    "h": 495
+   }
+  }
+ },
+ "panel": {
+  "title": "Arched Modakeke Ifá tray: face, lizards, birds and bound animals around a worn field",
+  "object_type": "opon Ifá, half-round (arched)",
+  "panel_type": "divination_instrument",
+  "summary": "A rare half-round Ifá tray with a heavily used centre. The rim carries a face at the top flanked by two long lizards or dogs and then birds, and a straight lower band with a small central figure between rows of animals lying on their backs, legs up, and a crocodile at the right end.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [],
+    "reading": "Top of the arch (undetected): a face with a crest between beaded strands, flanked by two long quadrupeds facing away and, lower on the shoulders, two birds with hooked beaks."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     0
+    ],
+    "reading": "The worn divining field."
+   },
+   {
+    "register": 2,
+    "motifs": [],
+    "reading": "Lower band (undetected): a small frontal figure at the centre between beaded strands, quadrupeds lying legs-up on either side, and a crocodile or lizard at the right corner."
+   }
+  ],
+  "composition": "A face-crowned arch over a straight base band; the arch is symmetrical about the face, the base centred on a small figure.",
+  "narrative": "The animals lying on their backs with legs in the air on the lower band look like trussed or slaughtered offerings; with the birds and lizards of the arch, the rim reads as the sacrifice that accompanies a consultation, laid out beneath Ẹ̀ṣù's face. The arched shape is unusual and may belong to a particular Modakeke workshop.",
+  "hypotheses": "Does not bear on 'chronicle'. The rhythm of beaded strands and animals is regular but not obviously counted.",
+  "cross_panel_links": [
+   "Other Modakeke trays: FoA_04-5580, FoA_04-5583, FoA_04-5586, FoA_04-5587, FoA_04-5588, FoA_04-5589.",
+   "Crocodile / lizard at the corner: FoA_04-5586 left rim, KBA_10300."
+  ],
+  "uncertainties": [
+   "The only detection is the empty field; the whole rim reading is from the photograph.",
+   "The 'legs-up' animals may be a carving convention for animals in profile along a curve."
+  ],
+  "confidence": "medium"
+ }
+}

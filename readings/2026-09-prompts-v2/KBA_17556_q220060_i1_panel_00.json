@@ -1,0 +1,54 @@
+{
+ "motifs": {
+  "0": {
+   "label": "tray_foot_figure_between_spirals",
+   "description": "The whole bottom arc of the drawn tray: at the centre a small figure with its head at the rim and bent arms bringing both fists to the chest around a disc; either side of it a tight spiral with a tail, and beyond those two splayed, cross-hatched creatures seen from above.",
+   "iconography": "The figure is the 'bust holding a disc' copied on KBA_17553, here in place. The tailed spirals read as coiled serpents; the splayed creatures as lizards, frogs or tortoises. The foot of the tray is guarded by coiled and crawling animals.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 0,
+    "y": 507,
+    "w": 745,
+    "h": 215
+   }
+  }
+ },
+ "panel": {
+  "title": "Survey drawing of a large round Ifá tray (48 cm): hooded face, cowrie blocks, gourds and coiled serpents",
+  "object_type": "pen-and-ink survey drawing of a round opon Ifá",
+  "panel_type": "divination_instrument",
+  "summary": "Drawing no. 4, captioned 'Ifabrett 48 cm, Yoruba 3'. At the head a face inside a pointed, hatched hood; either side, blocks of oval seed- or cowrie-like units, then pairs of gourds, zigzag bands and two D-shaped cartouches. At the foot a small figure holding a disc between two coiled serpents and two splayed creatures.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [],
+    "reading": "Head (undetected): a face in a pointed hood, flanked by blocks of oval cowrie- or kola-like units and pairs of gourds."
+   },
+   {
+    "register": 1,
+    "motifs": [],
+    "reading": "Sides (undetected): zigzag bands and a D-shaped cartouche on each side, mirrored."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     0
+    ],
+    "reading": "Foot: a figure holding a disc, between coiled serpents and splayed creatures."
+   }
+  ],
+  "composition": "Head–foot axis with near-perfect left–right mirroring: every motif on one side has its twin on the other.",
+  "narrative": "The richest of the drawn trays. Its head and foot are the two 'faces from an Ifá board' copied separately on KBA_17553, which ties that sheet to this tray. The border reads as the world of the consultation: cowries or kola (payment and offering), medicine gourds (àdó), and at the foot a devotee holding a small round object — perhaps an ikin nut — guarded by coiled serpents. The hooded head shares its pointed frame with the leaders of the Ado-Ekiti door.",
+  "hypotheses": "Neutral for 'chronicle'. The blocks of oval units are countable and worth checking for 'pattern as number'.",
+  "cross_panel_links": [
+   "Its head and foot figures are copied on KBA_17553.",
+   "Pointed-hood heads: EBA-Div_00303 (#23, #34).",
+   "Coiled serpents: KBA_10298; gourds: FoA_04-5588."
+  ],
+  "uncertainties": [
+   "The single box covers only the foot; the head and sides are undetected.",
+   "The ovals could be cowries, kola nuts or leaves."
+  ],
+  "confidence": "medium"
+ }
+}

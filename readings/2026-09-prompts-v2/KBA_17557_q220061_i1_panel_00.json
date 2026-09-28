@@ -1,0 +1,43 @@
+{
+ "motifs": {
+  "0": {
+   "label": "esu_figure_with_long_cap_blowing_pipe",
+   "description": "The whole drawing: a figure in profile, knees bent in a half-squat on a block, with a long cap falling down behind the head, bangles at wrist, waist and ankle, holding a long pipe or horn to the mouth that ends in a flared, knobbed bowl.",
+   "iconography": "Captioned 'Edschu-Darstellung' — Ẹ̀ṣù, the messenger and trickster. The long hanging cap or hair-lock is his standard attribute; he is often shown with a pipe, flute or whistle. The same Ẹ̀ṣù whose face heads every Ifá tray.",
+   "confidence": "high",
+   "bbox": {
+    "x": 232,
+    "y": 193,
+    "w": 564,
+    "h": 734
+   }
+  }
+ },
+ "panel": {
+  "title": "Drawing of Ẹ̀ṣù from a carved door: half-squatting figure with long cap and pipe",
+  "object_type": "archive sheet: outline drawing of one figure from a carved door",
+  "panel_type": "documentation_sheet",
+  "summary": "An outline drawing of a single figure copied from a carved door, captioned in German 'Representation of Edschu [Ẹ̀ṣù] on a carved door, Yoruba 3'. He half-squats with a long cap hanging behind his head and holds a long pipe or horn to his mouth.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "One figure: Ẹ̀ṣù with cap, bangles and pipe."
+   }
+  ],
+  "composition": "A single figure lifted from a door register and drawn large on its own.",
+  "narrative": "The only named deity in the drawings. It shows that the doors, as well as the trays, carried Ẹ̀ṣù — the go-between who carries messages and offerings — so the door panels are not only chronicles of kings and wars but also include the figures who guard crossings and thresholds, which is exactly where a door stands.",
+  "hypotheses": "Neutral for 'chronicle'; a reminder that door panels mix ritual figures with historical ones.",
+  "cross_panel_links": [
+   "Ẹ̀ṣù faces head the Ifá trays (e.g. FoA_04-5580, KBA_17556).",
+   "Door registers: EBA-Div_00303, KBA_19157."
+  ],
+  "uncertainties": [
+   "The object in his mouth could be a pipe, a horn or a whistle.",
+   "The pencil note below the caption is only partly legible ('…stellung von Türen')."
+  ],
+  "confidence": "high"
+ }
+}

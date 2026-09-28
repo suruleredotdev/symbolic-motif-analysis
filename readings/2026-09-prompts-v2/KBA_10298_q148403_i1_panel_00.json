@@ -1,0 +1,75 @@
+{
+ "motifs": {
+  "0": {
+   "label": "head_face_and_upper_rim",
+   "description": "The top of the drawn tray: a calm face with lidded eyes at the head of the rim, between ribbed blocks, with the start of the knotted-serpent compartments on either side.",
+   "iconography": "The ojú ọpọ́n (Ẹ̀ṣù) face that orients the tray.",
+   "confidence": "high",
+   "bbox": {
+    "x": 0,
+    "y": 0,
+    "w": 633,
+    "h": 182
+   }
+  },
+  "1": {
+   "label": "knotted_serpent",
+   "description": "In the lower-left rim compartment, a snake with a dotted body looped into a knot around a lozenge, its head with an eye turned back toward the face.",
+   "iconography": "A serpent tied in a knot — the snake as guardian and as the binding, self-returning coil of the ouroboros family. Paired with #2 on the other side.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 2,
+    "y": 574,
+    "w": 239,
+    "h": 208
+   }
+  },
+  "2": {
+   "label": "knotted_serpent",
+   "description": "The mirror of #1 in the lower-right compartment: dotted snake looped round a lozenge, head with an eye.",
+   "iconography": "See #1: a pair of knotted serpents flanking the foot of the tray.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 447,
+    "y": 532,
+    "w": 185,
+    "h": 211
+   }
+  }
+ },
+ "panel": {
+  "title": "Drawn round Ifá tray: face at the head, knotted serpents around the rim",
+  "object_type": "pen-and-ink survey drawing of a round opon Ifá",
+  "panel_type": "divination_instrument",
+  "summary": "A Frobenius survey drawing of a round Ifá tray: a hatched working field, a calm face at the head of the rim, and compartments of knotted dotted serpents separated by ribbed blocks.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "The face at the head."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     1,
+     2
+    ],
+    "reading": "Knotted serpents on both sides of the foot; more on the flanks (undetected), each between ribbed blocks."
+   }
+  ],
+  "composition": "A ring with one face and repeated serpent compartments, mirrored about the vertical axis.",
+  "narrative": "An Ifá tray guarded by serpents: every compartment but the head holds a snake tied in a knot. It is the clearest pairing of Ẹ̀ṣù and the serpent in the collection — the messenger and the coiled guardian — and one of the strongest serpent / ouroboros images the project is tracking.",
+  "hypotheses": "Neutral for 'chronicle'. The serpent compartments are counted units around the rim (about six to eight), a possible structure to compare with other trays.",
+  "cross_panel_links": [
+   "Serpents: KBA_10305, FoA_04-5586, EBA-Div_00312_panel_00.",
+   "Calm face: FoA_04-5589 (#0)."
+  ],
+  "uncertainties": [
+   "Side compartments are cropped by the sheet edge and not boxed.",
+   "The knotted forms could be read as lizards with looped tails."
+  ],
+  "confidence": "medium"
+ }
+}

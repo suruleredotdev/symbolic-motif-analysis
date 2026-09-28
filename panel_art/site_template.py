@@ -1379,11 +1379,18 @@ function panelCards(panel) {
       <button class="chip" data-object="${esc(panel.object)}">${esc(panel.object)}</button></div>`;
   }
   html += `<h3>${esc(r.title || panel.stem)}</h3>`;
+  const kind = [r.object_type, (r.panel_type || "").replaceAll("_", " ")].filter(Boolean);
+  if (kind.length) {
+    html += `<div class="eyebrow" style="margin:.3rem 0 0">${esc(kind.join(" · "))}</div>`;
+  }
   if (r.confidence) {
     html += `<div class="eyebrow" style="margin:.3rem 0 0">Confidence — ${esc(r.confidence)}</div>`;
   }
   for (const field of ["summary", "composition", "narrative"]) {
     if (r[field]) html += `<p class="serif">${esc(r[field])}</p>`;
+  }
+  if (r.hypotheses) {
+    html += `<p class="serif"><em>Against the thesis — ${esc(r.hypotheses)}</em></p>`;
   }
   html += `<div class="chips"><button class="chip" data-object="${esc(panel.object)}">
     ${esc(panel.object)}</button></div></div>`;

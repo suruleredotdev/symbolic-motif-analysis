@@ -1,0 +1,149 @@
+{
+ "motifs": {
+  "2": {
+   "label": "sacrificial_fowl",
+   "description": "A standing bird in profile — round eye, short beak, legs — its body filled with a fan of curved grooves for the wing, in the rim compartment just right of the top. It is the only animal on this rim, set between the couples and the armed men.",
+   "iconography": "A fowl is the commonest sacrifice prescribed by Ifá, so on a divining tray it most likely stands for the offering that follows a consultation. Birds also carry àṣẹ and the power of the 'mothers' (àjẹ́) in Yoruba thought.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 470,
+    "y": 46,
+    "w": 166,
+    "h": 146
+   }
+  },
+  "3": {
+   "label": "side_face_oju_opon",
+   "description": "A large face turned sideways at the left point of the rim: two almond eyes stacked vertically, a nose ridge and a slit mouth, its forehead band of short strokes toward the outer edge so the face looks into the empty centre. It answers the matching face (#7) on the opposite side.",
+   "iconography": "Faces on the rim of an ọpọ́n Ifá are ojú ọpọ́n, conventionally Ẹ̀ṣù, the messenger who carries the sacrifice; a pair on opposite sides fixes the tray's axis. Comparable to guardian faces that mark the cardinal points of a cosmogram.",
+   "confidence": "high",
+   "bbox": {
+    "x": 41,
+    "y": 345,
+    "w": 160,
+    "h": 258
+   }
+  },
+  "4": {
+   "label": "kneeling_figure_raising_long_gun",
+   "description": "A kneeling figure in a striated cap, in profile, holding a long object upright in both hands, in the lower-left compartment. The object's flared top and straight shaft read most like a musket held muzzle-down or stock-up.",
+   "iconography": "Read with the rifle-bearer at the top of the rim (#1, human-annotated), a second armed man: guards or warriors, in the rifle era of the 19th-century Yoruba wars. A pestle or staff cannot be excluded.",
+   "confidence": "low",
+   "bbox": {
+    "x": 53,
+    "y": 607,
+    "w": 189,
+    "h": 187
+   }
+  },
+  "5": {
+   "label": "coupling_pair",
+   "description": "Two figures lying together along the lower rim, one on its back in a striated cap, the other over it with knees drawn up — an intimate or sexual pairing. It sits at the bottom of the tray, opposite the rifle-bearer.",
+   "iconography": "Couples like this recur on this tray (#0, #6, #8) and point to consultations about marriage, conception and children — among the most frequent reasons to consult Ifá. Fertility imagery at the rim of a divining surface is common in Yoruba carving.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 187,
+    "y": 695,
+    "w": 262,
+    "h": 224
+   }
+  },
+  "6": {
+   "label": "embracing_couple",
+   "description": "Two figures face to face in a close embrace, one cupping the other's head, in the lower-right compartment beside #5.",
+   "iconography": "A second intimate pair; together with #0, #5 and #8 it makes coupling the main theme of this rim — fertility and marriage as the matters placed before Ifá.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 476,
+    "y": 701,
+    "w": 234,
+    "h": 206
+   }
+  },
+  "7": {
+   "label": "side_face_oju_opon",
+   "description": "The right-hand face, turned sideways like its partner (#3): stacked almond eyes, nose, mouth and a striated forehead band toward the rim edge, framed by hatched bars.",
+   "iconography": "The second ojú ọpọ́n (Ẹ̀ṣù) face. Two faces on opposite points mean the photograph shows the tray rotated a quarter-turn: these faces, not the top of the picture, mark its head and foot.",
+   "confidence": "high",
+   "bbox": {
+    "x": 719,
+    "y": 345,
+    "w": 159,
+    "h": 187
+   }
+  },
+  "8": {
+   "label": "coupling_pair",
+   "description": "Two figures stacked head-to-foot in the upper-left compartment, their heads toward the lower end, one lying over the other.",
+   "iconography": "Another intimate pair (compare #0, #5, #6), repeating the tray's fertility theme.",
+   "confidence": "low",
+   "bbox": {
+    "x": 59,
+    "y": 109,
+    "w": 207,
+    "h": 256
+   }
+  },
+  "9": {
+   "label": "figure_with_long_gun_and_companion",
+   "description": "In the right-hand compartment below the face #7, a figure in a striated cap with a long gun (or staff) laid along the rim, holding a smaller second figure against its body.",
+   "iconography": "Joins the armed men (#1, #4) and the couples in one image — protection and family together, which fits the human annotation's reading of this tray as about guarding marital unions.",
+   "confidence": "low",
+   "bbox": {
+    "x": 661,
+    "y": 536,
+    "w": 201,
+    "h": 264
+   }
+  }
+ },
+ "panel": {
+  "title": "Round Ifá tray: couples, riflemen and a fowl around the divining field",
+  "object_type": "opon Ifá, round",
+  "panel_type": "divination_instrument",
+  "summary": "A round divination tray with a plain central field and a carved rim of ten compartments. Two faces sit at opposite sides; between them the rim alternates coupling pairs with kneeling or reclining men holding long guns, plus a single fowl.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     3,
+     7
+    ],
+    "reading": "The axis: two ojú ọpọ́n faces on opposite sides of the rim, turned to look inward. The tray's head and foot are here, so the photograph is rotated a quarter-turn."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     8,
+     1,
+     2,
+     0
+    ],
+    "reading": "One half of the rim: a coupling pair (#8), a rifleman lying along the rim (#1, human-annotated), a fowl (#2) and a bound kneeling couple (#0, human-annotated)."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     4,
+     5,
+     6,
+     9
+    ],
+    "reading": "The other half: a kneeling man with a long gun (#4), two couples (#5, #6) and a figure with a gun holding a companion (#9) — the same themes, mirrored."
+   }
+  ],
+  "composition": "A ring around an empty working field, fixed by two faces on one diameter. Each half of the rim between the faces repeats the same mix of couples and armed men, so the two halves answer each other.",
+  "narrative": "Read from its motifs, this tray pictures the matters a client brings to Ifá and the offering that settles them: marriage, sex and children (four couples), and protection or danger (three men with guns), with a fowl as the sacrifice. The guns place the carving in the 19th-century rifle era. Building on the owner's annotations (a bound couple, a kneeling rifleman), the rim reads as a statement that divination guards the household — its unions and its safety — in a time of war.",
+  "hypotheses": "Weak support for 'chronicle': the rifles are period evidence, but nothing is sequenced like a king list. No bearing on pattern-as-number beyond the hatched dividers.",
+  "cross_panel_links": [
+   "Faces on the rim link it to every other Ifá tray here (FoA_04-5580, FoA_04-5583, KBA_10298, KBA_10305).",
+   "Riflemen connect it to the war imagery of the Ado-Ekiti palace door (EBA-Div_00303).",
+   "The kneeling couple also appears on the Modakeke trays FoA_04-5580 and FoA_04-5583."
+  ],
+  "uncertainties": [
+   "The long objects in #4 and #9 could be staffs or pestles rather than guns.",
+   "Boxes #5/#6 and #6/#9 overlap, so parts of scenes are counted twice."
+  ],
+  "confidence": "medium"
+ }
+}

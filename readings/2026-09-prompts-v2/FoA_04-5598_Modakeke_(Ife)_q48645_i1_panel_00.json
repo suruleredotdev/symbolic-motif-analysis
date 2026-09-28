@@ -1,0 +1,43 @@
+{
+ "motifs": {
+  "0": {
+   "label": "tapper_kneeling_figure_and_collars",
+   "description": "The lower half of the rightmost of four tappers: a small kneeling figure above stacked collars and a flared base.",
+   "iconography": "Ìróké Ifá: the diviner taps the tray with the pointed end to call Ọ̀rúnmìlà. The kneeling figure (usually a woman holding her breasts) is the devotee's posture of respect — kneeling to Ifá.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 471,
+    "y": 433,
+    "w": 78,
+    "h": 292
+   }
+  }
+ },
+ "panel": {
+  "title": "Four Ifá tappers (ìróké) from Modakeke on one plate",
+  "object_type": "photograph of four divination tappers",
+  "panel_type": "divination_instrument",
+  "summary": "A photographic plate joined from two prints, showing four long tapering tappers standing point-up. Each has a smooth pointed tip, collars and cross-hatched bands, and a figured grip — a head, a kneeling figure, or both.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "Only the grip of the rightmost tapper is boxed: a kneeling figure over collars. The other three show heads with crested coiffures, kneeling figures and cross-hatched bases."
+   }
+  ],
+  "composition": "A museum-style comparison: four objects of one type lined up so their shared grammar (point, collars, head, kneeling figure, base) can be read across them.",
+  "narrative": "The diviner's kit from Modakeke: four tappers carved to one formula. The repeated kneeling figure states the right posture before Ifá. Together with the Modakeke trays, the plate shows the same community's divination tools, recorded as the town lay empty after its 1909 evacuation.",
+  "hypotheses": "Neutral for 'chronicle'. Not numerical.",
+  "cross_panel_links": [
+   "The same kind of tapper as FoA_04-5599 panels 00 and 01 and FoA_04-5597_panel_00.",
+   "The trays they were used with: FoA_04-5580 to FoA_04-5589."
+  ],
+  "uncertainties": [
+   "The plate is two prints joined; the four may not have been photographed together.",
+   "Only one of the four tappers is detected."
+  ],
+  "confidence": "medium"
+ }
+}

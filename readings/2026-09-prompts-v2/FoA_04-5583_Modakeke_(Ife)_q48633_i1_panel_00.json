@@ -1,0 +1,147 @@
+{
+ "motifs": {
+  "0": {
+   "label": "figure_eight_plait_foot",
+   "description": "A broad figure-eight plait of grooved strands across the foot of the rim, diametrically opposite the face.",
+   "iconography": "Binding at the foot of the tray, answering the face at its head; plait as continuity and enclosure.",
+   "confidence": "high",
+   "bbox": {
+    "x": 204,
+    "y": 712,
+    "w": 529,
+    "h": 207
+   }
+  },
+  "1": {
+   "label": "head_face_with_crossed_bands",
+   "description": "A large face at the top of the rim with heavy lidded eyes, a banded mouth, a pointed crest, and two broad bands crossing behind it in an X.",
+   "iconography": "The ojú ọpọ́n (Ẹ̀ṣù). The crossed bands behind the face echo the crossed-band leaders at the centre of the Ado-Ekiti door (EBA-Div_00303 #23, #34) — a shared sign of authority or protective binding.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 280,
+    "y": 27,
+    "w": 413,
+    "h": 192
+   }
+  },
+  "2": {
+   "label": "reclining_figure_with_bundle",
+   "description": "A figure with a striped forehead lying along the upper-left rim beside a large striated bundle.",
+   "iconography": "A person with a load — firewood, cloth or a sheaf — perhaps an offering carried to the diviner.",
+   "confidence": "low",
+   "bbox": {
+    "x": 70,
+    "y": 141,
+    "w": 197,
+    "h": 197
+   }
+  },
+  "3": {
+   "label": "mudfish_or_snail",
+   "description": "A small smooth elongated creature lying along the left rim between hatched bars, rounded at one end.",
+   "iconography": "A mudfish (Olókun, water and liminality) or a snail (a cooling offering, and the shell of earth in Ife's creation story).",
+   "confidence": "low",
+   "bbox": {
+    "x": 25,
+    "y": 306,
+    "w": 171,
+    "h": 115
+   }
+  },
+  "4": {
+   "label": "chameleon_with_coiled_tail",
+   "description": "On the left rim, a creature with big ring eyes and a hatched crest, head pointing down, its tail wound into a tight spiral beneath it; mirrored by #7 on the right.",
+   "iconography": "Most likely a chameleon (agẹmọ) — ring eyes on turrets and a coiled tail. In the Ife creation story the chameleon tested the newly spread earth, after the hen had scattered it; the coil also belongs to the project's ouroboros / renewal family.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 12,
+    "y": 432,
+    "w": 241,
+    "h": 363
+   }
+  },
+  "5": {
+   "label": "figure_with_curved_drum",
+   "description": "On the upper-right rim, a figure in profile holding a large striated, curving object against the body.",
+   "iconography": "Possibly a drummer with an hourglass 'talking' drum and curved beater — the drum speaks oríkì and proverbs — or a figure holding a coiled serpent or fan.",
+   "confidence": "low",
+   "bbox": {
+    "x": 714,
+    "y": 161,
+    "w": 215,
+    "h": 263
+   }
+  },
+  "6": {
+   "label": "chameleon_with_coiled_tail",
+   "description": "Duplicate box of the right-hand chameleon (same area as #7).",
+   "iconography": "See #7.",
+   "confidence": "high",
+   "bbox": {
+    "x": 682,
+    "y": 451,
+    "w": 264,
+    "h": 361
+   }
+  },
+  "7": {
+   "label": "chameleon_with_coiled_tail",
+   "description": "On the right rim, the mirror of #4: ring-eyed head pointing down, hatched crest, tail coiled into a spiral.",
+   "iconography": "The second chameleon; a mirrored pair across the tray's axis. See #4.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 682,
+    "y": 451,
+    "w": 264,
+    "h": 361
+   }
+  }
+ },
+ "panel": {
+  "title": "Modakeke Ifá tray: face with crossed bands, mirrored chameleons, plait at the foot",
+  "object_type": "opon Ifá, round",
+  "panel_type": "divination_instrument",
+  "summary": "A round Ifá tray with a worn, grainy centre and a rim led by a large face with crossed bands at the head and a figure-eight plait at the foot. Mirrored chameleons with coiled tails hold the two sides.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     1,
+     0
+    ],
+    "reading": "The axis: face with crossed bands at the head, plait at the foot."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     2,
+     3,
+     4
+    ],
+    "reading": "Left side: a reclining figure with a bundle, a mudfish or snail, a chameleon."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     5,
+     7,
+     6
+    ],
+    "reading": "Right side: a figure with a curved drum or coil, the mirrored chameleon."
+   }
+  ],
+  "composition": "Strict bilateral symmetry about the head–foot axis: the chameleons mirror each other; hatched blocks divide the compartments.",
+  "narrative": "Where the other Modakeke tray (FoA_04-5580) shows the client's world, this one leans to creation: chameleons, a snail or mudfish and binding plait around the face of Ẹ̀ṣù. If the chameleon reading holds, the tray quotes the Ife story in which the hen spread the first earth and the chameleon tested it — an origin story carved around the surface where destinies are read.",
+  "hypotheses": "Neutral for 'chronicle' in the king-list sense, but an origin reference fits the idea of carving as historical memory. Not numerical.",
+  "cross_panel_links": [
+   "Crossed bands: Ado-Ekiti door leaders EBA-Div_00303 #23 and #34.",
+   "Fowl of the creation story: EBA-Div_00302 #2 and FoA_04-5580 #2.",
+   "Coiled forms: EBA-Div_00311_panel_00 (#1), KBA_17556."
+  ],
+  "uncertainties": [
+   "The chameleon could be a bird or a coiled serpent; #6 duplicates #7.",
+   "The pairing with the creation story is an inference, not attested on the object."
+  ],
+  "confidence": "medium"
+ }
+}

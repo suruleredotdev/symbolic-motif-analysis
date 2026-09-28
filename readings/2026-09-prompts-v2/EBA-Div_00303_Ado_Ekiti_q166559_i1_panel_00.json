@@ -1,0 +1,561 @@
+{
+ "motifs": {
+  "0": {
+   "label": "studded_grid_panel",
+   "description": "A tall rectangle filled with even rows of raised studs (about 7 across, 17-18 down) under a small crossed top, at the far left of the door's top register. It mirrors the studded conical form (#29) at the far right of the same register.",
+   "iconography": "Most likely beaded regalia — a beaded panel or bag of the kind reserved for kings and chiefs. Because it is a regular grid, it is also the door's best candidate for a count (to test by counting studs), but nothing yet ties the number to reigns or years.",
+   "confidence": "low",
+   "bbox": {
+    "x": 136,
+    "y": 178,
+    "w": 56,
+    "h": 150
+   }
+  },
+  "1": {
+   "label": "archer_drawing_bow",
+   "description": "A man in a tall conical cap drawing a bow, the bow's hatched limb and straight string shown as a large 'D', in the top register of the left leaf.",
+   "iconography": "An archer: hunter or bowman. In the top, royal register he may stand for the king's hunters or the town's founding hunter — a common figure in Yoruba town histories.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 195,
+    "y": 173,
+    "w": 123,
+    "h": 158
+   }
+  },
+  "2": {
+   "label": "kneeling_courtier",
+   "description": "A kneeling man in a conical cap with his hands joined at the chest and a long whisk or blade over his shoulder, in the top register of the left leaf.",
+   "iconography": "Kneeling with joined hands is the Yoruba posture of greeting and submission before a king; the object over the shoulder marks an official or messenger of the palace.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 322,
+    "y": 170,
+    "w": 54,
+    "h": 164
+   }
+  },
+  "3": {
+   "label": "file_of_five_animals",
+   "description": "Five small four-legged animals stacked one above another in a narrow strip at the right end of the left leaf's top register.",
+   "iconography": "Livestock — horses, cattle or goats — counted out in a column: wealth, tribute or spoils. The stacking reads like a tally, which makes it a small test case for 'pattern as number'.",
+   "confidence": "low",
+   "bbox": {
+    "x": 376,
+    "y": 171,
+    "w": 64,
+    "h": 160
+   }
+  },
+  "4": {
+   "label": "spearman",
+   "description": "A standing man in a conical helmet holding an upright spear, first in the second register of the left leaf.",
+   "iconography": "A warrior of the town's army; the conical cap is the door's constant mark for fighting men.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 129,
+    "y": 367,
+    "w": 72,
+    "h": 153
+   }
+  },
+  "5": {
+   "label": "archer_with_quiver",
+   "description": "A standing man in a conical helmet with a bow over his shoulder and a quiver of arrows at his waist, in the left leaf's second register.",
+   "iconography": "A bowman: part of a file of archers (#5-#8) marching to the right, the older arm of Yoruba warfare alongside the new rifles lower down the door.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 201,
+    "y": 366,
+    "w": 68,
+    "h": 158
+   }
+  },
+  "6": {
+   "label": "archer_with_quiver",
+   "description": "Second archer of the file in the left leaf's second register: conical helmet, bow over the shoulder, quiver at the waist.",
+   "iconography": "One of a counted file of archers; see #5.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 277,
+    "y": 364,
+    "w": 55,
+    "h": 163
+   }
+  },
+  "7": {
+   "label": "archer_with_quiver",
+   "description": "Third archer of the file in the left leaf's second register, carrying bow and quiver.",
+   "iconography": "One of a counted file of archers; see #5.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 326,
+    "y": 357,
+    "w": 48,
+    "h": 166
+   }
+  },
+  "8": {
+   "label": "archer_with_quiver",
+   "description": "Last archer of the file at the right end of the left leaf's second register, bow and quiver like the others.",
+   "iconography": "One of a counted file of archers; see #5.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 377,
+    "y": 354,
+    "w": 67,
+    "h": 165
+   }
+  },
+  "9": {
+   "label": "column_of_small_scenes",
+   "description": "A narrow strip at the left of the central register: a small capped figure holding up square plaques, a quadruped below it and a lozenge, stacked one above another.",
+   "iconography": "Small tokens set beside the leader figure (#23): goods or tribute carried in (the plaques) and animals. Too small to read securely.",
+   "confidence": "low",
+   "bbox": {
+    "x": 109,
+    "y": 747,
+    "w": 94,
+    "h": 221
+   }
+  },
+  "10": {
+   "label": "two_horses",
+   "description": "Two horses stacked one above the other, filling the left end of the right leaf's second register, a small figure at their feet.",
+   "iconography": "Horses were costly imports and the sign of cavalry and rank in Yorubaland (the power of old Ọ̀yọ́). Here they march with the warriors: the town's mounted strength.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 499,
+    "y": 343,
+    "w": 138,
+    "h": 195
+   }
+  },
+  "11": {
+   "label": "roped_captives_with_headloads",
+   "description": "Three men in conical caps walking in file, each with a box-like load on his head, a rope running from neck to neck, in the fifth register of the right leaf.",
+   "iconography": "A coffle: captives tied at the neck carrying goods — the booty and the enslaved people taken in war. It is one of the clearest records of 19th-century Yoruba warfare in the collection.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 503,
+    "y": 1219,
+    "w": 137,
+    "h": 201
+   }
+  },
+  "12": {
+   "label": "file_of_warriors_under_fish_frieze",
+   "description": "Four standing figures in pointed caps, one with long streaming hair or plume, holding staffs or guns, beneath a frieze of fish and lozenges, in the bottom register of the right leaf.",
+   "iconography": "Warriors on the march, possibly with a captive or a priest (the long-haired figure). The fish frieze above may mark a river crossing or simply divide registers.",
+   "confidence": "low",
+   "bbox": {
+    "x": 502,
+    "y": 1409,
+    "w": 192,
+    "h": 213
+   }
+  },
+  "13": {
+   "label": "roped_captives_with_headloads",
+   "description": "Four men walking in file with boxes on their heads and a rope held or tied at neck level, in the fifth register of the left leaf.",
+   "iconography": "The left leaf's coffle of captives, answering #11 on the right leaf: people and goods taken in war, led home.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 198,
+    "y": 1220,
+    "w": 179,
+    "h": 190
+   }
+  },
+  "14": {
+   "label": "stacked_lozenge_emblem",
+   "description": "A vertical column of lozenges and comb-like crossbars, upper half, beside the left leader figure (#23) in the central register.",
+   "iconography": "An emblem or staff of office rendered in abstract form (compare beaded staffs and Ogboni emblems). Its partner below is #24.",
+   "confidence": "low",
+   "bbox": {
+    "x": 364,
+    "y": 679,
+    "w": 94,
+    "h": 198
+   }
+  },
+  "15": {
+   "label": "warriors_over_small_animal",
+   "description": "Two warriors in conical caps, one with a spear and one with a leaf-bladed sword, walking over a small animal at the bottom right corner of the right leaf.",
+   "iconography": "Armed men on the march; the animal under their feet (dog, lizard or crocodile) may be a hunting dog or a register-filler.",
+   "confidence": "low",
+   "bbox": {
+    "x": 749,
+    "y": 1440,
+    "w": 140,
+    "h": 211
+   }
+  },
+  "16": {
+   "label": "rifleman",
+   "description": "A standing man in a conical cap holding a long gun upright, its stock at his feet, at the left end of the fourth register of the left leaf, beside a zigzag band.",
+   "iconography": "A rifleman — the first of a file (#30). Rifles date the carving to the later 19th century, the era of the Kiriji / Ekitiparapọ war in which Ado-Ekiti fought.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 109,
+    "y": 972,
+    "w": 89,
+    "h": 218
+   }
+  },
+  "17": {
+   "label": "large_archer_with_crest",
+   "description": "A larger standing figure with a tall crested cap, holding a bow, at the right of the right leaf's central register, beside a vertical zigzag band.",
+   "iconography": "Bigger than the rank-and-file: a war leader or chief hunter. The zigzag beside him can be read as a serpent or as Ṣàngó's lightning.",
+   "confidence": "low",
+   "bbox": {
+    "x": 775,
+    "y": 724,
+    "w": 115,
+    "h": 248
+   }
+  },
+  "18": {
+   "label": "ring_pierced_by_rod",
+   "description": "A large oval ring crossed diagonally by a straight rod, in the top register of the right leaf beside the crowned figure (#28).",
+   "iconography": "An emblem set among the regalia: possibly a snare or trap, a fan, or a ring-and-staff of office. Unclear.",
+   "confidence": "low",
+   "bbox": {
+    "x": 594,
+    "y": 166,
+    "w": 125,
+    "h": 141
+   }
+  },
+  "19": {
+   "label": "spearmen_with_small_figure",
+   "description": "Two warriors with spears walking, a small figure or club between them, in the bottom register of the right leaf.",
+   "iconography": "Part of the returning or marching army; the small figure may be a child or captive.",
+   "confidence": "low",
+   "bbox": {
+    "x": 644,
+    "y": 1441,
+    "w": 122,
+    "h": 211
+   }
+  },
+  "20": {
+   "label": "rifleman_guard",
+   "description": "A standing man in a conical cap holding a long gun, at the right end of the left leaf's fifth register, behind the captives (#13).",
+   "iconography": "The guard who drives the captives: the rifle makes the scene one of capture, not procession.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 377,
+    "y": 1222,
+    "w": 74,
+    "h": 188
+   }
+  },
+  "21": {
+   "label": "captives_led_by_rifleman",
+   "description": "Two roped men with headloads followed by a taller man holding an upright rifle, at the right of the right leaf's fifth register.",
+   "iconography": "Captor and captives in one frame — the clearest statement on the door that these files are prisoners of war.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 697,
+    "y": 1210,
+    "w": 170,
+    "h": 203
+   }
+  },
+  "22": {
+   "label": "rifleman",
+   "description": "A man in a tall cap holding a gun, at the far left of the left leaf's bottom register, beside a zigzag band.",
+   "iconography": "The first of the bottom register's armed file (#35).",
+   "confidence": "medium",
+   "bbox": {
+    "x": 112,
+    "y": 1450,
+    "w": 95,
+    "h": 207
+   }
+  },
+  "23": {
+   "label": "leader_with_crossed_bands",
+   "description": "The largest figure on the left leaf: frontal, head framed in a triangle, arms raised to two broad bands that cross behind the body to the corners, flared triangular skirt, set in the centre of the door.",
+   "iconography": "Scale and centrality mark a ruler or war chief. The crossed bands read as charm-laden bandoliers or a baldric worn by war leaders; the same figure on the right leaf (#34) makes a pair — perhaps the king and his war general, or two allied leaders.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 199,
+    "y": 740,
+    "w": 165,
+    "h": 237
+   }
+  },
+  "24": {
+   "label": "stacked_lozenge_emblem",
+   "description": "Lower half of the lozenge-and-crossbar column beside the left leader (#23), continuing #14.",
+   "iconography": "Continuation of the emblem or staff at #14.",
+   "confidence": "low",
+   "bbox": {
+    "x": 366,
+    "y": 877,
+    "w": 85,
+    "h": 98
+   }
+  },
+  "25": {
+   "label": "tortoise",
+   "description": "A tortoise seen from above, its shell marked in a grid, in the top register of the right leaf; a second tortoise (#26) sits below it.",
+   "iconography": "Ìjàpá the tortoise, the cunning trickster of Yoruba tales and a common offering; near the king it can signal wisdom and long life. A pair of tortoises may also be counted offerings.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 506,
+    "y": 163,
+    "w": 80,
+    "h": 90
+   }
+  },
+  "26": {
+   "label": "tortoise",
+   "description": "The second tortoise, below #25, same gridded shell, in the top register of the right leaf.",
+   "iconography": "See #25.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 505,
+    "y": 263,
+    "w": 80,
+    "h": 74
+   }
+  },
+  "27": {
+   "label": "line_of_kneeling_figures",
+   "description": "Seven kneeling figures with crested hair in one row, each reaching to the back of the figure in front, filling the third register of the right leaf.",
+   "iconography": "Kneeling is greeting and submission. The linked hands and crested hair suggest either palace wives kneeling to the king or captives tied in a line; in a door so full of war, captives are likely.",
+   "confidence": "low",
+   "bbox": {
+    "x": 499,
+    "y": 555,
+    "w": 372,
+    "h": 151
+   }
+  },
+  "28": {
+   "label": "crowned_king_with_attendants",
+   "description": "A frontal figure wearing a crown with upright points, arms resting on two small attendants at his sides, in the top register of the right leaf.",
+   "iconography": "A king supported by attendants is a classic royal image across Yoruba and Benin art. On a door captioned as the palace door of the ruler of Ado, this is most likely the Ewì himself at the head of the chronicle.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 718,
+    "y": 160,
+    "w": 81,
+    "h": 170
+   }
+  },
+  "29": {
+   "label": "beaded_conical_crown",
+   "description": "A tall conical form covered in rows of raised beads, closing at a pointed top, at the far right of the right leaf's top register; it mirrors the studded grid (#0) at the far left.",
+   "iconography": "Most likely a beaded crown (adé) — the supreme emblem of a Yoruba king — placed beside the crowned figure. A maize cob (abundance) is the alternative reading.",
+   "confidence": "low",
+   "bbox": {
+    "x": 799,
+    "y": 154,
+    "w": 74,
+    "h": 174
+   }
+  },
+  "30": {
+   "label": "file_of_six_riflemen",
+   "description": "Six men in conical caps standing in file, each holding a long gun upright, in the fourth register of the left leaf.",
+   "iconography": "A rifle company. Repeated identical figures read as a count of men — the army's strength — as much as a picture.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 134,
+    "y": 1000,
+    "w": 310,
+    "h": 189
+   }
+  },
+  "31": {
+   "label": "line_of_kneeling_figures",
+   "description": "Six kneeling figures with crested hair, hands joined to the figure in front, filling the third register of the left leaf.",
+   "iconography": "Mirror of #27 on the other leaf: submitting people — wives greeting the king or captives in a line.",
+   "confidence": "low",
+   "bbox": {
+    "x": 124,
+    "y": 557,
+    "w": 318,
+    "h": 157
+   }
+  },
+  "32": {
+   "label": "crouching_monkey",
+   "description": "A squatting animal with long limbs and a hand raised to its mouth, at the left of the right leaf's central register.",
+   "iconography": "A monkey — in Yoruba lore a mimic and trickster, and in masquerade a figure of mockery. Beside the leader it may be a comic or cautionary aside.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 499,
+    "y": 730,
+    "w": 64,
+    "h": 144
+   }
+  },
+  "33": {
+   "label": "swordsman",
+   "description": "A man in a conical helmet holding a long straight sword upright, below the monkey on the right leaf's central register.",
+   "iconography": "A sword-bearer or executioner in the leader's retinue.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 499,
+    "y": 873,
+    "w": 66,
+    "h": 125
+   }
+  },
+  "34": {
+   "label": "leader_with_crossed_bands",
+   "description": "The large frontal figure on the right leaf, triangle-framed head, raised arms and crossed bands — the mirror of #23.",
+   "iconography": "The second leader. A pair of equal leaders at the centre of both leaves may record an alliance — for Ado-Ekiti, the Ekitiparapọ confederacy — or king and war chief.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 569,
+    "y": 724,
+    "w": 195,
+    "h": 267
+   }
+  },
+  "35": {
+   "label": "file_with_tall_headgear",
+   "description": "Six figures with tall cylindrical hats, holding guns or staffs, in the bottom register of the left leaf.",
+   "iconography": "Men of rank or a different company: the tall hats set them apart from the conical-capped soldiers. Could also be carriers with loads.",
+   "confidence": "low",
+   "bbox": {
+    "x": 148,
+    "y": 1437,
+    "w": 290,
+    "h": 191
+   }
+  },
+  "36": {
+   "label": "file_of_armed_guards",
+   "description": "Four men in conical caps holding guns and spears, at the right of the right leaf's second register, beside the horses (#10).",
+   "iconography": "Armed escort of the mounted men; guns and spears together show the mixed weapons of the late-19th-century wars.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 642,
+    "y": 366,
+    "w": 225,
+    "h": 172
+   }
+  },
+  "37": {
+   "label": "file_of_seven_riflemen",
+   "description": "Seven men in conical caps with upright guns, the last one crouching, filling the fourth register of the right leaf.",
+   "iconography": "The right leaf's rifle company, answering #30 (six men) on the left.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 492,
+    "y": 1021,
+    "w": 387,
+    "h": 159
+   }
+  }
+ },
+ "panel": {
+  "title": "Palace door of the Ewì of Ado-Ekiti: king, army and captives",
+  "object_type": "double-leaf palace door",
+  "panel_type": "war_and_conflict",
+  "summary": "A two-leaf door photographed by Frobenius and captioned as the palace door of the ruler of Ado. Seven registers per leaf run from a crowned king and regalia at the top, through archers, horsemen and riflemen, to captives roped at the neck carrying loads under armed guard.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0,
+     1,
+     2,
+     3,
+     25,
+     26,
+     18,
+     28,
+     29
+    ],
+    "reading": "The royal register: the crowned king supported by attendants (#28), beaded regalia at both ends (#0, #29), an archer, a kneeling courtier, a column of animals and two tortoises."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     4,
+     5,
+     6,
+     7,
+     8,
+     10,
+     36
+    ],
+    "reading": "The army assembles: a spearman and four archers with quivers on the left; two horses and armed guards on the right."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     31,
+     27
+    ],
+    "reading": "Six and seven kneeling figures in linked lines — people submitting, likely captives or wives."
+   },
+   {
+    "register": 3,
+    "motifs": [
+     9,
+     23,
+     14,
+     24,
+     32,
+     33,
+     34,
+     17
+    ],
+    "reading": "The centre: two large leaders with crossed bands, one per leaf, flanked by emblems, a monkey, a swordsman and a large crested archer."
+   },
+   {
+    "register": 4,
+    "motifs": [
+     16,
+     30,
+     37
+    ],
+    "reading": "Rifle companies: six men on the left, seven on the right, guns upright."
+   },
+   {
+    "register": 5,
+    "motifs": [
+     13,
+     20,
+     11,
+     21
+    ],
+    "reading": "Captives with headloads tied neck to neck, driven by riflemen — the spoils of war."
+   },
+   {
+    "register": 6,
+    "motifs": [
+     22,
+     35,
+     12,
+     19,
+     15
+    ],
+    "reading": "The army on the march: men in tall hats, spearmen and swordsmen, a fish frieze above and a small animal below."
+   }
+  ],
+  "composition": "Two leaves read top to bottom in matching registers, with the king at the head and the two largest figures at the centre. Rank is shown by scale and headgear; each register repeats one type of person, so the door reads as counted groups.",
+  "narrative": "Read in order, the door tells the power of the Ado kingship through war: the crowned Ewì and his regalia; the army of archers, cavalry and riflemen; the two leaders; and the result — people kneeling in submission and captives led away with goods. Rifles and neck-roped coffles are period evidence of the 19th-century wars, when Ado-Ekiti fought in the Ekitiparapọ confederacy against Ibadan. The door is less a portrait of one battle than a record of the kingdom's strength and its captives.",
+  "hypotheses": "Strong support for 'chronicle' as a war record ordered from king to captives; a single king, not a king list. Moderate support for 'pattern as number': the counted files (4 archers, 6 and 7 kneeling, 6 and 7 riflemen, 5 animals, a studded grid) invite a tally reading that could be tested against oral accounts.",
+  "cross_panel_links": [
+   "Riflemen and kneeling figures link it to the Ifá tray EBA-Div_00302, where armed men and couples share the rim.",
+   "Conical-capped standing figures in files recur on the Ife door leaves EBA-Div_00311 and EBA-Div_00312.",
+   "The crowned figure with attendants compares with the crowned mount-sheet figures KBA_19153-19157."
+  ],
+  "uncertainties": [
+   "Several boxes cut groups arbitrarily (e.g. #16 inside #30, #19 and #15 overlapping #12), so some figures are counted twice.",
+   "The kneeling lines could be wives rather than captives; the crossed-band figures could be kings, war chiefs or masqueraders."
+  ],
+  "confidence": "medium"
+ }
+}

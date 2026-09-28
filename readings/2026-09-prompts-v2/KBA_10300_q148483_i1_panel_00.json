@@ -1,0 +1,80 @@
+{
+ "motifs": {
+  "0": {
+   "label": "top_rim_face_and_crocodiles",
+   "description": "The whole top edge of the drawn tray: a face shown by two large lashed eyes and a faint nose and mouth at the centre, a hatched crocodile to its left and a lozenge-marked block with a ribbed reptile to its right.",
+   "iconography": "The ojú ọpọ́n (Ẹ̀ṣù) face flanked by crocodiles — the messenger between the water's dangerous powers. A band, not one motif.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 103,
+    "y": 34,
+    "w": 748,
+    "h": 181
+   }
+  },
+  "1": {
+   "label": "left_rim_animal_file",
+   "description": "The left edge: a crocodile, a tortoise, a round shell-like creature, a quadruped marked with a lozenge and a ribbed reptile, stacked top to bottom.",
+   "iconography": "A file of water and earth creatures — crocodile, tortoise (Ìjàpá) — the animals of offering and danger that ring Ifá's field.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 88,
+    "y": 75,
+    "w": 114,
+    "h": 543
+   }
+  },
+  "2": {
+   "label": "right_rim_animal_file",
+   "description": "The right edge: crocodiles or lizards with ribbed bodies, skeletal fish forms and a quadruped, stacked top to bottom — the counterpart of #1.",
+   "iconography": "The mirror file of creatures; fish and crocodiles make the right side the watery one.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 759,
+    "y": 94,
+    "w": 109,
+    "h": 508
+   }
+  }
+ },
+ "panel": {
+  "title": "Survey drawing of a rectangular Ifá tray (35 × 41 cm): a border of crocodiles, fish and tortoises",
+  "object_type": "pen-and-ink survey drawing of a rectangular opon Ifá",
+  "panel_type": "divination_instrument",
+  "summary": "A drawing captioned 'Ifabrett, 35 × 41 cm, Yoruba 3' of a rectangular tray whose border is almost entirely animals: crocodiles, lizards, fish and tortoises, with a face shown by two large eyes at the top centre.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "Top: the face (eyes, nose, mouth) between a crocodile and a ribbed reptile."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     1,
+     2
+    ],
+    "reading": "Sides: files of crocodiles, tortoises, fish and quadrupeds."
+   },
+   {
+    "register": 2,
+    "motifs": [],
+    "reading": "Foot (undetected): a toothed crocodile with a curled tail, a chevron-filled oval (fish or bundle), and a tortoise seen from above."
+   }
+  ],
+  "composition": "A frame of animals facing along the rim, sides roughly mirrored, with the face as the single frontal element.",
+  "narrative": "A tray devoted to the creatures of river and bush — above all the crocodile, repeated around the frame. Read with the knotted serpents of KBA_10298 and the crocodile of FoA_04-5586, it shows how often Ifá's field is ringed by the dangerous water powers (Olókun's realm) that offerings keep in balance.",
+  "hypotheses": "Neutral for 'chronicle'. Not numerical.",
+  "cross_panel_links": [
+   "Crocodile rims: FoA_04-5586, FoA_04-5947.",
+   "Tortoises: EBA-Div_00303 (#25, #26), FoA_04-5586 (foot).",
+   "Same caption formula as KBA_10299, KBA_15356."
+  ],
+  "uncertainties": [
+   "The three boxes are whole sides of the frame, not motifs; the bottom side is missed."
+  ],
+  "confidence": "medium"
+ }
+}

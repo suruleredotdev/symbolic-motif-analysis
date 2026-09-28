@@ -1,0 +1,55 @@
+{
+ "motifs": {
+  "0": {
+   "label": "bust_holding_small_disc",
+   "description": "The right-hand vignette on the mount: a face with round eyes and a square mouth above two arms bent to bring both fists to the chest, a small disc or bead between them, on a hatched ground.",
+   "iconography": "A devotee holding a small round object — a kola nut, an ikin palm nut or a bead — to the chest. It is the figure at the foot of the 48 cm tray KBA_17556, redrawn the right way up.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 558,
+    "y": 212,
+    "w": 262,
+    "h": 171
+   }
+  },
+  "1": {
+   "label": "face_in_triangular_hood",
+   "description": "The left-hand vignette: a face with eyes, nose and banded mouth set inside a tall pointed triangle with hatched sides, on a hatched ground.",
+   "iconography": "The Ẹ̀ṣù (ojú ọpọ́n) face from the head of the 48 cm tray KBA_17556, framed by a pointed hood — the same triangle-framed head as the two central leaders of the Ado-Ekiti door (EBA-Div_00303 #23, #34).",
+   "confidence": "medium",
+   "bbox": {
+    "x": 206,
+    "y": 211,
+    "w": 249,
+    "h": 154
+   }
+  }
+ },
+ "panel": {
+  "title": "Mount sheet: 'two faces from an Ifá board'",
+  "object_type": "archive mount sheet with two copied drawings",
+  "panel_type": "documentation_sheet",
+  "summary": "An album page with an insert of two pen drawings, captioned in German 'Yoruba — 2 faces from an Ifá board' and 'copy of a drawing from the small picture archive'. They are the head and foot figures of the 48 cm tray drawn on KBA_17556.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     1,
+     0
+    ],
+    "reading": "Two excerpted faces side by side: a hooded face and a bust holding a disc."
+   }
+  ],
+  "composition": "Two details lifted from one tray — its head and its foot — and set side by side for comparison.",
+  "narrative": "The sheet shows the archive's own method: pulling the key figures off an object to compare them, much as this project does. The two chosen are the ones that orient the tray: Ẹ̀ṣù's hooded face at the head and a devotee holding a disc at the foot. The hood links tray imagery to the Ado-Ekiti door's triangle-headed leaders.",
+  "hypotheses": "Neutral; methodologically interesting as an early 'motif extraction'.",
+  "cross_panel_links": [
+   "Source tray: KBA_17556 (head and foot).",
+   "Triangle-framed heads: EBA-Div_00303 (#23, #34)."
+  ],
+  "uncertainties": [
+   "A copy of a copy: the drawings are two steps from the carving."
+  ],
+  "confidence": "medium"
+ }
+}

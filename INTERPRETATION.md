@@ -58,7 +58,7 @@ Recommended order: run `--stage direct` first, read it, and escalate to
 `--stage panels --panels <stem>` for the specific panels where the description
 clearly isn't enough.
 
-## Three widening passes
+## Widening passes
 
 Each pass consumes the one before it. That ordering is what makes the output
 cohere rather than repeat itself — a panel reading can refer to "the interlace
@@ -73,6 +73,9 @@ was read.
                             ▼
    layout ────────────▶ ② panel reading  (one call per panel)
    panel image ───────▶     │
+                            ▼
+   pair picker ───────▶ ②b comparison     (one call per likely pair of panels)
+                            │
                             ▼
                        ③ corpus synthesis (one call, over everything)
 ```
@@ -91,8 +94,42 @@ the panel. Returns a register-by-register reading, an account of the
 composition, a narrative reading, links to the wider corpus, and explicit
 uncertainties.
 
-**③ Corpus synthesis** — what does the collection say? Receives every brief and
-every panel reading, no images. Returns a Markdown essay.
+**②b Cross-panel comparison** — how do *these two* objects relate? The panel
+pass sees one object at a time and the synthesis sees only text, so neither can
+notice that a survey drawing records a tray that also survives as a photograph,
+that two trays share a workshop, or that a mount sheet excerpts another object.
+Those identifications change the story: two records of one object are one piece
+of evidence, not two.
+
+Pairs are picked without the API (`panel_art/compare.py`). Every pair of panels
+is scored on three signals, each turned into a rank so none dominates: shared
+motif families weighted by rarity, closeness of the panels' mean motif
+embeddings, and shared rare words (TF-IDF) in labels and panel readings, with
+archive identifiers stripped so a reading cannot match a panel just by citing
+it. A pair qualifies when the two panels are mutual nearest neighbours on any one
+signal, or sit next to each other in the catalogue (crops of one photograph,
+neighbouring accession numbers). Selection works per signal rather than on an
+average because the pairs that matter most are strong on one signal and blank on
+another: a drawing and a photograph of one tray share rare words but no motif
+family, since drawings and photographs cluster apart.
+
+Each chosen pair gets one call with both annotated panels, both readings and
+both motif lists. The model returns a relation (same object, copy or detail,
+same workshop, shared programme, thematic parallel, unrelated), the evidence,
+motif-to-motif correspondences, differences, and what the pair adds to the
+story. The prompt asks for "unrelated" when that is what the images show.
+
+On the September 2026 readings the picker put 7 of 8 hand-found links among its
+88 pairs, at ranks 1, 3, 7, 8, 27, 34 and 63. The miss was a single shared motif
+on otherwise different objects (EBA-Div_00303 ↔ KBA_19157), which is a motif
+comparison, not an object one. `--stage compare --dry-run` prints every pair and
+why it was picked before any call is made. `--max-pairs` (default 100) caps the
+cost, and `--pairs-per-panel` (default 2) sets how many nearest neighbours count.
+
+**③ Corpus synthesis** — what does the collection say? Receives every brief,
+every panel reading and every comparison that found a relation, no images.
+Returns a Markdown essay that groups records of one object and objects from one
+workshop.
 
 ---
 
@@ -146,17 +183,28 @@ still run on labels and counts alone, just with less to go on.
 
 ## Prompting
 
-One system prompt (`interpret.SYSTEM_PROMPT`) across all three passes. Its
-substantive job is to keep three kinds of claim separable in the output:
+One system prompt (`interpret.SYSTEM_PROMPT`) across every pass, assembled from
+named sections so each can be revised and tested on its own:
 
-> (a) what the image shows, (b) what the pipeline's grouping implies, and
-> (c) what is being inferred from cultural knowledge.
+| Section | What it sets |
+|---|---|
+| `ROLE` | Anthropologist, art historian and symbolism scholar, practised in reading symbolic and early writing systems — Egyptian hieroglyphs (Rosetta Stone, Champollion's principles), Maya glyphs (Dresden Codex, dynastic stelae), Yoruba àrokò, Ifá odù — and in cross-cultural motifs. |
+| `THESIS` | The project's working thesis, stated as hypotheses to *test*: panels as chronicles (ruler sequences, war, renewal symbols such as the ouroboros) and pattern as number (bands that count reigns, years or verses, as Ifá marks index 16/256 odù). Every reading says whether it supports, weakens or does not bear on them. |
+| `CORPUS_CONTEXT` | What the collection is (Frobenius 1910–12 photographs, survey drawings, mount sheets) and the history needed to read war and rule in it: Modákẹ́kẹ́'s founding and wars with Ifẹ̀, the Kiriji / Ekitiparapọ war, Modákẹ́kẹ́'s 1909 evacuation, the Ọọ̀ni succession of 1910. Names the panel types to test for. |
+| `SYMBOL_NOTES` | Starting points for recurring symbols (serpent / ouroboros, horse, crocodile / lizard / mudfish, tortoise, monkey, the ojú ọpọ́n face, kneeling and armed figures, interlace), with Aronson's caution that textile meaning is "far from watertight" and the ARAS order: describe, then cultural context, then cross-cultural parallel. |
+| `METHOD` | A detection is one element on a larger object — never describe a single motif as a group. Keep seen / Yoruba context / comparison distinct. Human labels are the strongest evidence. Point to oral and archival sources for checking; never invent them. Mention segmentation problems only where they change a reading. Build motif → panel → story. |
+| `STYLE` | Concise and readable; no pipeline statistics unless asked; do not retitle or dismiss the collection. |
 
-It also states plainly that the clusters are data-derived rather than
-established iconographic categories, that the existing labels are a mix of
-human and model guesses, and that segmentation errors are common — a detection
-may be a fragment, a duplicate, or an artefact of the photograph. Without that,
-readings tend to treat a bad bbox as a carved element and build on it.
+The corpus essay (both `--stage corpus` and `--stage direct`) follows
+`CORPUS_ESSAY_BRIEF`: the story in brief, the collection read in order, a
+vocabulary table, what it says about the thesis, and where to check it — with
+pipeline data notes last, not first.
+
+Cluster briefs carry a `motif_gloss` written for a single instance, which is
+what `label_motifs.py --from-briefs` copies onto motifs (the family-level
+`visual_definition` reads wrongly on one motif). Panel readings add
+`object_type`, `panel_type` and `hypotheses`; per-motif readings add a
+`role_on_board`.
 
 Passes ① and ② use structured outputs (`output_config.format`) rather than
 asking for JSON in prose; pass ③ is free-form Markdown. Every call uses
@@ -178,6 +226,8 @@ analysis/interpretation/
   layouts/<stem>.json   deterministic geometry — written even on --dry-run
   panels/<stem>.json    structured panel reading (+ the layout it used)
   panels/<stem>.md      the same reading, rendered for reading
+  comparisons.json      "<stem_a>|<stem_b>" → cross-panel comparison
+  comparisons.md        the same, rendered for reading
   corpus.md             the synthesis essay
 ```
 
@@ -189,6 +239,40 @@ briefs are checkpointed after each call, so an interrupted run resumes with
 ---
 
 ## Usage
+
+**One command, start to finish.** `scripts/run_interpretation.py` runs every
+step in the order their inputs depend on — cluster briefs, a reading per motif
+(`label_motifs.py --per-motif --refresh-generated`, which leaves labels by a
+person alone), a reading per panel, cross-panel comparisons, the corpus essay,
+then the site:
+
+```bash
+export ANTHROPIC_API_KEY=...
+python3 scripts/run_interpretation.py \
+  --analysis-dir frobenius_artifacts/analysis \
+  --embeddings   motif_embeddings_edges.npy \
+  --paths        motif_paths_edges.txt
+#   --dry-run       print every prompt, no key needed, nothing written
+#   --resume        skip briefs and panels already on disk
+#   --only site     rebuild just the page from what is on disk
+```
+
+**Readings made elsewhere.** `scripts/import_readings.py` writes readings that
+did not come from an API run — written in a Claude session without a key, or
+corrected by hand in bulk — through the same writers the pipeline uses, so
+they land in `motif_labels.json` and `interpretation/` exactly as a run would
+leave them. Each motif reading can carry its `bbox`, so it still lands on the
+right motif after boxes are edited and re-indexed; a reading whose box is gone
+is reported, not written. Labels by a person are kept unless `--overwrite`.
+
+```bash
+python3 scripts/import_readings.py --analysis-dir frobenius_artifacts/analysis \
+  --readings path/to/readings --corpus path/to/corpus.md \
+  --model "where these came from"
+python3 scripts/run_interpretation.py --analysis-dir frobenius_artifacts/analysis --only site
+```
+
+The individual stages, when you want one on its own:
 
 ```bash
 # Inspect the joined prompt — no API key, no calls
@@ -259,7 +343,8 @@ where a family label is genuinely too coarse.
 
 **Provenance decides authority.** Every label records its source —
 `cluster-brief`, `llm`, `llm-edited`, or `human`. A missing source counts as
-human, which is the safe default: it protects existing annotation. Generated
+human, which is the safe default: it protects existing annotation. `llm-edited`
+— a model draft a person rewrote — also counts as human. Generated
 labels are freely replaced by later passes; a human label is never overwritten
 without `--overwrite`. In the prompts, human annotation is presented first and
 explicitly as *"the strongest evidence available"*, while generated labels are

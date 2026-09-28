@@ -1,0 +1,53 @@
+{
+ "motifs": {
+  "0": {
+   "label": "sheet_top_with_tray_head",
+   "description": "A wide strip across the top of the sheet: blank card, the pencilled number '30', and the head of the drawn tray — a face made of two lozenge eyes and a nose between ribbed blocks, with the first rim units either side.",
+   "iconography": "Mostly paper; the carving it catches is the ojú ọpọ́n face that orients the tray.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 0,
+    "y": 0,
+    "w": 975,
+    "h": 319
+   }
+  }
+ },
+ "panel": {
+  "title": "Survey drawing of a round Ifá tray (25 cm) with a rim of twelve repeated fish-head units",
+  "object_type": "pen-and-ink survey drawing of a round opon Ifá",
+  "panel_type": "divination_instrument",
+  "summary": "A drawing captioned 'Ifabrett, 25 cm diameter, Yoruba 3' of a small round tray. A face at the head and a ribbed block at the foot sit on one axis; between them the rim carries about twelve identical units — rounded forms with a hatched 'fin' and an open V, six on each side.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "The head: two lozenge eyes and a nose between ribbed blocks (plus blank card)."
+   },
+   {
+    "register": 1,
+    "motifs": [],
+    "reading": "Rim (undetected): six identical units down each side, facing alternately."
+   },
+   {
+    "register": 2,
+    "motifs": [],
+    "reading": "Foot (undetected): a ribbed block opposite the face."
+   }
+  ],
+  "composition": "A strict ring: one face, one block, and a regular sequence of identical units in between.",
+  "narrative": "The simplest, most regular tray in the collection. The repeated unit looks like a fish head or a bird; if it is a fish head it recalls the agbérí ẹja ('fish head') pattern that Aronson tied to Olókun in Ijebu cloth — a motif moving between cloth and wood. A tray built from twelve identical units between two fixed points is also the clearest case here of carved pattern that could be counted.",
+  "hypotheses": "Neutral for 'chronicle'. Strongest tray candidate for 'pattern as number': twelve units (or fourteen compartments with face and block) — to compare against Ifá counts, which it does not obviously match (16).",
+  "cross_panel_links": [
+   "Same caption formula: KBA_10299, KBA_10300, KBA_15356, KBA_17556.",
+   "Fish and water motifs: KBA_10300, FoA_04-5589 (corner mudfish)."
+  ],
+  "uncertainties": [
+   "The only box is mostly blank card.",
+   "The repeated unit could be a bird, a shell or a stylised hand."
+  ],
+  "confidence": "medium"
+ }
+}

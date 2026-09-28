@@ -1,0 +1,52 @@
+{
+ "motifs": {
+  "0": {
+   "label": "coiled_serpent_lid_apex",
+   "description": "The raised roundel at the top of the drawn lid: a spiral with two small marks near its centre, set in a hatched ring, at the point where all the lid's compartments meet.",
+   "iconography": "Most likely a coiled snake with its head at the centre — the serpent coil that guards lids and thresholds in Yoruba carving and belongs to the ouroboros / renewal family. A plain turned knob is the alternative.",
+   "confidence": "low",
+   "bbox": {
+    "x": 253,
+    "y": 20,
+    "w": 281,
+    "h": 164
+   }
+  }
+ },
+ "panel": {
+  "title": "Survey drawing of a lidded vessel: coiled serpent over a lid of scenes",
+  "object_type": "pen-and-ink survey drawing of a lidded round container",
+  "panel_type": "documentation_sheet",
+  "summary": "A Frobenius survey drawing (sheet '5.') of a round lidded container in three-quarter view. The lid is divided into wedge-shaped compartments of figures and animals around a coiled apex; the body is panelled with rows of small triangles.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     0
+    ],
+    "reading": "The apex coil."
+   },
+   {
+    "register": 1,
+    "motifs": [],
+    "reading": "Lid compartments (undetected): figures with raised arms, a figure leaning over a quadruped, a tortoise, reclining figures and animals."
+   },
+   {
+    "register": 2,
+    "motifs": [],
+    "reading": "Body (undetected): panels of triangle rows between plain fillets."
+   }
+  ],
+  "composition": "Concentric and radial: an abstract centre, a ring of scenes, a patterned skirt.",
+  "narrative": "A container whose lid gathers people and animals — offerings, perhaps a hunt or tribute — around a coiled serpent. Such lidded bowls held kola or divination materials; placing the contents under a guardian coil fits that use. A pencilled word at the lower right (struck through) is not legible enough to read.",
+  "hypotheses": "Neutral. The triangle rows on the body are regular but read as texture.",
+  "cross_panel_links": [
+   "Coils: EBA-Div_00311_panel_00 (#1), KBA_17556.",
+   "Tortoise: EBA-Div_00303 (#25, #26)."
+  ],
+  "uncertainties": [
+   "A drawing of an object, so detail is the draughtsman's; the one box covers only the apex."
+  ],
+  "confidence": "low"
+ }
+}

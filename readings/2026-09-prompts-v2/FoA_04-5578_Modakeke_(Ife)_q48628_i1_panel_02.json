@@ -1,0 +1,139 @@
+{
+ "motifs": {
+  "0": {
+   "label": "double_spiral_knot_right",
+   "description": "The right part of the band of double-spiral knots between the figures and the lizard, on the middle of the post.",
+   "iconography": "Part of one knot band (with #1 and #2) dividing the figure register from the reptile register.",
+   "confidence": "high",
+   "bbox": {
+    "x": 121,
+    "y": 465,
+    "w": 150,
+    "h": 172
+   }
+  },
+  "1": {
+   "label": "double_spiral_knot_left",
+   "description": "The left part of the same knot band: two volutes coiling in opposite directions.",
+   "iconography": "See #0 — one band cut into three boxes.",
+   "confidence": "high",
+   "bbox": {
+    "x": 11,
+    "y": 458,
+    "w": 93,
+    "h": 180
+   }
+  },
+  "2": {
+   "label": "knot_band_slice",
+   "description": "A narrow slice through the middle of the knot band between #1 and #0.",
+   "iconography": "Not a separate motif — a strip of the same band.",
+   "confidence": "high",
+   "bbox": {
+    "x": 78,
+    "y": 460,
+    "w": 72,
+    "h": 178
+   }
+  },
+  "3": {
+   "label": "lizard_figure_left",
+   "description": "The left of two mirrored figures in the upper register: arms bent up with spread fingers, knees out, a dotted line from neck to groin that splits into an arch between the legs; the head is lost to a hole in the wood.",
+   "iconography": "Its splayed pose and dotted spine match the lizard below (#5): a human–reptile figure or a person shown in a lizard's posture. Lizards and crocodiles carry royal and water power (Olókun) and appear in Ife origin stories.",
+   "confidence": "low",
+   "bbox": {
+    "x": 11,
+    "y": 132,
+    "w": 122,
+    "h": 324
+   }
+  },
+  "4": {
+   "label": "lizard_figure_right",
+   "description": "The right of the mirrored pair: a large head with striated 'rays', lozenge eyes and pointed ears, arms raised, dotted spine splitting into an arch between the legs.",
+   "iconography": "The same radiating head as the lizard (#5) marks the pair as reptile-like beings — possibly masked men or guardian spirits. A mirrored pair at the top of a post works as a guardian couple.",
+   "confidence": "low",
+   "bbox": {
+    "x": 134,
+    "y": 142,
+    "w": 141,
+    "h": 311
+   }
+  },
+  "5": {
+   "label": "lizard_crossing_register",
+   "description": "A lizard or crocodile lying across the post below the knot band, seen from above: splayed bent legs, dotted spine, and a radiating striated head at the right.",
+   "iconography": "A reptile — agama lizard or crocodile. It is the key that unlocks the figures above, which share its spine and head.",
+   "confidence": "medium",
+   "bbox": {
+    "x": 3,
+    "y": 657,
+    "w": 271,
+    "h": 103
+   }
+  },
+  "6": {
+   "label": "double_spiral_knot_lower",
+   "description": "The broad lower band of double-spiral knots, holed by damage, closing the carved face.",
+   "iconography": "The lowest binding band; its twin runs at the top of the post (undetected).",
+   "confidence": "high",
+   "bbox": {
+    "x": 2,
+    "y": 779,
+    "w": 273,
+    "h": 202
+   }
+  }
+ },
+ "panel": {
+  "title": "Modakeke post: mirrored lizard-figures above a lizard, between knot bands",
+  "object_type": "veranda post or door stile",
+  "panel_type": "architectural_ornament",
+  "summary": "A post face with bands of double-spiral knots dividing two registers: a mirrored pair of figures with raised arms and dotted spines above, and a single lizard or crocodile lying across the post below.",
+  "register_readings": [
+   {
+    "register": 0,
+    "motifs": [
+     3,
+     4
+    ],
+    "reading": "Two mirrored lizard-like figures with raised arms and radiating heads."
+   },
+   {
+    "register": 1,
+    "motifs": [
+     1,
+     2,
+     0
+    ],
+    "reading": "A knot band dividing figures from reptile."
+   },
+   {
+    "register": 2,
+    "motifs": [
+     5
+    ],
+    "reading": "A lizard or crocodile crossing the post."
+   },
+   {
+    "register": 3,
+    "motifs": [
+     6
+    ],
+    "reading": "A lower knot band."
+   }
+  ],
+  "composition": "Knot bands alternate with figural registers. The upper pair is mirrored about the post's axis; the reptile below lies across it.",
+  "narrative": "The post pairs two reptile-like guardians with a lizard, the three sharing a dotted spine and radiating head. It may picture people taking a reptile's form — the powers of water and earth that guard a household or shrine — rather than a scene. The old reading took the pair for snake-holders or leopard-men; the shared spine points to the lizard.",
+  "hypotheses": "Does not bear on 'chronicle'. The knot bands are ornament, not obviously counted.",
+  "cross_panel_links": [
+   "Reptile seen from above: EBA-Div_00311_panel_02 and the drawn trays KBA_10300, KBA_10305.",
+   "Same plate as FoA_04-5578 panels 00 and 01 (Modakeke)."
+  ],
+  "uncertainties": [
+   "The head of #3 is destroyed; the figures could be human dancers rather than hybrids.",
+   "#0-#2 are one knot band split into three boxes."
+  ],
+  "confidence": "low"
+ }
+}
