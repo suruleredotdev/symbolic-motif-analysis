@@ -45,6 +45,14 @@ def key_to_motif(key: str) -> str | None:
     return f"{match.group(1)}/{int(match.group(2))}" if match else None
 
 
+def _bbox_iou(a: dict, b: dict) -> float:
+    ix = max(0, min(a["x"] + a["w"], b["x"] + b["w"]) - max(a["x"], b["x"]))
+    iy = max(0, min(a["y"] + a["h"], b["y"] + b["h"]) - max(a["y"], b["y"]))
+    inter = ix * iy
+    union = a["w"] * a["h"] + b["w"] * b["h"] - inter
+    return inter / union if union > 0 else 0.0
+
+
 @dataclass
 class MotifRecord:
     """One motif detection across the full pipeline lifecycle."""
@@ -57,7 +65,7 @@ class MotifRecord:
     area_ratio: float
     predicted_iou: float
     stability_score: float
-    source: str                         # "sam_auto" | "sam_prompted" | "manual"
+    source: str                         # "sam_auto" | "sam_prompted" | "manual" | "llm" | "sam_llm"
     created_at: str = ""                # ISO 8601
     included: bool = True               # user approved this detection?
 
@@ -147,6 +155,9 @@ class PipelineState:
         self._draft_cursor: dict[str, int] = {}
         self._draft_accepted: dict[str, int] = {}
         self._draft_skipped: dict[str, int] = {}
+        # Every Add / Skip on a draft, flushed to draft_log.jsonl on save —
+        # the record of how often each source's suggestions were kept.
+        self._draft_log: list[dict] = []
 
         # Paths (set by load_from_disk)
         self._annotated_dir: Path | None = None
@@ -276,7 +287,24 @@ class PipelineState:
         data = [m.to_approved_dict() for m in included]
         path = self._annotated_dir / f"{stem}_approved.json"
         path.write_text(json.dumps(data, indent=2))
+        self._flush_draft_log(stem)
         return path
+
+    def _flush_draft_log(self, stem: str) -> None:
+        """Append this panel's draft decisions to annotated/draft_log.jsonl."""
+        entries = [e for e in self._draft_log if e["panel"] == stem]
+        if not entries or self._annotated_dir is None:
+            return
+        with (self._annotated_dir / "draft_log.jsonl").open("a") as f:
+            for e in entries:
+                e = dict(e)
+                # An Add that was unticked before saving never reached
+                # _approved.json — count it as dropped, not kept.
+                rec = e.pop("_record", None)
+                if e["action"] == "accept" and rec is not None and not rec.included:
+                    e["action"] = "dropped"
+                f.write(json.dumps(e) + "\n")
+        self._draft_log = [e for e in self._draft_log if e["panel"] != stem]
 
     # ── Cluster persistence ───────────────────────────────────────────────
     #
@@ -551,10 +579,14 @@ class PipelineState:
             if det.segmentation is not None:
                 ed = _edge_density(img_gray, det.segmentation)
 
-            # Composite score for ranking
-            score = (0.5 * det.predicted_iou
-                     + 0.3 * ed
-                     + 0.2 * novelty)
+            # prompted_segment() ranks its own output; anything else falls
+            # back to the older composite.
+            if getattr(det, "rank_score", 0.0) > 0:
+                score = det.rank_score
+            else:
+                score = (0.5 * det.predicted_iou
+                         + 0.3 * ed
+                         + 0.2 * novelty)
 
             rec = MotifRecord(
                 panel_stem=stem,
@@ -575,7 +607,7 @@ class PipelineState:
 
         # Store with metadata for status display
         self._sam_candidates[stem] = [
-            {"record": r, "score": s, "edge_density": e, "novelty": n}
+            {"record": r, "score": s, "edge_density": e, "novelty": n, "origin": "sam"}
             for s, e, n, r in records
         ]
         self._draft_cursor[stem] = 0
@@ -583,6 +615,58 @@ class PipelineState:
         self._draft_skipped[stem] = 0
 
         return len(records)
+
+    def pending_drafts(self, stem: str) -> list[dict]:
+        """Queue entries not yet accepted or skipped, in review order."""
+        cands = self._sam_candidates.get(stem, [])
+        return cands[self._draft_cursor.get(stem, 0):]
+
+    def cache_llm_suggestions(self, stem: str, suggestions: list) -> int:
+        """Replace the draft queue with Claude's suggestions (llm_segment.Suggestion).
+
+        Same Add / Skip flow as SAM candidates. Each entry keeps the model's
+        label and reason for display; the record's source is "sam_llm" for a
+        reviewed SAM candidate and "llm" for a box Claude added.
+        """
+        panel = self.panels[stem]
+        entries = []
+        for s in suggestions:
+            area_ratio = (s.bbox["w"] * s.bbox["h"]) / (panel.width * panel.height)
+            rec = MotifRecord(
+                panel_stem=stem, index=-1, bbox=dict(s.bbox),
+                scale="motif" if area_ratio < 0.25 else "register",
+                area_ratio=round(area_ratio, 5),
+                predicted_iou=1.0, stability_score=1.0,
+                source=s.source, created_at="", included=False,
+                notes=f"llm: {s.label}" if s.label else None,
+            )
+            entries.append({"record": rec, "score": None, "edge_density": None,
+                            "novelty": None, "origin": s.origin, "label": s.label,
+                            "reason": s.reason, "confidence": s.confidence,
+                            "sam_index": s.sam_index, "snapped": s.snapped})
+        self._sam_candidates[stem] = entries
+        self._draft_cursor[stem] = 0
+        self._draft_accepted[stem] = 0
+        self._draft_skipped[stem] = 0
+        return len(entries)
+
+    def _log_draft(self, stem: str, cand: dict, action: str,
+                   final_bbox: dict | None = None) -> None:
+        proposed = dict(cand["record"].bbox)
+        entry = {
+            "panel": stem, "action": action, "origin": cand.get("origin", "sam"),
+            "source": cand["record"].source, "proposed": proposed,
+            "at": datetime.now().isoformat(timespec="seconds"),
+        }
+        if final_bbox is not None:
+            entry["final"] = dict(final_bbox)
+            entry["iou"] = round(_bbox_iou(proposed, final_bbox), 3)
+        for k in ("score", "edge_density", "label", "confidence"):
+            if cand.get(k) is not None:
+                entry[k] = round(cand[k], 4) if isinstance(cand[k], float) else cand[k]
+        if action == "accept":
+            entry["_record"] = cand["record"]       # resolved on flush
+        self._draft_log.append(entry)
 
     def draft_count(self, stem: str) -> tuple[int, int, int, int]:
         """Returns (total, cursor, accepted, skipped) for draft queue."""
@@ -609,6 +693,7 @@ class PipelineState:
         cand = self.next_draft(stem)
         assert cand is not None, "No draft to accept"
         rec = cand["record"]
+        self._log_draft(stem, cand, "accept", adjusted_bbox or rec.bbox)
 
         if adjusted_bbox:
             rec.bbox = adjusted_bbox
@@ -629,6 +714,9 @@ class PipelineState:
 
     def skip_draft(self, stem: str) -> None:
         """Skip the current draft candidate."""
+        cand = self.next_draft(stem)
+        if cand is not None:
+            self._log_draft(stem, cand, "skip")
         self._draft_cursor[stem] = self._draft_cursor.get(stem, 0) + 1
         self._draft_skipped[stem] = self._draft_skipped.get(stem, 0) + 1
 

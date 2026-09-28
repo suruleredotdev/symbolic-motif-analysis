@@ -1,3 +1,4 @@
+python-dotenv
 requests
 transformers
 numpy
@@ -12,3 +13,4 @@ opencv-python-headless    # bounding box annotation rendering
 open_clip_torch           # CLIP ViT-L/14 image + text embeddings
 umap-learn                # 2D projection for similarity scatter plots
 anthropic                 # Claude API for motif descriptions
+pillow
