@@ -455,6 +455,36 @@ interpretation/panels/<panel>.md  ← register-by-register reading, using the br
 interpretation/corpus.md          ← the synthesis over everything
 ```
 
+### Re-embed and re-cluster after boxes change
+
+Adding, deleting or re-indexing boxes leaves the embeddings and the cluster
+assignments describing the old boxes: new motifs get no family, and the
+interpretation's cohesion and look-alike signals thin out. Recompute both in
+`motif_pipeline.ipynb` (`uv run jupyter notebook motif_pipeline.ipynb`):
+
+1. **Stage 0–1** — run the setup cells so the approved boxes load from
+   `annotated/`.
+2. **Stage 2 → Compute Embeddings** — preprocessing `edges` (the setting the
+   current families were built with). CLIP runs over every approved box.
+3. Tune `min_cluster_size` / `min_samples` / pass 2 until the families look
+   right in the scatter (Stage 3 Gallery helps).
+4. **Save Clusters** — writes `analysis/clusters.json` and the matching
+   `analysis/embeddings_cache.npy` + `embeddings_cache_keys.txt`.
+
+Then refresh everything downstream. `run_interpretation.py` picks up the cache
+automatically when `--embeddings` is not given, so cluster briefs, labels,
+panels, comparisons and the corpus all see the new families:
+
+```bash
+python3 scripts/run_interpretation.py --analysis-dir frobenius_artifacts/analysis --dry-run
+python3 scripts/run_interpretation.py --analysis-dir frobenius_artifacts/analysis
+```
+
+The individual scripts take the cache explicitly:
+`--embeddings analysis/embeddings_cache.npy --paths analysis/embeddings_cache_keys.txt`.
+Cluster ids are renumbered by every clustering run, so the cluster briefs must
+be regenerated after one (the `clusters` step does this).
+
 ### Quick re-run after bbox_review curation
 
 Steps 7–10 only (parameters already tuned, Phase 3 already run):

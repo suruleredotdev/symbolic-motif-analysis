@@ -79,6 +79,7 @@ DEFAULT_EFFORT = "high"
 
 # Motif crop paths look like  .../motifs_norm/<panel_stem>/<NNN>_<scale>_iou<X>.png
 _MOTIF_PATH_RE = re.compile(r"motifs(?:_norm)?/([^/]+)/(\d+)_")
+_BARE_KEY_RE = re.compile(r"^([^/\s]+)/(\d+)$")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -282,7 +283,11 @@ def parse_motif_key(path_like: str) -> str | None:
     """
     match = _MOTIF_PATH_RE.search(path_like)
     if not match:
-        return None
+        # The notebook's embedding cache (embeddings_cache_keys.txt) stores
+        # the key itself, "<panel_stem>/<index>", rather than a crop path.
+        match = _BARE_KEY_RE.match(path_like.strip())
+        if not match:
+            return None
     return f"{match.group(1)}/{int(match.group(2))}"
 
 

@@ -53,9 +53,25 @@ def _script(name: str):
     return module
 
 
+def cached_embeddings(analysis_dir: Path) -> tuple[Path, Path] | None:
+    """The embedding matrix motif_pipeline.ipynb Stage 2 saves beside clusters.json.
+
+    Its "Save Clusters" button writes clusters.json and this cache from one
+    Compute Embeddings run, so the two always describe the same boxes — which
+    makes it the right default when no --embeddings are given.
+    """
+    npy = analysis_dir / "embeddings_cache.npy"
+    keys = analysis_dir / "embeddings_cache_keys.txt"
+    return (npy, keys) if npy.exists() and keys.exists() else None
+
+
 def plan(args) -> list[tuple[str, str, list[str]]]:
     """(step, script, argv) for each step to run — separated out so it is testable."""
     common = ["--analysis-dir", str(args.analysis_dir)]
+    if not (args.embeddings and args.paths):
+        cached = cached_embeddings(args.analysis_dir)
+        if cached:
+            args.embeddings, args.paths = cached
     emb = []
     if args.embeddings and args.paths:
         emb = ["--embeddings", str(args.embeddings), "--paths", str(args.paths)]
@@ -90,8 +106,11 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument("--analysis-dir", type=Path, default=Path("frobenius_artifacts/analysis"))
-    p.add_argument("--embeddings", type=Path, default=None)
-    p.add_argument("--paths", type=Path, default=None)
+    p.add_argument("--embeddings", type=Path, default=None,
+                   help="Default: <analysis-dir>/embeddings_cache.npy, which the "
+                        "pipeline notebook's Save Clusters writes, if present")
+    p.add_argument("--paths", type=Path, default=None,
+                   help="Default: <analysis-dir>/embeddings_cache_keys.txt")
     p.add_argument("--panels", nargs="*", metavar="STEM", default=None,
                    help="Limit labels, panels and the site to these panel stems")
     p.add_argument("--model", default=None, help="Override each script's default model")

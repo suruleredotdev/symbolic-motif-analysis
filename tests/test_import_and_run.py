@@ -143,3 +143,34 @@ def test_runner_can_rebuild_just_the_site(analysis_dir: Path, tmp_path: Path):
     out = analysis_dir / "interpretation" / "site.html"
     assert runner.main(["--analysis-dir", str(analysis_dir), "--only", "site"]) == 0
     assert out.exists()
+
+
+def test_notebook_embedding_cache_joins_to_the_corpus(analysis_dir: Path):
+    # motif_pipeline.ipynb's Save Clusters writes bare "<stem>/<index>" keys,
+    # not crop paths; the interpretation scripts must read them as they are.
+    import numpy as np
+    from panel_art.pipeline_state import PipelineState
+    from panel_art.interpret import load_corpus
+
+    state = PipelineState()
+    state.load_from_disk(analysis_dir / "annotated", analysis_dir / "panels")
+    keys = [m.motif_key for m in state.motifs]
+    state.save_embeddings(analysis_dir / "embeddings_cache.npy",
+                          analysis_dir / "embeddings_cache_keys.txt",
+                          keys, embeddings=np.eye(len(keys), 8, dtype=np.float32))
+
+    corpus = load_corpus(analysis_dir,
+                         embeddings_path=analysis_dir / "embeddings_cache.npy",
+                         paths_path=analysis_dir / "embeddings_cache_keys.txt")
+    assert corpus.embedding_coverage() == (len(keys), len(keys))
+
+
+def test_runner_defaults_to_the_notebook_embedding_cache(analysis_dir: Path):
+    args = runner.build_parser().parse_args(["--analysis-dir", str(analysis_dir)])
+    assert "--embeddings" not in dict((s, a) for s, _, a in runner.plan(args))["panels"]
+
+    (analysis_dir / "embeddings_cache.npy").write_bytes(b"")
+    (analysis_dir / "embeddings_cache_keys.txt").write_text("")
+    args = runner.build_parser().parse_args(["--analysis-dir", str(analysis_dir)])
+    argv = dict((s, a) for s, _, a in runner.plan(args))["panels"]
+    assert argv[argv.index("--embeddings") + 1] == str(analysis_dir / "embeddings_cache.npy")
