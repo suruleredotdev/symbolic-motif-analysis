@@ -144,6 +144,22 @@ catalogue, but full-resolution images or the full set need a request.
 These belong in the **named-carver control set** (below), not the archaic
 corpus.
 
+The Ọ̀yọ́ palace carvings published by Fọlárànmí (*African Arts* 51(2),
+2018) are a well-documented addition to that set, photographed in situ
+by the author in 2013–14:
+
+- **Garden Hall screen**: eight strips, about 295 × 313 cm, about 135
+  carved images in some 45 compositions, each identified in the article.
+  Commissioned by Aláàfin Siyanbọ́lá Ládìgbòlù and probably carved
+  1934–44. Carver unknown; the article separates its style from that of
+  Arówògún, Fákẹ́yẹ and Ọlọ́wẹ̀ of Ìsẹ́. It carries five variants of the
+  *ìbọ̀* interlace, a motif the article also traces on *agbádá*
+  embroidery, house balustrades and Ifá trays, so it is a direct test of
+  whether clustering keeps one motif's variants together across media.
+- **Àwọ̀dì Òkè reception-hall doors**: two doors of four registers per
+  leaf, carved mid-1960s to 1968 by the Ajíbọ́nà family of Ilé-Ìbúkè,
+  Ọ̀yọ́.
+
 ---
 
 ## Tier 3: printed sources
