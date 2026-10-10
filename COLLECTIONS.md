@@ -163,7 +163,8 @@ and attributions: Carroll, *Yoruba Religious Carving* (1967); Fagg &
 Pemberton, *Yoruba Sculpture of West Africa* (1982); Drewal, Pemberton &
 Abiodun, *Yoruba: Nine Centuries* (1989); Abiodun, Drewal & Pemberton
 (eds.), *The Yoruba Artist* (1994); Walker, *Olowe of Ise* (1998);
-Fọlárànmí on the Ọ̀yọ́ palace doors; Arnoldi's MSU thesis on Yoruba
+Fọlárànmí, "This Is Our Story: Iconography of Carved Doors and Panels in
+Ọ̀yọ́ Palace" (*African Arts* 51(2), 2018, pp. 44–57); Arnoldi's MSU thesis on Yoruba
 doors, which notes that their iconography is "still to be explored".
 
 ---
@@ -268,6 +269,7 @@ mention crops or embeddings.
 | British Museum, Africa department | A query of Yoruba, Ekiti and Ijebu doors and boards with registration year ≤ 1912 | Registration numbers encode the year; trivial for them, impossible for us |
 | MARKK Hamburg (Digital Benin) | A bulk export of plaque records and images | The site was down on 2026-10-10; an export is better than scraping anyway |
 | Prof. Henry Drewal | Already emailed (Aug 2026). Follow up with the dated-corpus design and ask which doors he would treat as anchor examples | Recommended by Prof. Ogundiran |
+| Prof. Stephen Fọlárànmí (Rhodes University; formerly Obafemi Awolowo University, Ilé-Ifẹ̀) | A conversation on how the Ọ̀yọ́ palace doors read; a joint analysis of those doors with his interpretations as the expert reading; a talk to the Arts of Africa group at Rhodes or the Nigerian Field Society, where he is National Secretary | Wrote the study of the Ọ̀yọ́ palace doors and panels, which notes how little has been written on them |
 
 ---
 
